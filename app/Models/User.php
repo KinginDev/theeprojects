@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -29,6 +28,9 @@ class User extends Authenticatable
         'refferal_user',
         'refferal',
         'refferal_bonus',
+        "smart_earners",
+        'api_earners',
+        'topuser_earners',
     ];
 
     /**
@@ -50,7 +52,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 }

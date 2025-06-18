@@ -1,18 +1,16 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use App\Models\Referral;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Models\Setting;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class authController extends Controller
 {
@@ -22,74 +20,71 @@ class authController extends Controller
     }
 
     public function loginAction(Request $request)
-{
-    // Validate form inputs
-    $request->validate([
-        'emailTel' => 'required',
-        'password' => 'required',
-    ]);
+    {
+        // Validate form inputs
+        $request->validate([
+            'emailTel' => 'required',
+            'password' => 'required',
+        ]);
 
-    $login = $request->input('emailTel');
-    $password = $request->input('password');
+        $login    = $request->input('emailTel');
+        $password = $request->input('password');
 
-    // Determine if input is email, phone number, or username
-    $isEmail = filter_var($login, FILTER_VALIDATE_EMAIL);
-    $isPhoneNumber = preg_match('/^\d+$/', $login); // Assumes a valid phone number is numeric
-    $isUsername = !$isEmail && !$isPhoneNumber; // Assume username if neither email nor phone number
+        // Determine if input is email, phone number, or username
+        $isEmail       = filter_var($login, FILTER_VALIDATE_EMAIL);
+        $isPhoneNumber = preg_match('/^\d+$/', $login); // Assumes a valid phone number is numeric
+        $isUsername    = ! $isEmail && ! $isPhoneNumber;  // Assume username if neither email nor phone number
 
-    if ($isEmail) {
-        $credentials = ['email' => $login, 'password' => $password];
-    } elseif ($isPhoneNumber) {
-        $credentials = ['tel' => $login, 'password' => $password];
-    } else {
-        $credentials = ['username' => $login, 'password' => $password];
+        if ($isEmail) {
+            $credentials = ['email' => $login, 'password' => $password];
+        } elseif ($isPhoneNumber) {
+            $credentials = ['tel' => $login, 'password' => $password];
+        } else {
+            $credentials = ['username' => $login, 'password' => $password];
+        }
+
+        // Attempt login with the provided credentials
+        if (Auth::attempt($credentials)) {
+            // Authentication successful
+            $user = Auth::user();
+            session(['username' => $user->username]);
+
+            // Redirect based on user role
+            return match ($user->role) {
+                0, 1    => redirect()->route('admin.dashboard'),
+                2       => redirect()->route('dashboard'),
+                default => redirect()->route('login'), // Default route if role is not matched
+            };
+        } else {
+            // Log failed login attempt
+            Log::warning('Failed login attempt', ['login' => $login]);
+        }
+
+        // Authentication failed
+        return redirect(route('login'))->withErrors(['error' => 'Login details are not valid']);
     }
-
-    // Attempt login with the provided credentials
-    if (Auth::attempt($credentials)) {
-        // Authentication successful
-        $user = Auth::user();
-        session(['username' => $user->username]);
-
-        // Redirect based on user role
-        return match ($user->role) {
-            0, 1 => redirect()->route('admin.dashboard'),
-            2 => redirect()->route('dashboard'),
-            default => redirect()->route('login'), // Default route if role is not matched
-        };
-    } else {
-        // Log failed login attempt
-        Log::warning('Failed login attempt', ['login' => $login]);
-    }
-
-    // Authentication failed
-    return redirect(route('login'))->withErrors(['error' => 'Login details are not valid']);
-}
-
-
 
     public function registration()
     {
         return view('users-layout.auth-register');
     }
 
-
     public function registrationAction(Request $request)
     {
         // Validation rules for the form inputs
         $validator = Validator::make($request->all(), [
-            'fname' => 'required',
-            'username' => 'required|unique:users',
-            'email' => 'required|email|unique:users',
-            'tel' => [
+            'fname'     => 'required',
+            'username'  => 'required|unique:users',
+            'email'     => 'required|email|unique:users',
+            'tel'       => [
                 'required',
                 'max:20',
                 'min:6',
                 'unique:users',
             ], // Corrected the comma issue here
-            'address' => 'required',
-            'password' => 'required|max:20|min:6',
-            'cpassword' => 'required|same:password'
+            'address'   => 'required',
+            'password'  => 'required|max:20|min:6',
+            'cpassword' => 'required|same:password',
         ]);
 
         // Check if validation fails
@@ -98,31 +93,34 @@ class authController extends Controller
         }
 
         // Default values for user registration
-        $role = 2;
-        $refferal_user = $request->input('referral'); // Get referral username from the request
-        $refferal = 0;
+        $role           = 2;
+        $refferal_user  = $request->input('referral'); // Get referral username from the request
+        $refferal       = 0;
         $refferal_bonus = 0.0;
-        $cal = 1;
+        $cal            = 1;
 
-        // Generate a unique user_id
+                                                                  // Generate a unique user_id
         $randomString = strtoupper(substr(md5(mt_rand()), 0, 8)); // Generate a random 8-character string
-        $latestUserId = User::max('id') + 1; // Fetch the next auto-increment ID
-        $userId = 'UID' . $randomString . $latestUserId; // Combine strings to form a unique user ID
+        $latestUserId = User::max('id') + 1;                      // Fetch the next auto-increment ID
+        $userId       = 'UID' . $randomString . $latestUserId;    // Combine strings to form a unique user ID
 
         // Data array for creating a new user
         $data = [
-            'name' => $request->fname,
-            'user_id' => $userId, // Assign the generated user_id
-            'username' => $request->username,
-            'address' => $request->address,
-            'email' => $request->email,
-            'tel' => $request->tel,
-            'password' => Hash::make($request->password),
-            'role' => $role,
-            'cal' => $cal,
-            'refferal_user' => $refferal_user ?? null, // Set nullable if referral user is not provided
-            'refferal' => $refferal,
-            'refferal_bonus' => $refferal_bonus,
+            'name'            => $request->fname,
+            'username'        => $request->username,
+            'user_id'         => $userId, // Use the generated unique user ID
+            'address'         => $request->address,
+            'email'           => $request->email,
+            'tel'             => $request->tel,
+            'password'        => Hash::make($request->password),
+            'role'            => $role,
+            'cal'             => $cal,
+            'refferal_user'   => $refferal_user ?? null, // Set nullable if referral user is not provided
+            'refferal'        => $refferal,
+            'refferal_bonus'  => $refferal_bonus,
+            "smart_earners"   => 0,
+            'api_earners'     => 0,
+            'topuser_earners' => 0,
         ];
 
         // Create the user
@@ -139,9 +137,9 @@ class authController extends Controller
 
                     // Create referral record
                     Referral::create([
-                        'user_id' => $referrer->user_id, // ID of the referring user
-                        'referral_user_id' => $user->user_id, // ID of the referred user
-                        'referral_username' => $user->username, // Referred user's username
+                        'user_id'           => $referrer->user_id, // ID of the referring user
+                        'referral_user_id'  => $user->user_id,     // ID of the referred user
+                        'referral_username' => $user->username,    // Referred user's username
                     ]);
                 }
             }
@@ -159,9 +157,6 @@ class authController extends Controller
         return view('users-layout.forget_password');
     }
 
-
-
-
     public function forgetPasswordMail(Request $request)
     {
         // Validate the email input
@@ -175,7 +170,7 @@ class authController extends Controller
         // Check if the user exists in the database
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // Redirect back with an error message
             return redirect()->back()->withErrors(['message' => 'Email address not found']);
         }
@@ -197,9 +192,9 @@ class authController extends Controller
         // Send an email notification to the user
         try {
             Mail::send([], [], function ($mail) use ($email, $htmlContent) {
-                $mail->to($email) // Send to the user's email
+                $mail->to($email)                   // Send to the user's email
                     ->subject('Password Reset Request') // Subject of the email
-                    ->html($htmlContent); // Use the html() method to set the HTML body
+                    ->html($htmlContent);               // Use the html() method to set the HTML body
             });
 
             // Log that the email was sent successfully
@@ -216,21 +211,19 @@ class authController extends Controller
         }
     }
 
-
-
     public function updatePassword(Request $request)
     {
         // Validate the request data
         $request->validate([
-            'password' => 'required|string|min:8|confirmed', // Ensure the password is confirmed
+            'password'              => 'required|string|min:8|confirmed', // Ensure the password is confirmed
             'password_confirmation' => 'required|string|min:8',
-            'email' => 'required|email', // Ensure the email is provided
+            'email'                 => 'required|email', // Ensure the email is provided
         ]);
 
         // Assuming you get the user by the token passed in the URL
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->back()->withErrors(['message' => 'User not found.']);
         }
 
@@ -241,8 +234,6 @@ class authController extends Controller
         // Redirect back with a success message
         return redirect()->route('login')->with('success', 'Your password has been reset successfully!');
     }
-
-
 
     public function showResetForm(Request $request)
     {

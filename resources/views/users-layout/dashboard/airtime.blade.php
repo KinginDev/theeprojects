@@ -300,11 +300,19 @@
                                 showConfirmButton: false // Hide the default OK button
                             });
                         } else if (response.status === 'failed') {
-                            Swal.fire({
-                                title: "Error!",
-                                text: response.message,
-                                icon: "error"
-                            });
+                            if(response.result.code == "018") { // Low wallet balance
+                                Swal.fire({
+                                    title: "Error!",
+                                    text: "Insufficient balance. Please fund your account.",
+                                    icon: "error"
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Error!",
+                                    text: response.message,
+                                    icon: "error"
+                                });
+                            }
                         }
                     },
                     error: function (xhr, status, error) {

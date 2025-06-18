@@ -1,19 +1,17 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use GuzzleHttp\Client;
-use DateTime;
-use DateTimeZone;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use App\Models\AirtimeTransaction;
 use App\Models\Notification;
-use App\Models\Setting;
 use App\Models\percentage;
+use App\Models\Setting;
+use App\Models\User;
+use DateTime;
+use DateTimeZone;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class airtimeController extends Controller
 {
@@ -24,13 +22,13 @@ class airtimeController extends Controller
 
         if ($user) {
             // Retrieve all data for the user from the database
-            $userData = User::where('id', $user->id)->first();
+            $userData      = User::where('id', $user->id)->first();
             $notifications = Notification::where('username', $user->username)->get();
 
             return view('users-layout.dashboard.airtime', [
-                'userData' => $userData,
+                'userData'      => $userData,
                 'notifications' => $notifications,
-            ],);
+            ], );
         }
     }
 
@@ -39,25 +37,25 @@ class airtimeController extends Controller
         // Validate the request
         $request->validate([
             'network' => 'required|in:mtn,airtel,glo,etisalat', // Validate that network is one of the specified values
-            'amount' => 'required|numeric',
-            'tel' => 'required|numeric',
+            'amount'  => 'required|numeric',
+            'tel'     => 'required|numeric',
         ]);
 
         // Get the input values
         $network = $request->input('network');
-        $amount = $request->input('amount');
-        $tel = $request->input('tel');
+        $amount  = $request->input('amount');
+        $tel     = $request->input('tel');
 
         // Retrieve the authenticated user
-        $user = Auth::user();
+        $user        = Auth::user();
         $userBalance = $user->account_balance;
-        $email = $user->email;
-        $username = $user->username;
+        $email       = $user->email;
+        $username    = $user->username;
 
         // User types
-        $smart_earners = $user->smart_earners;
+        $smart_earners   = $user->smart_earners;
         $topuser_earners = $user->topuser_earners;
-        $api_earners = $user->api_earners;
+        $api_earners     = $user->api_earners;
 
         // Get percentage rates for services
         $getPercentage = Percentage::select('smart_earners_percent', 'topuser_earners_percent', 'api_earners_percent')
@@ -65,7 +63,7 @@ class airtimeController extends Controller
                 'Airtel_Airtime_VTU',
                 'GLO_Airtime_VTU',
                 'MTN_Airtime_VTU',
-                '9mobile_Airtime_VTU'
+                '9mobile_Airtime_VTU',
             ])->get();
 
         // Check if the user has sufficient funds
@@ -78,10 +76,10 @@ class airtimeController extends Controller
 
         // Map service IDs to the corresponding service names in the database
         $serviceMap = [
-            'airtel' => 'Airtel_Airtime_VTU',
-            'mtn' => 'MTN_Airtime_VTU',
-            'glo' => 'GLO_Airtime_VTU',
-            'etisalat' => '9mobile_Airtime_VTU' // Etisalat now called 9mobile
+            'airtel'   => 'Airtel_Airtime_VTU',
+            'mtn'      => 'MTN_Airtime_VTU',
+            'glo'      => 'GLO_Airtime_VTU',
+            'etisalat' => '9mobile_Airtime_VTU', // Etisalat now called 9mobile
         ];
 
         // Initialize finalAmount with the original amount
@@ -90,21 +88,21 @@ class airtimeController extends Controller
         // Apply the correct deduction based on the user's role
         if (isset($serviceMap[$serviceID])) {
             $serviceName = $serviceMap[$serviceID];
-            $percentage = Percentage::where('service', $serviceMap[$serviceID])->first();
+            $percentage  = Percentage::where('service', $serviceMap[$serviceID])->first();
 
             if ($percentage) {
                 if ($smart_earners == 1) {
                     $smartEarnerPercent = $percentage->smart_earners_percent;
-                    $deduction = ($smartEarnerPercent / 100) * $amount;
-                    $finalAmount = $amount - $deduction;
+                    $deduction          = ($smartEarnerPercent / 100) * $amount;
+                    $finalAmount        = $amount - $deduction;
                 } elseif ($topuser_earners == 1) {
                     $topuserEarnerPercent = $percentage->topuser_earners_percent;
-                    $deduction = ($topuserEarnerPercent / 100) * $amount;
-                    $finalAmount = $amount - $deduction;
+                    $deduction            = ($topuserEarnerPercent / 100) * $amount;
+                    $finalAmount          = $amount - $deduction;
                 } elseif ($api_earners == 1) {
                     $apiEarnerPercent = $percentage->api_earners_percent;
-                    $deduction = ($apiEarnerPercent / 100) * $amount;
-                    $finalAmount = $amount - $deduction;
+                    $deduction        = ($apiEarnerPercent / 100) * $amount;
+                    $finalAmount      = $amount - $deduction;
                 } else {
                     return response()->json(['status' => 'failed', 'message' => 'No valid earner type found']);
                 }
@@ -119,36 +117,38 @@ class airtimeController extends Controller
         }
 
         // Generate request ID
-        $current_time = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time = $current_time->format("YmdHis");
+        $current_time     = new DateTime('now', new DateTimeZone('Africa/Lagos'));
+        $formatted_time   = $current_time->format("YmdHis");
         $additional_chars = "89htyyo";
-        $request_id = $formatted_time . $additional_chars;
+        $request_id       = $formatted_time . $additional_chars;
         while (strlen($request_id) < 12) {
             $request_id .= "x";
         }
 
         // Get settings
         $configuration = Setting::first();
-        $apiUrl = $configuration->airtime_api_url;
+        $apiUrl        = $configuration->airtime_api_url;
 
         // Set up Guzzle client and API request
         $client = new Client();
-        $data = [
+        $data   = [
             "request_id" => $request_id,
-            "serviceID" => $serviceID,
-            "amount" => $amount, // Use finalAmount after deduction and rounding
-            "phone" => $tel,
-            "email" => $email,
+            "serviceID"  => $serviceID,
+            "amount"     => $amount, // Use finalAmount after deduction and rounding
+            "phone"      => $tel,
+            "email"      => $email,
         ];
+
+        \Log::info("Data:", $data);
 
         // Make API call
         $response = $client->post($apiUrl, [
             'headers' => [
-                'api-key' => $configuration->api_key,
-                'secret-key' => $configuration->secret_key,
+                'api-key'      => $configuration->api_key,
+                'secret-key'   => $configuration->secret_key,
                 'Content-Type' => 'application/json',
             ],
-            'json' => $data,
+            'json'    => $data,
         ]);
 
         // Decode the API response
@@ -161,14 +161,14 @@ class airtimeController extends Controller
             $currentBal = $userBalance - $finalAmount;
 
             // Requery the transaction status using the request_id
-            $requeryUrl = $configuration->transaction_api_url;
+            $requeryUrl      = $configuration->transaction_api_url;
             $requeryResponse = $client->post($requeryUrl, [
                 'headers' => [
-                    'api-key' => $configuration->api_key,
-                    'secret-key' => $configuration->secret_key,
+                    'api-key'      => $configuration->api_key,
+                    'secret-key'   => $configuration->secret_key,
                     'Content-Type' => 'application/json',
                 ],
-                'json' => ['request_id' => $request_id],
+                'json'    => ['request_id' => $request_id],
             ]);
 
             $requeryResult = json_decode($requeryResponse->getBody());
@@ -176,19 +176,19 @@ class airtimeController extends Controller
             // Check if the requery was successful
             if ($requeryResult->code === "000") {
                 // Save transaction in the database
-                $transaction = new AirtimeTransaction();
-                $transaction->username = $username;
-                $transaction->network = $network;
-                $transaction->tel = $tel;
-                $transaction->amount = $amount;
-                $transaction->prev_bal = $userBalance;
-                $transaction->current_bal = $currentBal;
+                $transaction                 = new AirtimeTransaction();
+                $transaction->username       = $username;
+                $transaction->network        = $network;
+                $transaction->tel            = $tel;
+                $transaction->amount         = $amount;
+                $transaction->prev_bal       = $userBalance;
+                $transaction->current_bal    = $currentBal;
                 $transaction->percent_profit = $amount - $finalAmount;
                 $transaction->transaction_id = $requeryResult->content->transactions->transactionId;
-                $transaction->identity = $requeryResult->content->transactions->unique_element;
-                $transaction->status = $requeryResult->content->transactions->status;
-                $transaction->created_at = now();
-                $transaction->updated_at = now();
+                $transaction->identity       = $requeryResult->content->transactions->unique_element;
+                $transaction->status         = $requeryResult->content->transactions->status;
+                $transaction->created_at     = now();
+                $transaction->updated_at     = now();
                 $transaction->save();
 
                 // Return success response

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('fund_transactions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->string('user_id')->nullable();
             $table->string('username');
             $table->string('tel');
             $table->decimal('amount', 10, 2);
@@ -22,8 +22,6 @@ return new class extends Migration
             $table->string('status');
             $table->timestamps();
 
-            // Foreign key constraint
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

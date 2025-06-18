@@ -1,55 +1,46 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use GuzzleHttp\Client;
-use App\Models\Airtime;
 use App\Models\AirtimeTransaction;
 use App\Models\dataTransactions;
-use App\Models\EletricityTransaction;
-use App\Models\TvTransactions;
-use App\Models\InsuranceTransaction;
 use App\Models\EducationTransaction;
-use App\Models\UserMessage;
+use App\Models\EletricityTransaction;
+use App\Models\FundTransaction;
+use App\Models\InsuranceTransaction;
+use App\Models\merchants;
 use App\Models\Notification;
 use App\Models\percentage;
-use App\Models\FundTransaction;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Referral;
+use App\Models\Setting;
+use App\Models\TvTransactions;
+use App\Models\User;
+use App\Models\UserMessage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Referral;
-use App\Models\merchants;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Session;
-
-
-
+use Illuminate\Support\Str;
 
 class adminController extends Controller
 {
     public function dashboard()
     {
-        $user = Auth::user(); // Get the currently authenticated user
-        $userCount = User::count(); // Get the total number of users
+        $user             = Auth::user();                 // Get the currently authenticated user
+        $userCount        = User::count();                // Get the total number of users
         $totalUserBalance = User::sum('account_balance'); // Get the total balance of all users
 
         // Get total credited amount from FundTransaction
         $totalCreditedAmount = FundTransaction::sum('amount');
 
         // Get total debited amounts from each transaction type (all users)
-        $totalAirtimeDebited = AirtimeTransaction::sum('amount');
-        $totalDataDebited = DataTransactions::sum('amount');
-        $totalEducationDebited = EducationTransaction::sum('amount');
+        $totalAirtimeDebited     = AirtimeTransaction::sum('amount');
+        $totalDataDebited        = DataTransactions::sum('amount');
+        $totalEducationDebited   = EducationTransaction::sum('amount');
         $totalElectricityDebited = EletricityTransaction::sum('amount');
-        $totalInsuranceDebited = InsuranceTransaction::sum('amount');
-        $totalTvDebited = TvTransactions::sum('amount');
+        $totalInsuranceDebited   = InsuranceTransaction::sum('amount');
+        $totalTvDebited          = TvTransactions::sum('amount');
 
         // Calculate total debited amount from all transactions combined
         $totalDebitedAmount = $totalAirtimeDebited + $totalDataDebited + $totalEducationDebited +
@@ -62,7 +53,7 @@ class adminController extends Controller
         $api_url = "https://lucysrosedata.com/api/user/";
 
         // Ensure site_token exists in the configuration
-        if (!$configuration || !$configuration->site_token) {
+        if (! $configuration || ! $configuration->site_token) {
             return response()->json(['error' => 'API token is missing in settings.'], 400);
         }
 
@@ -106,23 +97,19 @@ class adminController extends Controller
         // Handle the data (you can check for the 'user' field here)
         $usersd = $data['user'] ?? null;
 
-        if (!$usersd) {
+        if (! $usersd) {
             return response()->json(['error' => 'User data not found.'], 404);
         }
 
-
         $totalUserBalance = $usersd['Account_Balance'] ?? 0.00; // User account balance
-
 
         return view('admin-layout.index', compact('user', 'userCount', 'totalUserBalance', 'totalCreditedAmount', 'totalDebitedAmount', 'totalUserBalance'));
     }
-
 
     public function manage()
     {
         // Retrieve all users from the users table
         $users = User::orderBy('created_at', 'desc')->get();
-
 
         // Pass the user data to the view
         return view('admin-layout.manageAccount', ['users' => $users]);
@@ -154,21 +141,19 @@ class adminController extends Controller
         return view('admin-layout.editUser', compact('user'));
     }
 
-
     public function updateUser(Request $request, $id)
     {
         $request->validate([
             'fullname' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email'    => 'required|email|unique:users,email,' . $id,
         ]);
 
-        $user = User::find($id);
-        $user->name = $request->input('fullname');
+        $user           = User::find($id);
+        $user->name     = $request->input('fullname');
         $user->username = $request->input('username');
-        $user->email = $request->input('email');
+        $user->email    = $request->input('email');
         $user->save();
-
 
         // Check if the users was successful
         if ($user->save()) {
@@ -184,7 +169,7 @@ class adminController extends Controller
     {
         $user = User::find($id);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('manage')->with('error', 'User not found');
         }
 
@@ -201,7 +186,7 @@ class adminController extends Controller
     {
         $user = User::find($id);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('manage')->with('error', 'User not found');
         }
 
@@ -218,7 +203,7 @@ class adminController extends Controller
     {
         $user = User::find($id);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('manage')->with('error', 'User not found');
         }
 
@@ -247,9 +232,9 @@ class adminController extends Controller
             'amount' => 'required|numeric', // Ensure the amount is numeric
         ]);
 
-        $user = User::find($id);
+        $user          = User::find($id);
         $configuration = Setting::first();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
@@ -259,22 +244,22 @@ class adminController extends Controller
         if ($user->save()) {
             // Record the transaction in the fund_transactions table
             $transaction = FundTransaction::create([
-                'user_id' => $user->user_id,
-                'username' => $user->username,
-                'tel' => $user->tel,
-                'amount' => $amount,
+                'user_id'        => $user->id,
+                'username'       => $user->username,
+                'tel'            => $user->tel,
+                'amount'         => $amount,
                 'transaction_id' => 'TXN-' . now()->format('YmdHis') . Str::random(5),
-                'identity' => 'Manual Funding',
-                'status' => 'Success',
-                'prev_bal' => $user->account_balance,
-                'current_bal' => $user->account_balance += $amount,
+                'identity'       => 'Manual Funding',
+                'status'         => 'Success',
+                'prev_bal'       => $user->account_balance,
+                'current_bal'    => $user->account_balance += $amount,
             ]);
 
             // Check if this is the first funding for the user
             $isFirstFunding = FundTransaction::where('user_id', $user->user_id)->count() === 1;
 
             // Handle referral bonus logic for the first funding
-            if ($isFirstFunding && !empty($user->refferal_user)) {
+            if ($isFirstFunding && ! empty($user->refferal_user)) {
                 $referrer = User::where('user_id', $user->refferal_user)->first();
 
                 if ($referrer) {
@@ -300,7 +285,7 @@ class adminController extends Controller
         $funding = FundTransaction::find($id);
 
         // Check if the funding transaction exists
-        if (!$funding) {
+        if (! $funding) {
             return response()->json(['message' => 'Funding transaction not found'], 404);
         }
 
@@ -311,7 +296,7 @@ class adminController extends Controller
         $user = User::where('username', $userfund)->first();
 
         // Check if the user exists
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
@@ -333,8 +318,6 @@ class adminController extends Controller
         }
     }
 
-
-
     public function adminAirtime()
     {
         // Retrieve all airtime transactions
@@ -345,43 +328,41 @@ class adminController extends Controller
             'MTN_Airtime_VTU',
             'Airtel_Airtime_VTU',
             'GLO_Airtime_VTU',
-            '9mobile_Airtime_VTU'
+            '9mobile_Airtime_VTU',
         ])->get();
 
         return view('admin-layout.airtime', [
-            'airtimes' => $airtimes,
-            'airtime_transaction' => $airtime_transaction
+            'airtimes'            => $airtimes,
+            'airtime_transaction' => $airtime_transaction,
         ]);
     }
-
-
 
     public function addChargeAirtimeUser(Request $request, $id)
     {
         // Validate the inputs
         $request->validate([
             'smart_earners' => 'required|string',
-            'top_users' => 'required|string',
-            'api_percent' => 'required|string',
+            'top_users'     => 'required|string',
+            'api_percent'   => 'required|string',
         ]);
 
         // Retrieve the validated inputs
         $smartEarners = $request->input('smart_earners');
-        $topUsers = $request->input('top_users');
-        $apiPercent = $request->input('api_percent');
+        $topUsers     = $request->input('top_users');
+        $apiPercent   = $request->input('api_percent');
 
         // Find the airtime record with the specified ID
         $airtime = percentage::find($id);
 
         // Check if airtime record exists
-        if (!$airtime) {
+        if (! $airtime) {
             return response()->json(['message' => 'Record not found'], 404);
         }
 
         // Update the percentage fields with the given values
-        $airtime->smart_earners_percent = $smartEarners;
+        $airtime->smart_earners_percent   = $smartEarners;
         $airtime->topuser_earners_percent = $topUsers;
-        $airtime->api_earners_percent = $apiPercent;
+        $airtime->api_earners_percent     = $apiPercent;
 
         // Save the changes and handle the response
         try {
@@ -393,7 +374,6 @@ class adminController extends Controller
             return response()->json(['message' => 'Failed to update charge'], 500);
         }
     }
-
 
     public function adminData()
     {
@@ -417,8 +397,8 @@ class adminController extends Controller
 
         $data_transaction = dataTransactions::all();
         return view('admin-layout.data', [
-            'airtimes' => $airtimes,
-            'data_transaction' => $data_transaction
+            'airtimes'         => $airtimes,
+            'data_transaction' => $data_transaction,
         ]);
     }
 
@@ -439,32 +419,31 @@ class adminController extends Controller
             'Kaduna_Electric_-_KAEDCO',
             'KEDCO_-_Kano_Electric',
             'PHED_-_Port_Harcourt_Electric',
-            'Yola_Electric_Disco_Payment_-_YEDC'
+            'Yola_Electric_Disco_Payment_-_YEDC',
         ])->get();
 
         $eletricity_transaction = EletricityTransaction::all();
         return view('admin-layout.electricity', [
-            'airtimes' => $airtimes,
-            'eletricity_transaction' => $eletricity_transaction
+            'airtimes'               => $airtimes,
+            'eletricity_transaction' => $eletricity_transaction,
         ]);
     }
 
     public function adminTv()
     {
 
-
         // Retrieve only the percentages for specific services
         $airtimes = percentage::whereIn('service', [
             'Gotv_Payment',
             'Dstv_Payment',
             'Startime_Payment',
-            'Showmax_Payment'
+            'Showmax_Payment',
         ])->get();
 
         $tv_transaction = TvTransactions::orderBy('created_at', 'desc')->get();
         return view('admin-layout.cableTv', [
-            'airtimes' => $airtimes,
-            'tv_transaction' => $tv_transaction
+            'airtimes'       => $airtimes,
+            'tv_transaction' => $tv_transaction,
         ]);
     }
 
@@ -472,7 +451,7 @@ class adminController extends Controller
     {
         $message_user = User::orderBy('created_at', 'desc')->get();
         return view('admin-layout.message', [
-            'message_user' => $message_user
+            'message_user' => $message_user,
         ]);
     }
 
@@ -487,17 +466,17 @@ class adminController extends Controller
     public function site_setting()
     {
         $settings = Setting::first();
-        $user = Auth::user(); // Get the currently authenticated user
-        // Show the current fee (default from config if no session value)
-        
+        $user     = Auth::user(); // Get the currently authenticated user
+                                  // Show the current fee (default from config if no session value)
+
         $target = storage_path('app/public');
-$link = public_path('storage');
+        $link   = public_path('storage');
 
 // Check if the symbolic link already exists
-if (!file_exists($link)) {
-    symlink($target, $link);
-  
-} 
+        if (! file_exists($link)) {
+            symlink($target, $link);
+
+        }
 
         return view('admin-layout.site-setting', compact('settings', 'user'));
     }
@@ -506,7 +485,7 @@ if (!file_exists($link)) {
     {
         $user = Auth::user();
         return view('admin-layout.editUser', [
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -514,24 +493,24 @@ if (!file_exists($link)) {
     {
         // Validate the request
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'tel' => 'required|string|max:15',
-            'address' => 'required|string',
+            'name'     => 'required|string|max:255',
+            'tel'      => 'required|string|max:15',
+            'address'  => 'required|string',
             'password' => 'nullable|confirmed|min:6', // Validate password confirmation
-            'upgrade' => 'nullable|integer', // Ensure upgrade is an integer if provided
+            'upgrade'  => 'nullable|integer',         // Ensure upgrade is an integer if provided
         ]);
 
         // Find the user or return 404 if not found
         $user = User::findOrFail($id);
 
-        // Check and update earner fields based on upgrade value
+                                      // Check and update earner fields based on upgrade value
         $isUpgradedToTopUser = false; // Track if the user is upgraded to topuser
 
         if (isset($validatedData['upgrade'])) {
             // Reset all earners to 0 initially
-            $user->smart_earners = 0;
+            $user->smart_earners   = 0;
             $user->topuser_earners = 0;
-            $user->api_earners = 0;
+            $user->api_earners     = 0;
 
             // Set the specific earner field based on upgrade value
             switch ($validatedData['upgrade']) {
@@ -540,7 +519,7 @@ if (!file_exists($link)) {
                     break;
                 case 2:
                     $user->topuser_earners = 1;
-                    $isUpgradedToTopUser = true; // Mark as upgraded to topuser
+                    $isUpgradedToTopUser   = true; // Mark as upgraded to topuser
                     break;
                 case 3:
                     $user->api_earners = 1;
@@ -552,8 +531,8 @@ if (!file_exists($link)) {
         }
 
         // Update basic user information
-        $user->name = $validatedData['name'];
-        $user->tel = $validatedData['tel'];
+        $user->name    = $validatedData['name'];
+        $user->tel     = $validatedData['tel'];
         $user->address = $validatedData['address'];
 
         // If password is provided, hash and update it
@@ -562,7 +541,7 @@ if (!file_exists($link)) {
         }
 
         // Check if the user was referred and upgraded to topuser
-        if ($isUpgradedToTopUser && !empty($user->refferal_user)) {
+        if ($isUpgradedToTopUser && ! empty($user->refferal_user)) {
             // Find the referrer
             $referrer = User::where('username', $user->refferal_user)->first();
 
@@ -581,9 +560,6 @@ if (!file_exists($link)) {
             ->with('success', 'User updated successfully.');
     }
 
-
-
-
     public function adminEducation()
     {
         // Retrieve only the percentages for specific services
@@ -595,8 +571,8 @@ if (!file_exists($link)) {
 
         $education_transaction = EducationTransaction::orderBy('created_at', 'desc')->get();
         return view('admin-layout.education', [
-            'airtimes' => $airtimes,
-            'education_transaction' => $education_transaction
+            'airtimes'              => $airtimes,
+            'education_transaction' => $education_transaction,
         ]);
     }
 
@@ -609,11 +585,10 @@ if (!file_exists($link)) {
 
         ])->get();
 
-
         $insurance_transaction = InsuranceTransaction::all();
         return view('admin-layout.insurance', [
-            'airtimes' => $airtimes,
-            'insurance_transaction' => $insurance_transaction
+            'airtimes'              => $airtimes,
+            'insurance_transaction' => $insurance_transaction,
         ]);
     }
 
@@ -623,7 +598,7 @@ if (!file_exists($link)) {
         $user = User::find($id);
 
         // Check if the user exists
-        if (!$user) {
+        if (! $user) {
             // Redirect back with an error message if the user is not found
             return redirect()->back()->with('error', 'User not found.');
         }
@@ -638,7 +613,7 @@ if (!file_exists($link)) {
         $user = User::find($id);
 
         // Check if the user exists
-        if (!$user) {
+        if (! $user) {
             return redirect()->back()->with('error', 'User not found.');
         }
 
@@ -652,8 +627,8 @@ if (!file_exists($link)) {
         // For example:
         Notification::create([
             'username' => $user->username,
-            'msghead' => $request->subject, // Correctly adding a newline between the subject and the message
-            'msgbody' => $request->message, // Correctly adding a newline between the subject and the message
+            'msghead'  => $request->subject, // Correctly adding a newline between the subject and the message
+            'msgbody'  => $request->message, // Correctly adding a newline between the subject and the message
         ]);
 
         // Redirect back with a success message
@@ -666,51 +641,51 @@ if (!file_exists($link)) {
         $user = Auth::user();
 
         $validatedData = $request->validate(array_merge([
-            'site_name' => 'required|string|max:255',
-            'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'api_key' => 'required|string',
-            'secret_key' => 'required|string',
-            'site_token' => 'required|string',
-            'monnify_api_key' => 'required|string',
-            'monnify_contract_code' => 'required|string',
-            'header_color' => 'required|string',
-            'template_color' => 'required|string',
-            'test_color' => 'required|string',
-            'site_bank_name' => 'required|string',
-            'site_bank_account_name' => 'required|string',
+            'site_name'                 => 'required|string|max:255',
+            'site_logo'                 => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'api_key'                   => 'required|string',
+            'secret_key'                => 'required|string',
+            'site_token'                => 'required|string',
+            'monnify_api_key'           => 'required|string',
+            'monnify_contract_code'     => 'required|string',
+            'header_color'              => 'required|string',
+            'template_color'            => 'required|string',
+            'test_color'                => 'required|string',
+            'site_bank_name'            => 'required|string',
+            'site_bank_account_name'    => 'required|string',
             'site_bank_account_account' => 'required|string',
-            'site_bank_comment' => 'required|string',
-            'whatsapp_number' => 'required|string',
-            'welcome_message' => 'required|string',
-            'email' => 'required|string',
-            'monnify_percent' => 'required|string',
-            'bonus' => 'required|string',
-            'company_phone' => 'required|string',
-            'company_address' => 'required|string',
-            'company_email' => 'required|string',
+            'site_bank_comment'         => 'required|string',
+            'whatsapp_number'           => 'required|string',
+            'welcome_message'           => 'required|string',
+            'email'                     => 'required|string',
+            'monnify_percent'           => 'required|string',
+            'bonus'                     => 'required|string',
+            'company_phone'             => 'required|string',
+            'company_address'           => 'required|string',
+            'company_email'             => 'required|string',
         ], $user->role == 0 ? [
-            'airtime_api_url' => 'required|url',
-            'transaction_api_url' => 'required|url',
-            'data_network_api_url' => 'required|url',
-            'data_api_url' => 'required|url',
-            'data_mtn' => 'required|url',
-            'data_airtime' => 'required|url',
-            'electricity_pay_api_url' => 'required|url',
-            'electricity_verify_api_url' => 'required|url',
-            'tv_bouquet_api_url' => 'required|url',
-            'tv_billcode_api_url' => 'required|url',
+            'airtime_api_url'                     => 'required|url',
+            'transaction_api_url'                 => 'required|url',
+            'data_network_api_url'                => 'required|url',
+            'data_api_url'                        => 'required|url',
+            'data_mtn'                            => 'required|url',
+            'data_airtime'                        => 'required|url',
+            'electricity_pay_api_url'             => 'required|url',
+            'electricity_verify_api_url'          => 'required|url',
+            'tv_bouquet_api_url'                  => 'required|url',
+            'tv_billcode_api_url'                 => 'required|url',
             'education_waec_registration_api_url' => 'required|url',
-            'education_waec_api_url' => 'required|url',
-            'education_jamb_api_url' => 'required|url',
-            'education_check_result_api_url' => 'required|url',
-            'education_jamb_verify_api_url' => 'required|url',
-            'insurance_health_insurance_api_url' => 'required|url',
+            'education_waec_api_url'              => 'required|url',
+            'education_jamb_api_url'              => 'required|url',
+            'education_check_result_api_url'      => 'required|url',
+            'education_jamb_verify_api_url'       => 'required|url',
+            'insurance_health_insurance_api_url'  => 'required|url',
             'insurance_personal_accident_api_url' => 'required|url',
-            'insurance_ui_insure_api_url' => 'required|url',
-            'insurance_state_api_url' => 'required|url',
-            'insurance_color_api_url' => 'required|url',
-            'insurance_brand_api_url' => 'required|url',
-            'insurance_engine_capacity_api_url' => 'required|url',
+            'insurance_ui_insure_api_url'         => 'required|url',
+            'insurance_state_api_url'             => 'required|url',
+            'insurance_color_api_url'             => 'required|url',
+            'insurance_brand_api_url'             => 'required|url',
+            'insurance_engine_capacity_api_url'   => 'required|url',
         ] : []));
 
         $settings = Setting::first();
@@ -736,13 +711,13 @@ if (!file_exists($link)) {
     public function walletSummaryadmin()
     {
         // Fetch and merge transactions
-        $airtimeTransactions = AirtimeTransaction::orderBy('created_at', 'desc')->get();
-        $dataTransactions = DataTransactions::orderBy('created_at', 'desc')->get();
-        $educationTransactions = EducationTransaction::orderBy('created_at', 'desc')->get();
+        $airtimeTransactions     = AirtimeTransaction::orderBy('created_at', 'desc')->get();
+        $dataTransactions        = DataTransactions::orderBy('created_at', 'desc')->get();
+        $educationTransactions   = EducationTransaction::orderBy('created_at', 'desc')->get();
         $electricityTransactions = EletricityTransaction::orderBy('created_at', 'desc')->get();
-        $fundTransactions = FundTransaction::orderBy('created_at', 'desc')->get();
-        $insuranceTransactions = InsuranceTransaction::orderBy('created_at', 'desc')->get();
-        $tvTransactions = TvTransactions::orderBy('created_at', 'desc')->get();
+        $fundTransactions        = FundTransaction::orderBy('created_at', 'desc')->get();
+        $insuranceTransactions   = InsuranceTransaction::orderBy('created_at', 'desc')->get();
+        $tvTransactions          = TvTransactions::orderBy('created_at', 'desc')->get();
 
         // Combine and sort all transactions
         $allTransactions = collect()
@@ -758,7 +733,6 @@ if (!file_exists($link)) {
         return view('admin-layout.wallet', compact('allTransactions'));
     }
 
-
     public function add_account()
     {
         return view('admin-layout.add_account');
@@ -769,17 +743,17 @@ if (!file_exists($link)) {
         // Validation rules for the form inputs
         $validator = Validator::make($request->all(), [
             'user_role' => 'required|in:1,2',
-            'fname' => 'required',
-            'username' => 'required|unique:users',
-            'email' => 'required|email|unique:users',
-            'tel' => [
+            'fname'     => 'required',
+            'username'  => 'required|unique:users',
+            'email'     => 'required|email|unique:users',
+            'tel'       => [
                 'required',
                 'regex:/^0\d{10}$/', // Ensure the phone number starts with '0' and is followed by 10 digits
-                'unique:users'
+                'unique:users',
             ],
-            'address' => 'required',
-            'password' => 'required|max:20|min:6',
-            'cpassword' => 'required|same:password'
+            'address'   => 'required',
+            'password'  => 'required|max:20|min:6',
+            'cpassword' => 'required|same:password',
         ]);
 
         // Check if validation fails
@@ -787,31 +761,31 @@ if (!file_exists($link)) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Default values for user registration
-        $role = $request->user_role; // Get the selected user role
-        $refferal_user = $request->input('referral'); // Get referral username from the request
-        $refferal = 0;
+                                                       // Default values for user registration
+        $role           = $request->user_role;         // Get the selected user role
+        $refferal_user  = $request->input('referral'); // Get referral username from the request
+        $refferal       = 0;
         $refferal_bonus = 0.0;
-        $cal = 1;
+        $cal            = 1;
 
-        // Generate a unique user_id
+                                                                  // Generate a unique user_id
         $randomString = strtoupper(substr(md5(mt_rand()), 0, 8)); // Generate a random 8-character string
-        $latestUserId = User::max('id') + 1; // Fetch the next auto-increment ID
-        $userId = 'UID' . $randomString . $latestUserId; // Combine strings to form a unique user ID
+        $latestUserId = User::max('id') + 1;                      // Fetch the next auto-increment ID
+        $userId       = 'UID' . $randomString . $latestUserId;    // Combine strings to form a unique user ID
 
         // Data array for creating a new user
         $data = [
-            'name' => $request->fname,
-            'user_id' => $userId, // Assign the generated user_id
-            'username' => $request->username,
-            'address' => $request->address,
-            'email' => $request->email,
-            'tel' => $request->tel,
-            'password' => Hash::make($request->password),
-            'role' => $role,
-            'cal' => $cal,
-            'refferal_user' => $refferal_user ?? null, // Set nullable if referral user is not provided
-            'refferal' => $refferal,
+            'name'           => $request->fname,
+            'user_id'        => $userId, // Assign the generated user_id
+            'username'       => $request->username,
+            'address'        => $request->address,
+            'email'          => $request->email,
+            'tel'            => $request->tel,
+            'password'       => Hash::make($request->password),
+            'role'           => $role,
+            'cal'            => $cal,
+            'refferal_user'  => $refferal_user ?? null, // Set nullable if referral user is not provided
+            'refferal'       => $refferal,
             'refferal_bonus' => $refferal_bonus,
         ];
 
@@ -826,9 +800,9 @@ if (!file_exists($link)) {
                 if ($referrer) {
                     // Create referral record
                     Referral::create([
-                        'user_id' => $referrer->user_id, // ID of the referring user
-                        'referral_user_id' => $user->user_id, // ID of the referred user
-                        'referral_username' => $user->username, // Referred user's username
+                        'user_id'           => $referrer->user_id, // ID of the referring user
+                        'referral_user_id'  => $user->user_id,     // ID of the referred user
+                        'referral_username' => $user->username,    // Referred user's username
                     ]);
                 }
             }
@@ -855,13 +829,12 @@ if (!file_exists($link)) {
 
     public function manageSubAdmin()
     {
-        // Fetch all merchant pages from the merchants model
+                                   // Fetch all merchant pages from the merchants model
         $pages = merchants::all(); // Use the correct model name (should be singular by convention)
 
         // Return the view and pass the 'pages' data
         return view('admin-layout.marchant', compact('pages'));
     }
-
 
     public function updatePageStatus($id, $action)
     {
@@ -875,7 +848,7 @@ if (!file_exists($link)) {
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid action provided.'
+                    'message' => 'Invalid action provided.',
                 ], 400);
             }
 
@@ -883,12 +856,12 @@ if (!file_exists($link)) {
 
             return response()->json([
                 'success' => true,
-                'message' => 'Page status updated successfully.'
+                'message' => 'Page status updated successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while updating the status.'
+                'message' => 'An error occurred while updating the status.',
             ], 500);
         }
     }
@@ -902,7 +875,7 @@ if (!file_exists($link)) {
         $monnifyFee = $settings->monnify_percent;
 
         return response()->json([
-            'fee' => $monnifyFee
+            'fee' => $monnifyFee,
         ]);
     }
 }
