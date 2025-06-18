@@ -106,21 +106,18 @@ class authController extends Controller
 
         // Data array for creating a new user
         $data = [
-            'name'            => $request->fname,
-            'username'        => $request->username,
-            'user_id'         => $userId, // Use the generated unique user ID
-            'address'         => $request->address,
-            'email'           => $request->email,
-            'tel'             => $request->tel,
-            'password'        => Hash::make($request->password),
-            'role'            => $role,
-            'cal'             => $cal,
-            'refferal_user'   => $refferal_user ?? null, // Set nullable if referral user is not provided
-            'refferal'        => $refferal,
-            'refferal_bonus'  => $refferal_bonus,
-            "smart_earners"   => 0,
-            'api_earners'     => 0,
-            'topuser_earners' => 0,
+            'name'           => $request->fname,
+            'user_id'        => $userId, // Assign the generated user_id
+            'username'       => $request->username,
+            'address'        => $request->address,
+            'email'          => $request->email,
+            'tel'            => $request->tel,
+            'password'       => Hash::make($request->password),
+            'role'           => $role,
+            'cal'            => $cal,
+            'refferal_user'  => $refferal_user ?? null, // Set nullable if referral user is not provided
+            'refferal'       => $refferal,
+            'refferal_bonus' => $refferal_bonus,
         ];
 
         // Create the user

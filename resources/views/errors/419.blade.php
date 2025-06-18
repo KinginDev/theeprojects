@@ -6,9 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-    
-    <script>
-        window.location.href = "{{URL::to('/login')}}";
-    </script>
+@section('code', '419')
 </body>
 </html>
