@@ -1,0 +1,242 @@
+#side-menu li a i {
+  color: #FF6600 !important;
+}
+
+.btn-org {
+  background-color: #FF6600 !important;
+  color: white !important;
+}
+
+.btn-outline-org {
+  border: 1px solid #FF6600;
+  color: #FF6600;
+}
+
+.total {
+  position: relative;
+  background-color: transparent;
+}
+.total a {
+  position: absolute;
+  right: 0;
+}
+
+.text-gray {
+  color: gray;
+}
+
+.amt-balance .h4 {
+  font-weight: bolder;
+}
+.amt-balance i {
+  margin-top: 5px;
+  font-size: 18px;
+}
+
+.send-rec a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  padding: 8px;
+  border-radius: 6px;
+}
+.send-rec a:nth-child(2) {
+  margin-left: 15px;
+}
+.send-rec a i {
+  font-size: 18px;
+  margin-right: 5px;
+}
+
+.br-2 {
+  border-radius: 15px;
+}
+
+.moni-card {
+  padding: 35px;
+}
+
+.box {
+  width: 100%;
+  position: relative;
+  padding: 25px;
+  border: 2px solid rgba(116, 116, 116, 0.1);
+  border-radius: 10px;
+}
+.box .h4 {
+  font-weight: bold;
+}
+
+.ico {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 111, 166, 0.2);
+  border-radius: 10px;
+  position: absolute;
+  right: 20px;
+}
+.ico i {
+  font-size: 25px;
+  color: rgb(0, 111, 166);
+}
+
+.re {
+  background-color: rgba(210, 0, 0, 0.2) !important;
+}
+.re i {
+  color: rgb(210, 0, 0);
+}
+
+.qbox {
+  text-align: center;
+  position: relative;
+}
+.qbox p {
+  color: black;
+  font-weight: bold;
+  font-size: 14px !important;
+}
+.qbox .item-box {
+  margin-top: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  left: calc(50% - 15px);
+}
+.qbox .item-box i {
+  font-size: 24px;
+  color: #FF6600;
+}
+
+.transaction-icon {
+  display: flex;
+}
+.transaction-icon h6 {
+  margin-top: 10px !important;
+  margin-left: 10px;
+}
+.transaction-icon .icon-hold {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 102, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.transaction-icon .icon-hold i {
+  color: #FF6600;
+  font-size: 18px;
+  margin-top: 3px;
+}
+
+.p-12 {
+  padding: 12px;
+}
+
+.pay {
+  border: 1.5px solid rgba(124, 124, 124, 0.4);
+  border-radius: 4px;
+  padding: 10px;
+  text-align: center;
+}
+
+.tab-s .active {
+  background-color: #FF6600 !important;
+}
+
+.swap-flight {
+  font-size: 30px;
+  color: #FF6600;
+}
+
+.link {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 102, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+}
+.link i {
+  font-size: 25px;
+  color: rgb(255, 102, 0);
+}
+
+.text-ref {
+  margin-left: 15px;
+  margin-top: 2px;
+}
+.text-ref span:nth-child(1) {
+  font-weight: bolder;
+}
+.text-ref span:nth-child(3) {
+  font-weight: bolder;
+  font-size: 25px;
+}
+
+.bank {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(116, 116, 116, 0.2);
+  border-radius: 15px;
+}
+.bank i {
+  font-size: 25px;
+}
+
+.status-success {
+  color: green;
+}
+
+.status-pending {
+  color: orange;
+}
+
+.status-fail {
+  color: red;
+}
+
+.tran-items {
+  position: relative;
+}
+
+.tran-item {
+  position: relative;
+}
+.tran-item p:nth-child(2) {
+  position: absolute;
+  right: 0;
+}
+
+@media screen and (max-width: 800px) {
+  .box {
+    margin-top: 10px;
+  }
+  .qbox p {
+    font-size: 10px !important;
+  }
+  .ico {
+    width: 35px;
+    height: 35px;
+  }
+  .ico i {
+    font-size: 18px;
+  }
+  .tran-item {
+    font-size: 12px;
+  }
+}/*# sourceMappingURL=cost.css.map */
