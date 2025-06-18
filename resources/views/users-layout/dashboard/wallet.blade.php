@@ -64,7 +64,7 @@
                                             <tbody>
                                                 @foreach ($allTransactions as $transaction)
                                                     <tr>
-                                                        <td>{{ $transaction->transaction_id }}</td>
+                                                        <td>{{ $transaction->reference }}</td>
                                                         <td>₦{{ number_format($transaction->amount, 2) }}</td>
                                                         <td>{{ $transaction->identity }}</td>
                                                         <td>₦{{ $transaction->prev_bal }}</td>

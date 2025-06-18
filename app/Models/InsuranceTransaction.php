@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +18,7 @@ class InsuranceTransaction extends Model
         'type',
         'tel',
         'amount',
-        'transaction_id',
+        'reference',
         'purchased_code',
         'response_description',
         'transaction_date',
@@ -33,6 +32,6 @@ class InsuranceTransaction extends Model
     // If you want to cast some attributes to a specific type, you can use the $casts property
     protected $casts = [
         'transaction_date' => 'datetime',
-        'amount' => 'decimal:2',
+        'amount'           => 'decimal:2',
     ];
 }

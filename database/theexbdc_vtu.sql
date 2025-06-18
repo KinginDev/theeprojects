@@ -58,7 +58,7 @@ CREATE TABLE `airtimes_transactions` (
   `network` varchar(255) NOT NULL,
   `tel` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `identity` varchar(255) NOT NULL,
   `prev_bal` varchar(225) NOT NULL,
   `current_bal` varchar(225) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE `airtimes_transactions` (
 -- Dumping data for table `airtimes_transactions`
 --
 
-INSERT INTO `airtimes_transactions` (`id`, `username`, `network`, `tel`, `amount`, `transaction_id`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `airtimes_transactions` (`id`, `username`, `network`, `tel`, `amount`, `reference`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (11, 'henryleogee', 'mtn', '08011111111', '200', '17263034379329129422761401', '08011111111', '2080479.35', '2080285.35', '6', 'delivered', '2024-09-14 07:44:00', '2024-09-14 07:44:00'),
 (12, 'henryleogee', 'mtn', '08011111111', '1000', '17263077854008358764503944', '08011111111', '2080285.35', '2079315.35', '30', 'delivered', '2024-09-14 08:56:26', '2024-09-14 08:56:26'),
 (13, 'henryleogee', 'mtn', '08011111111', '1000', '17263890892872264699800072', '08011111111', '2074846.19', '2073876.19', '30', 'delivered', '2024-09-15 07:31:31', '2024-09-15 07:31:31'),
@@ -130,7 +130,7 @@ CREATE TABLE `data_transactions` (
   `tel` varchar(255) NOT NULL,
   `plan` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `identity` varchar(255) NOT NULL,
   `prev_bal` varchar(225) NOT NULL,
   `current_bal` varchar(225) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE `data_transactions` (
 -- Dumping data for table `data_transactions`
 --
 
-INSERT INTO `data_transactions` (`id`, `username`, `api_response`, `network`, `tel`, `plan`, `amount`, `transaction_id`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `data_transactions` (`id`, `username`, `api_response`, `network`, `tel`, `plan`, `amount`, `reference`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'henryleo4', '{\"id\":259606,\"ident\":\"1551335740c213ec95\",\"network\":4,\"balance_before\":\"5948.0\",\"balance_after\":\"5888.0\",\"mobile_number\":\"09047933240\",\"plan\":232,\"Status\":\"successful\",\"api_response\":\"You have successfully gifted 2349047933240 with 100MB of Data. valid till 9\\/2\\/2024 12:00:00 PM\",\"plan_network\":\"AIRTEL\",\"plan_name\":\"100.0MB\",\"plan_amount\":\"60.0\",\"create_date\":\"2024-08-27T08:00:40.717601\",\"Ported_number\":true}', '4', '09047933240', '232', '60', '20240827080089htyyo', 'Data Purchase', '', '', '', 'successful', '2024-08-27 06:00:39', '2024-08-27 06:00:39'),
 (2, 'henryleo4', '{\"id\":259607,\"ident\":\"12824119741233bec6\",\"network\":4,\"balance_before\":\"5888.0\",\"balance_after\":\"5828.0\",\"mobile_number\":\"09047933240\",\"plan\":232,\"Status\":\"successful\",\"api_response\":\"You have successfully gifted 2349047933240 with 100MB of Data. valid till 9\\/2\\/2024 12:00:00 PM\",\"plan_network\":\"AIRTEL\",\"plan_name\":\"100.0MB\",\"plan_amount\":\"60.0\",\"create_date\":\"2024-08-27T08:06:59.757119\",\"Ported_number\":true}', '4', '09047933240', '232', '60', '20240827080689htyyo', 'Data Purchase', '', '', '', 'successful', '2024-08-27 06:06:58', '2024-08-27 06:06:58'),
 (3, 'henryleo4', '{\"id\":259609,\"ident\":\"1168317579dddb955c\",\"network\":4,\"balance_before\":\"5828.0\",\"balance_after\":\"5768.0\",\"mobile_number\":\"09047933240\",\"plan\":232,\"Status\":\"successful\",\"api_response\":\"You have successfully gifted 2349047933240 with 100MB of Data. valid till 9\\/2\\/2024 12:00:00 PM\",\"plan_network\":\"AIRTEL\",\"plan_name\":\"100.0MB\",\"plan_amount\":\"60.0\",\"create_date\":\"2024-08-27T08:08:55.571277\",\"Ported_number\":true}', '4', '09047933240', '232', '60', '20240827080889htyyo', 'Data Purchase', '', '', '', 'successful', '2024-08-27 06:08:53', '2024-08-27 06:08:53'),
@@ -202,7 +202,7 @@ CREATE TABLE `education_transactions` (
   `type` varchar(255) NOT NULL,
   `tel` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `purchased_code` varchar(255) NOT NULL,
   `response_description` varchar(255) NOT NULL,
   `transaction_date` varchar(255) NOT NULL,
@@ -219,7 +219,7 @@ CREATE TABLE `education_transactions` (
 -- Dumping data for table `education_transactions`
 --
 
-INSERT INTO `education_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `transaction_id`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `education_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `reference`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'okika', 'WAEC Registration', 'waec-registraion', '0908', '27500.00', '2024081816511f785c32', 'Token: 0100070365657400875', 'TRANSACTION SUCCESSFUL', '2024-08-18 15:51:32', 'waec', '', '', '', 'successful', '2024-08-18 14:51:32', '2024-08-18 14:51:32'),
 (2, 'okika', 'WAEC Registration', 'waec-registraion', '08011111111', '27500.00', '2024081816553450c972', 'Token: 0100070365657400875', 'TRANSACTION SUCCESSFUL', '2024-08-18 15:55:47', 'waec', '', '', '', 'successful', '2024-08-18 14:55:47', '2024-08-18 14:55:47'),
 (3, 'okika', 'WAEC Registration', 'waec-registraion', '08011111111', '27500.00', '20240818165697bccdf8', 'Token: 0100070365657400875', 'TRANSACTION SUCCESSFUL', '2024-08-18 15:56:51', 'waec', '', '', '', 'successful', '2024-08-18 14:56:51', '2024-08-18 14:56:51'),
@@ -281,7 +281,7 @@ CREATE TABLE `eletricity_transactions` (
   `type` varchar(255) NOT NULL,
   `tel` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `purchased_code` varchar(255) NOT NULL,
   `response_description` varchar(255) NOT NULL,
   `transaction_date` varchar(255) NOT NULL,
@@ -298,7 +298,7 @@ CREATE TABLE `eletricity_transactions` (
 -- Dumping data for table `eletricity_transactions`
 --
 
-INSERT INTO `eletricity_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `transaction_id`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `eletricity_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `reference`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'henryleo4', 'ikeja-electric', 'prepaid', '09047933240', '1000', '20240824111489htyyo', 'Token : 26362054405982757802', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:14:02', 'ikeja-electric', '', '', '', 'successful', '2024-08-24 09:14:02', '2024-08-24 09:14:02'),
 (2, 'henryleo4', 'ikeja-electric', 'prepaid', '2349047933240', '1000', '20240824111689htyyo', 'Token : 26362054405982757802', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:16:15', 'ikeja-electric', '', '', '', 'successful', '2024-08-24 09:16:15', '2024-08-24 09:16:15'),
 (3, 'henryleo4', 'eko-electric', 'prepaid', '09047933240', '1000', '20240824111789htyyo', 'Token : 11786621902768210244', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:17:56', 'eko-electric', '', '', '', 'successful', '2024-08-24 09:17:56', '2024-08-24 09:17:56'),
@@ -350,7 +350,7 @@ CREATE TABLE `fund_transactions` (
   `username` varchar(255) NOT NULL,
   `tel` varchar(255) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `identity` varchar(255) NOT NULL,
   `status` varchar(255) NOT NULL,
   `prev_bal` varchar(111) NOT NULL,
@@ -363,7 +363,7 @@ CREATE TABLE `fund_transactions` (
 -- Dumping data for table `fund_transactions`
 --
 
-INSERT INTO `fund_transactions` (`id`, `user_id`, `username`, `tel`, `amount`, `transaction_id`, `identity`, `status`, `prev_bal`, `current_bal`, `created_at`, `updated_at`) VALUES
+INSERT INTO `fund_transactions` (`id`, `user_id`, `username`, `tel`, `amount`, `reference`, `identity`, `status`, `prev_bal`, `current_bal`, `created_at`, `updated_at`) VALUES
 (49, 'UIDDCC92D2546', 'Hartz', '09086337336', 100.00, 'MNFY|02|20241226082024|046241', 'monnify', 'SUCCESS', '600.00', '700', '2024-12-26 12:21:03', '2024-12-26 12:21:03'),
 (50, 'UIDAC281CC382', 'author', '09089389903', 100.00, 'MNFY|01|20241226082439|003196', 'monnify', 'SUCCESS', '0.00', '100', '2024-12-26 12:26:36', '2024-12-26 12:26:36'),
 (51, 'UID38D0D96F44', 'Babyluv', '09013680640', 6000.00, 'TXN-20241226135334sfBhv', 'Manual Funding', 'Success', '849.50', '6849.5', '2024-12-26 18:53:34', '2024-12-26 18:53:34'),
@@ -390,7 +390,7 @@ CREATE TABLE `insurance_transactions` (
   `type` varchar(255) NOT NULL,
   `tel` varchar(255) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `purchased_code` text DEFAULT NULL,
   `response_description` text DEFAULT NULL,
   `transaction_date` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -407,7 +407,7 @@ CREATE TABLE `insurance_transactions` (
 -- Dumping data for table `insurance_transactions`
 --
 
-INSERT INTO `insurance_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `transaction_id`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `insurance_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `reference`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'okika', 'Third Party Motor Insurance - Universal Insurance', '1', '09047933240', 3000.00, '20240823132230af7122', 'Download Certificate : https://3rdparty.universalinsuranceonline.com/PrintCertificate.aspx?Data=UPMSB001190319136038', 'TRANSACTION SUCCESSFUL', '2024-08-23 11:22:28', 'Third Party Motor Insurance', '', '', '', 'successful', '2024-08-23 11:22:28', '2024-08-23 11:22:28'),
 (2, 'okika', 'Health Insurance - HMO', 'option-a', '09047933240', 2500.00, '202408231444c3a27c1d', '', 'TRANSACTION SUCCESSFUL', '2024-08-23 12:44:41', 'Health Insurance', '', '', '', 'successful', '2024-08-23 12:44:41', '2024-08-23 12:44:41'),
 (3, 'henryleo4', 'Third Party Motor Insurance - Universal Insurance', '1', '09047933240', 3000.00, '20240828074144a6dad41a', 'Download Certificate : https://3rdparty.universalinsuranceonline.com/PrintCertificate.aspx?Data=UPMSB001190319136038', 'TRANSACTION SUCCESSFUL', '2024-08-28 05:41:45', 'Third Party Motor Insurance', '', '', '', 'successful', '2024-08-28 05:41:45', '2024-08-28 05:41:45'),
@@ -459,23 +459,23 @@ CREATE TABLE `job_batches` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `merchants`
+-- Table structure for table `pages`
 --
 
-CREATE TABLE `merchants` (
+CREATE TABLE `pages` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `pages` varchar(255) DEFAULT NULL,
-  `pages_id` varchar(225) NOT NULL,
+  `route_title` varchar(255) DEFAULT NULL,
+  `route_name` varchar(225) NOT NULL,
   `action` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `merchants`
+-- Dumping data for table `pages`
 --
 
-INSERT INTO `merchants` (`id`, `pages`, `pages_id`, `action`, `created_at`, `updated_at`) VALUES
+INSERT INTO `pages` (`id`, `route_title`, `route_name`, `action`, `created_at`, `updated_at`) VALUES
 (1, 'Dashboard', 'admin.dashboard', '1', '2024-09-28 12:07:15', '2025-01-16 19:13:14'),
 (2, 'Manage users', 'manage', '1', '2024-09-28 12:07:15', '2025-01-16 19:13:11'),
 (3, 'Credit User account', 'creditUserAccount', '1', '2024-09-28 12:07:15', '2025-01-16 19:13:05'),
@@ -574,7 +574,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (18, '2024_08_30_083735_create_referrals_table', 11),
 (19, '2024_09_10_062731_create_settings_table', 12),
 (20, '2024_09_11_120231_create_percentage_table', 13),
-(21, '2024_09_28_114522_create_merchants_table', 14);
+(21, '2024_09_28_114522_create_pages_table', 14);
 
 -- --------------------------------------------------------
 
@@ -851,7 +851,7 @@ CREATE TABLE `tv_transactions` (
   `tel` varchar(255) NOT NULL,
   `plan` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
-  `transaction_id` varchar(255) NOT NULL,
+  `reference` varchar(255) NOT NULL,
   `identity` varchar(255) NOT NULL,
   `prev_bal` varchar(225) NOT NULL,
   `current_bal` varchar(225) NOT NULL,
@@ -865,7 +865,7 @@ CREATE TABLE `tv_transactions` (
 -- Dumping data for table `tv_transactions`
 --
 
-INSERT INTO `tv_transactions` (`id`, `username`, `api_response`, `network`, `tel`, `plan`, `amount`, `transaction_id`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `tv_transactions` (`id`, `username`, `api_response`, `network`, `tel`, `plan`, `amount`, `reference`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (5, 'henryleogee', 'TRANSACTION SUCCESSFUL', 'renew', '0908872', '1212121212', '63885', '2024090709092689htyyo', 'DSTV Subscription', '', '', '', 'successful', '2024-09-07 07:09:28', '2024-09-07 07:09:28'),
 (6, 'henryleogee', 'TRANSACTION SUCCESSFUL', 'change', '08011111111', '1212121212', '2565.00', '20240915110333NV8hE', 'DSTV Subscription', '2072876.19', '2070349.665', '38.475', 'successful', '2024-09-15 09:03:36', '2024-09-15 09:03:36'),
 (7, 'henryleogee', 'TRANSACTION SUCCESSFUL', 'change', '08011111111', '1212121212', '2565.00', '20240915110416vq7yT', 'DSTV Subscription', '2070349.67', '2067823.145', '38.475', 'successful', '2024-09-15 09:04:18', '2024-09-15 09:04:18'),
@@ -1172,14 +1172,14 @@ ALTER TABLE `failed_jobs`
 --
 ALTER TABLE `fund_transactions`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `fund_transactions_transaction_id_unique` (`transaction_id`);
+  ADD UNIQUE KEY `fund_transactions_reference_unique` (`reference`);
 
 --
 -- Indexes for table `insurance_transactions`
 --
 ALTER TABLE `insurance_transactions`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `insurance_transactions_transaction_id_unique` (`transaction_id`);
+  ADD UNIQUE KEY `insurance_transactions_reference_unique` (`reference`);
 
 --
 -- Indexes for table `jobs`
@@ -1195,9 +1195,9 @@ ALTER TABLE `job_batches`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `merchants`
+-- Indexes for table `pages`
 --
-ALTER TABLE `merchants`
+ALTER TABLE `pages`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1323,9 +1323,9 @@ ALTER TABLE `jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `merchants`
+-- AUTO_INCREMENT for table `pages`
 --
-ALTER TABLE `merchants`
+ALTER TABLE `pages`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --

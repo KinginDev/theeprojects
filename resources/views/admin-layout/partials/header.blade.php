@@ -85,7 +85,7 @@
                             $user = auth()->user();
 
                             // Retrieve active pages for the authenticated user
-                            $pages = \App\Models\merchants::where('action', 1)->get(); // Adjust the model path if necessary
+                            $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
                         @endphp
                         <!-- Check if user role is Merchant (1) -->
                         @php
@@ -111,16 +111,17 @@
 
                         @endphp
 
+
                         @if ($user->role == 1)
                             @foreach ($pages as $page)
                                 @if ($page->id >= 1 && $page->id <= 17)
                                     <li class="nav-item">
-                                        <a href="{{ route($page->pages_id) }}"
+                                        <a href="{{ route($page->route_name) }}"
                                             class="nav-link waves-effect d-flex align-items-center">
-                                            <i class="{{ $icons[$page->pages_id] ?? 'ri-menu-line' }} me-2"></i>
-                                            <span>{{ $page->pages }}</span>
+                                            <i class="{{ $icons[$page->route_name] ?? 'ri-menu-line' }} me-2"></i>
+                                            <span>{{ $page->route_title }}</span>
                                             <span
-                                                class="badge rounded-pill bg-info ms-auto">{{ $page->action ? 'Active' : 'Inactive' }}</span>
+                                                class="badge rounded-pill bg-info ms-auto">{{ $page->status ? 'Active' : 'Inactive' }}</span>
                                         </a>
                                     </li>
                                 @endif

@@ -184,7 +184,7 @@ class airtimeController extends Controller
                 $transaction->prev_bal       = $userBalance;
                 $transaction->current_bal    = $currentBal;
                 $transaction->percent_profit = $amount - $finalAmount;
-                $transaction->transaction_id = $requeryResult->content->transactions->transactionId;
+                $transaction->reference      = $requeryResult->content->transactions->transactionId;
                 $transaction->identity       = $requeryResult->content->transactions->unique_element;
                 $transaction->status         = $requeryResult->content->transactions->status;
                 $transaction->created_at     = now();

@@ -143,7 +143,7 @@
                                     <td>{{ $transaction->purchased_code }}</td>
                                     <td>{{ $transaction->tel }}</td>
                                     <td>₦{{ $transaction->amount }}</td>
-                                    <td>{{ $transaction->transaction_id }}</td>
+                                    <td>{{ $transaction->reference }}</td>
                                     <td>{{ $transaction->identity }}</td>
                                     <td>{{ $transaction->status }}</td>
 

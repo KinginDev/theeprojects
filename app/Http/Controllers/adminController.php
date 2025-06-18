@@ -7,8 +7,8 @@ use App\Models\EducationTransaction;
 use App\Models\EletricityTransaction;
 use App\Models\FundTransaction;
 use App\Models\InsuranceTransaction;
-use App\Models\merchants;
 use App\Models\Notification;
+use App\Models\Pages;
 use App\Models\percentage;
 use App\Models\Referral;
 use App\Models\Setting;
@@ -244,15 +244,15 @@ class adminController extends Controller
         if ($user->save()) {
             // Record the transaction in the fund_transactions table
             $transaction = FundTransaction::create([
-                'user_id'        => $user->id,
-                'username'       => $user->username,
-                'tel'            => $user->tel,
-                'amount'         => $amount,
-                'transaction_id' => 'TXN-' . now()->format('YmdHis') . Str::random(5),
-                'identity'       => 'Manual Funding',
-                'status'         => 'Success',
-                'prev_bal'       => $user->account_balance,
-                'current_bal'    => $user->account_balance += $amount,
+                'user_id'     => $user->id,
+                'username'    => $user->username,
+                'tel'         => $user->tel,
+                'amount'      => $amount,
+                'reference'   => 'TXN-' . now()->format('YmdHis') . Str::random(5),
+                'identity'    => 'Manual Funding',
+                'status'      => 'Success',
+                'prev_bal'    => $user->account_balance,
+                'current_bal' => $user->account_balance += $amount,
             ]);
 
             // Check if this is the first funding for the user
@@ -829,8 +829,8 @@ class adminController extends Controller
 
     public function manageSubAdmin()
     {
-                                   // Fetch all merchant pages from the merchants model
-        $pages = merchants::all(); // Use the correct model name (should be singular by convention)
+                               // Fetch all merchant pages from the pages model
+        $pages = Pages::all(); // Use the correct model name (should be singular by convention)
 
         // Return the view and pass the 'pages' data
         return view('admin-layout.marchant', compact('pages'));
@@ -839,7 +839,7 @@ class adminController extends Controller
     public function updatePageStatus($id, $action)
     {
         try {
-            $page = merchants::findOrFail($id);
+            $page = Pages::findOrFail($id);
 
             if ($action === 'activate') {
                 $page->action = 1;

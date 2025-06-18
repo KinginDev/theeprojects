@@ -56,7 +56,9 @@
                                         <div class="card-header d-flex justify-content-between align-items-center p-3 rounded-top-4"
                                             style="background-color: {{ $configuration->template_color }} !important; color: white;">
                                             <h6 class="mb-0">Total Balance</h6>
-                                            <a href="{{ route('usertransactions') }}" class="text-white small">Transaction
+                                            <a href="{{ route('users.usertransactions', [
+                                            'slug' => Helper::merchant()->slug
+                                            ]) }}" class="text-white small">Transaction
                                                 History</a>
                                         </div>
                                         <div class="card-body p-4">
@@ -101,7 +103,9 @@
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('airtime') }}" class="qbox">
+                                                    <a href="{{ route('users.airtime', [
+                                                    'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phone-line"></i>
                                                         </div>
@@ -115,7 +119,9 @@
 
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('data') }}" class="qbox">
+                                                    <a href="{{ route('users.data', [
+                                                        'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-wifi-line"></i>
                                                         </div>
@@ -130,7 +136,9 @@
 
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('electricity') }}" class="qbox">
+                                                    <a href="{{ route('users.electricity', [
+                                                        'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-lightbulb-flash-line"></i>
                                                         </div>
@@ -147,7 +155,9 @@
 
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('tv') }}" class="qbox">
+                                                    <a href="{{ route('users.tv', [
+                                                        'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-tv-line"></i>
                                                         </div>
@@ -305,7 +315,9 @@
 
                                             <div class="col-6">
                                                 <div class="card p-2 br-2 bg-dark">
-                                                    <a href="{{ route('usertransactions') }}" class="qbox">
+                                                    <a href="{{ route('users.usertransactions', [
+                                                        'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phon-line"></i>
                                                         </div>
@@ -321,7 +333,9 @@
                                             </div>
                                             <div class="col-6">
                                                 <div class="card p-2 br-2 bg-dark">
-                                                    <a href="{{ route('usersupport') }}" class="qbox">
+                                                    <a href="{{ route('users.usersupport', [
+                                                        'slug' => Helper::merchant()->slug
+                                                    ]) }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phon-line"></i>
                                                         </div>
@@ -337,14 +351,16 @@
                                             </div>
                                             @php
                                                 // Retrieve active pages for the authenticated user
-                                                $pages = \App\Models\merchants::where('action', 1)->get(); // Adjust the model path if necessary
+                                                $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
                                             @endphp
 
                                             @foreach ($pages as $page)
                                                 @if ($page->id == 33 && $page->action == 1)
                                                     <div class="col-6">
                                                         <div class="card p-2 br-2 bg-dark">
-                                                            <a href="{{ route('walletSummary') }}" class="qbox">
+                                                            <a href="{{ route('users.walletSummary', [
+                                                                'slug' => Helper::merchant()->slug
+                                                            ]) }}" class="qbox">
                                                                 <div class="item-box">
                                                                     <i class="ri-phone-line"></i>
                                                                     <!-- Use the appropriate icon class -->
@@ -847,7 +863,9 @@
                                     Swal.fire({
                                         title: "Success!",
                                         html: response.message +
-                                            '<br><br><a href="{{ route('dashboard') }}" class="btn btn-primary">View Reflect Balance</a>',
+                                            '<br><br><a href="{{ route('users.dashboard', [
+                                                'slug' => Helper::merchant()->slug
+                                            ]) }}" class="btn btn-primary">View Reflect Balance</a>',
                                         icon: "success",
                                         text: response.message,
                                         showConfirmButton: false
@@ -899,7 +917,9 @@
                     if (result.isConfirmed) {
                         // If the user clicks OK, submit the request via AJAX
                         $.ajax({
-                            url: '{{ route('upgradeTopuser') }}',
+                            url: '{{ route('users.upgradeTopuser', [
+                                'slug' => Helper::merchant()->slug
+                            ]) }}',
                             type: 'POST',
                             data: {
                                 _token: '{{ csrf_token() }}', // CSRF token

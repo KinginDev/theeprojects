@@ -282,7 +282,7 @@
                 </div>
                 @php
                     // Retrieve active pages for the authenticated user
-                    $pages = \App\Models\merchants::where('action', 1)->get(); // Adjust the model path if necessary
+                    $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
                 @endphp
                 @foreach ($pages as $page)
                     @if ($page->id == 35 && $page->action == 1)

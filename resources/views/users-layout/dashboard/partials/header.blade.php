@@ -33,11 +33,15 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
             <div class="navbar-header">
                 <div class="d-flex">
                     <div class="navbar-brand-box">
-                        <a href="{{ route('dashboard') }}" class="logo logo-dark">
+                        <a href="{{ route('users.dashboard', [
+                            'slug' => Helper::merchant()->slug
+                        ]) }}" class="logo logo-dark">
 
                         </a>
 
-                        <a href="{{ route('dashboard') }}" class="logo logo-light">
+                        <a href="{{ route('users.dashboard', [
+                        'slug' => Helper::merchant()->slug
+                        ]) }}" class="logo logo-light">
 
                             <span class="logo-lg">
                                 <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo-light" width="100%">
@@ -64,17 +68,25 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                             <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="{{ route('user.setting') }}"><i
+                            <a class="dropdown-item" href="{{ route('users.user.setting', [
+                            'slug' => Helper::merchant()->slug
+                            ]) }}"><i
                                     class="ri-user-line align-middle me-1"></i> Edit Profile</a>
-                            <a class="dropdown-item" href="{{ route('usersupport') }}"><i
+                            <a class="dropdown-item" href="{{ route('users.usersupport', [
+                            'slug' => Helper::merchant()->slug
+                            ]) }}"><i
                                     class="ri-mail-send-line align-middle me-1"></i> Support</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="{{ route('logout') }}"><i
+                            <a class="dropdown-item text-danger" href="{{ route('logout', [
+                            'slug' => Helper::merchant()->slug
+                            ]) }}"><i
                                     class="ri-shut-down-line align-middle me-1 text-danger"></i> Logout</a>
                         </div>
                     </div>
                     <div class="dropdown d-inline-block">
-                        <a href="{{ route('user.setting') }}"><button type="button"
+                        <a href="{{ route('users.user.setting', [
+                            'slug' => Helper::merchant()->slug
+                        ]) }}"><button type="button"
                                 class="btn header-item noti-icon right-bar-toggle waves-effect">
                                 <i class="ri-settings-2-line"></i>
                             </button></a>
@@ -96,7 +108,7 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                             $user = auth()->user();
 
                             // Retrieve active pages for the authenticated user
-                            $pages = \App\Models\merchants::where('action', 1)->get(); // Adjust the model path if necessary
+                            $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
                         @endphp
 
                         <!-- Check if user role is Merchant (1) -->
@@ -121,10 +133,12 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                             @foreach ($pages as $page)
                                 @if ($page->id >= 18 && $page->id <= 33)
                                     <li class="nav-item">
-                                        <a href="{{ route($page->pages_id) }}"
+                                        <a href="{{ route("users.{$page->route_name}", [
+                                            'slug' => Helper::merchant()->slug
+                                        ]) }}"
                                             class="nav-link waves-effect d-flex align-items-center">
-                                            <i class="{{ $icons[$page->pages_id] ?? 'ri-menu-line' }} me-2"></i>
-                                            <span>{{ $page->pages }}</span>
+                                            <i class="{{ $icons[$page->route_name] ?? 'ri-menu-line' }} me-2"></i>
+                                            <span>{{ $page->route_title }}</span>
                                             <span
                                                 class="badge rounded-pill bg-info ms-auto">{{ $page->action ? 'Active' : 'Inactive' }}</span>
                                         </a>
@@ -134,43 +148,57 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                         @else
                             <!-- For other roles, display all menu items -->
                             <li>
-                                <a href="{{ route('dashboard') }}" class="waves-effect">
+                                <a href="{{ route('users.dashboard', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="bi bi-grid"></i>
                                     <span>Dashboard</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('airtime') }}" class="waves-effect">
+                                <a href="{{ route('users.airtime', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-phone-line"></i>
                                     <span>Buy Airtime</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('data') }}" class="waves-effect">
+                                <a href="{{ route('users.data', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-wifi-line"></i>
                                     <span>Buy Internet Data</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('electricity') }}" class="waves-effect">
+                                <a href="{{ route('users.electricity', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-lightbulb-flash-line"></i>
                                     <span>Buy Electricity</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('tv') }}" class="waves-effect">
+                                <a href="{{ route('users.tv', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-tv-line"></i>
                                     <span>Buy TV Subscription</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('education') }}" class="waves-effect">
+                                <a href="{{ route('users.education', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-book-line"></i>
                                     <span>Education</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('insurance') }}" class="waves-effect">
+                                <a href="{{ route('users.insurance', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-shield-line"></i>
                                     <span>Insurance</span>
                                 </a>
@@ -181,7 +209,7 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                                     <span>Fund Wallet</span>
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="{{ route('dashboard', ['action' => 'showModal']) }}">ATM/Transfer
+                                    <li><a href="{{ route('users.dashboard', ['action' => 'showModal', 'slug' => Helper::merchant()->slug]) }}">ATM/Transfer
                                             Funding</a></li>
                                     <li><a href="#">Automated Bank Funding</a></li>
                                     <li><a href="#">Manual Bank Funding</a></li>
@@ -191,28 +219,36 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                             <li class="menu-title">Others</li>
 
                             <li>
-                                <a href="{{ route('usertransactions') }}" class="waves-effect">
+                                <a href="{{ route('users.usertransactions', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-history-line"></i>
                                     <span>Transaction History</span>
                                 </a>
                             </li>
 
                             <li>
-                                <a href="{{ route('usersupport') }}" class="waves-effect">
+                                <a href="{{ route('users.usersupport', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-customer-service-line"></i>
                                     <span>Support</span>
                                 </a>
                             </li>
 
                             <li>
-                                <a href="{{ route('user.setting') }}" class="waves-effect">
+                                <a href="{{ route('users.user.setting', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-settings-line"></i>
                                     <span>Setting</span>
                                 </a>
                             </li>
 
                             <li>
-                                <a href="{{ route('logout') }}" class="waves-effect">
+                                <a href="{{ route('logout', [
+                                    'slug' => Helper::merchant()->slug
+                                ]) }}" class="waves-effect">
                                     <i class="ri-shut-down-line"></i>
                                     <span>Logout</span>
                                 </a>
@@ -225,7 +261,7 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
         <!-- Left Sidebar End -->
     </div>
 
-    
+
 </body>
 
 </html>

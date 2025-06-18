@@ -14,22 +14,22 @@ class CreateInsuranceTransactionsTable extends Migration
     public function up()
     {
         Schema::create('insurance_transactions', function (Blueprint $table) {
-            $table->id(); // Auto-incrementing primary key
-            $table->string('username'); // Username of the user
-            $table->string('product_name'); // Name of the insurance product
-            $table->string('type'); // Type of insurance
-            $table->string('tel'); // Phone number
-            $table->decimal('amount', 10, 2); // Amount paid
-            $table->string('transaction_id')->unique(); // Unique transaction ID
-            $table->text('purchased_code')->nullable(); // Purchased code (nullable)
-            $table->text('response_description')->nullable(); // Response description (nullable)
+            $table->id();                                        // Auto-incrementing primary key
+            $table->string('username');                          // Username of the user
+            $table->string('product_name');                      // Name of the insurance product
+            $table->string('type');                              // Type of insurance
+            $table->string('tel');                               // Phone number
+            $table->decimal('amount', 10, 2);                    // Amount paid
+            $table->string('reference')->unique();               // Unique transaction ID
+            $table->text('purchased_code')->nullable();          // Purchased code (nullable)
+            $table->text('response_description')->nullable();    // Response description (nullable)
             $table->timestamp('transaction_date')->useCurrent(); // Transaction date
-            $table->string('identity'); // Identity field
+            $table->string('identity');                          // Identity field
             $table->string('prev_bal');
             $table->string('current_bal');
             $table->string('percent_profit');
             $table->string('status'); // Status of the transaction
-            $table->timestamps(); // Laravel timestamps (created_at and updated_at)
+            $table->timestamps();     // Laravel timestamps (created_at and updated_at)
         });
     }
 

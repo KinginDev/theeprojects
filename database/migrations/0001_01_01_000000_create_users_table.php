@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->decimal('account_balance', 20, 2)->default(0.00);
             $table->string('address');
-            $table->string('refferal_user')->nullable(); // Nullable if not always provided
-            $table->string('refferal')->default(''); // Default value
+            $table->string('refferal_user')->nullable();             // Nullable if not always provided
+            $table->string('refferal')->default('');                 // Default value
             $table->decimal('refferal_bonus', 10, 2)->default(0.00); // Changed to decimal
             $table->integer('role');
             $table->string('smart_earners');
@@ -29,8 +29,11 @@ return new class extends Migration
             $table->string('api_earners');
             $table->integer('cal')->default(0);
             $table->timestamp('email_verified_at')->nullable();
+            $table->unsignedBigInteger(('merchant_id'))->nullable(); // Foreign key for merchants
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('merchant_id')->references('id')->on('merchants')->onDelete('set null');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

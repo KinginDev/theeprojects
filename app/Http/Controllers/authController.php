@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Classes\Helper;
 use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -73,18 +74,18 @@ class authController extends Controller
     {
         // Validation rules for the form inputs
         $validator = Validator::make($request->all(), [
-            'fname'     => 'required',
-            'username'  => 'required|unique:users',
-            'email'     => 'required|email|unique:users',
-            'tel'       => [
+            'fname'    => 'required',
+            'username' => 'required|unique:users',
+            'email'    => 'required|email|unique:users',
+            'tel'      => [
                 'required',
                 'max:20',
                 'min:6',
                 'unique:users',
             ], // Corrected the comma issue here
-            'address'   => 'required',
-            'password'  => 'required|max:20|min:6',
-            'cpassword' => 'required|same:password',
+            'address'  => 'required',
+            'password' => 'required|max:20|min:6|confirmed',
+            'terms'    => 'accepted', // Ensure terms are accepted
         ]);
 
         // Check if validation fails
@@ -118,6 +119,7 @@ class authController extends Controller
             'refferal_user'  => $refferal_user ?? null, // Set nullable if referral user is not provided
             'refferal'       => $refferal,
             'refferal_bonus' => $refferal_bonus,
+            'merchant_id'    => Helper::merchant()->id,
         ];
 
         // Create the user

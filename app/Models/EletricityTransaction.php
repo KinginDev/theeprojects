@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +16,7 @@ class EletricityTransaction extends Model
         'type',
         'tel',
         'amount',
-        'transaction_id',
+        'reference',
         'purchased_code',
         'response_description',
         'transaction_date',
@@ -32,6 +31,6 @@ class EletricityTransaction extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'amount' => 'decimal:2',
+        'amount'           => 'decimal:2',
     ];
 }

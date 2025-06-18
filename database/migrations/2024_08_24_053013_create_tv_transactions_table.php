@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('tel');
             $table->string('plan');
             $table->string('amount');
-            $table->string('transaction_id');
+            $table->string('reference');
             $table->string('identity');
             $table->string('prev_bal');
             $table->string('current_bal');

@@ -1,19 +1,18 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\TvTransactions;  // Import the TvTransactions model
-use App\Models\dataTransactions;  // Import the TvTransactions model
-use App\Models\AirtimeTransaction;  // Import the TvTransactions model
-use App\Models\EletricityTransaction;  // Import the TvTransactions model
+use App\Models\AirtimeTransaction;
+use App\Models\dataTransactions;      // Import the TvTransactions model
 use App\Models\EducationTransaction;  // Import the TvTransactions model
+use App\Models\EletricityTransaction; // Import the TvTransactions model
+use App\Models\FundTransaction;       // Import the TvTransactions model
 use App\Models\InsuranceTransaction;  // Import the TvTransactions model
-use App\Models\Notification;  // Import the TvTransactions model
-use App\Models\Setting;  // Import the TvTransactions model
-use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;          // Import the TvTransactions model
+use App\Models\Setting;               // Import the TvTransactions model
+use App\Models\TvTransactions;        // Import the TvTransactions model
 use App\Models\User;
-use App\Models\FundTransaction;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class transactionController extends Controller
 {
@@ -23,42 +22,42 @@ class transactionController extends Controller
         $requestId = $request->query('hash');
 
         // Attempt to find the transaction in the TvTransactions table
-        $transaction = TvTransactions::where('transaction_id', $requestId)->first();
+        $transaction = TvTransactions::where('reference', $requestId)->first();
 
         // Check if the transaction was found
-        if (!$transaction) {
-            $transaction = dataTransactions::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = dataTransactions::where('reference', $requestId)->first();
         }
 
-        if (!$transaction) {
-            $transaction = AirtimeTransaction::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = AirtimeTransaction::where('reference', $requestId)->first();
         }
 
-        if (!$transaction) {
-            $transaction = EletricityTransaction::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = EletricityTransaction::where('reference', $requestId)->first();
         }
 
-        if (!$transaction) {
-            $transaction = InsuranceTransaction::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = InsuranceTransaction::where('reference', $requestId)->first();
         }
 
-        if (!$transaction) {
-            $transaction = EducationTransaction::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = EducationTransaction::where('reference', $requestId)->first();
         }
 
-        if (!$transaction) {
-            $transaction = FundTransaction::where('transaction_id', $requestId)->first();
+        if (! $transaction) {
+            $transaction = FundTransaction::where('reference', $requestId)->first();
         }
         $user = Auth::user();
 
         if ($user) {
             // Retrieve all data for the user from the database
-            $userData = User::where('id', $user->id)->first();
+            $userData      = User::where('id', $user->id)->first();
             $notifications = Notification::where('username', $user->username)->get();
 
             // Pass the transaction details to the transaction view
             return view('users-layout.dashboard.transactionview', [
-                'userData' => $userData,
+                'userData'      => $userData,
                 'notifications' => $notifications,
             ], [
                 'transaction' => $transaction,
@@ -67,7 +66,6 @@ class transactionController extends Controller
     }
     public function usertransactions()
     {
-
 
         $user = Auth::user();
 
@@ -79,7 +77,7 @@ class transactionController extends Controller
 
             // Pass the data and the flag to the view
             return view('users-layout.dashboard.transactions', [
-                'userData' => $userData,
+                'userData'      => $userData,
                 'notifications' => $notifications,
             ]);
         }
@@ -87,61 +85,60 @@ class transactionController extends Controller
 
     public function fetchAirtimeTransactions()
     {
-        $user = Auth::user();
+        $user         = Auth::user();
         $transactions = AirtimeTransaction::where('username', $user->username)
-        ->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
-    
+            ->orderBy('created_at', 'desc') // or 'transaction_date'
+            ->get();
+
         return response()->json($transactions);
     }
 
     public function fetchDataTransactions()
     {
-        $user = Auth::user();
+        $user             = Auth::user();
         $dataTransactions = dataTransactions::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($dataTransactions);
     }
 
     public function fetchElectricityTransactions()
     {
-        $user = Auth::user();
+        $user                    = Auth::user();
         $electricityTransactions = EletricityTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($electricityTransactions);
     }
 
     public function fetchTvTransactions()
     {
-        $user = Auth::user();
+        $user           = Auth::user();
         $tvTransactions = TvTransactions::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($tvTransactions);
     }
 
     public function fetchEducationTransactions()
     {
-        $user = Auth::user();
+        $user                  = Auth::user();
         $educationTransactions = EducationTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($educationTransactions);
     }
 
     public function fetchInsuranceTransactions()
     {
-        $user = Auth::user();
+        $user                  = Auth::user();
         $insuranceTransactions = InsuranceTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($insuranceTransactions);
     }
     public function fetchFundTransactions()
     {
-        $user = Auth::user();
+        $user             = Auth::user();
         $fundTransactions = FundTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
-        ->get();
+            ->get();
         return response()->json($fundTransactions);
     }
-
 
     public function usernotification()
     {
@@ -155,7 +152,7 @@ class transactionController extends Controller
             $notifications = Notification::where('username', $user->username)->get();
 
             return view('users-layout.dashboard.notification', [
-                'userData' => $userData,
+                'userData'      => $userData,
                 'notifications' => $notifications,
             ]);
         }
@@ -167,17 +164,17 @@ class transactionController extends Controller
     public function walletSummary()
     {
         // Retrieve the authenticated user
-        $user = Auth::user();
+        $user     = Auth::user();
         $username = $user->username;
 
         // Fetch data from each table where username matches the authenticated user
-        $airtimeTransactions = AirtimeTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $dataTransactions = dataTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $educationTransactions = EducationTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $airtimeTransactions     = AirtimeTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $dataTransactions        = dataTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $educationTransactions   = EducationTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
         $electricityTransactions = EletricityTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $fundTransactions = FundTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $insuranceTransactions = InsuranceTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $tvTransactions = TvTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $fundTransactions        = FundTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $insuranceTransactions   = InsuranceTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $tvTransactions          = TvTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
 
         // Combine the transactions into a single collection and sort them by creation date
         $allTransactions = $airtimeTransactions
@@ -194,8 +191,8 @@ class transactionController extends Controller
 
         // Fetch notifications where the username matches the authenticated user's username
         $notifications = Notification::where('username', $username)->get();
-        $configuration= Setting::first();
+        $configuration = Setting::first();
         // Pass the data to the view
-        return view('users-layout.dashboard.wallet', compact('userData', 'notifications', 'allTransactions','configuration'));
+        return view('users-layout.dashboard.wallet', compact('userData', 'notifications', 'allTransactions', 'configuration'));
     }
 }

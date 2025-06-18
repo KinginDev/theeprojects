@@ -52,7 +52,7 @@
 
                                     <div class="d-flex tran-item">
                                         <p class="text-gray">Transaction ID</p>
-                                        <p class="d-flex"><span class="ms-2">{{ $transaction->transaction_id }}</span></p>
+                                        <p class="d-flex"><span class="ms-2">{{ $transaction->reference }}</span></p>
                                     </div>
 
                                     <div class="d-flex tran-item">

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('username');
             $table->string('tel');
             $table->decimal('amount', 10, 2);
-            $table->string('transaction_id')->unique();
+            $table->string('reference')->unique();
             $table->string('identity');
             $table->string('status');
             $table->timestamps();

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('tel');
             $table->string('amount');
-            $table->string('transaction_id');
+            $table->string('reference');
             $table->string('purchased_code');
             $table->string('response_description');
             $table->string('transaction_date');

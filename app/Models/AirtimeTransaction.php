@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +15,7 @@ class AirtimeTransaction extends Model
         'network',
         'tel',
         'amount',
-        'transaction_id',
+        'reference',
         'identity',
         'percent_profit',
         'current_bal',
@@ -26,4 +25,3 @@ class AirtimeTransaction extends Model
         'updated_at',
     ];
 }
-

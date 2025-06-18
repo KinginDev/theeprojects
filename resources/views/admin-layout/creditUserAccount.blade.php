@@ -131,7 +131,7 @@
 
                                                     <th>Amount</th>
 
-                                                
+
                                                     <th>Status</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -144,7 +144,7 @@
 
                                                         <td>{{ $fund->username }}</td>
                                                         <td>{{ $fund->tel }}</td>
-                                                        <td>{{ $fund->transaction_id }}</td>
+                                                        <td>{{ $fund->reference }}</td>
 
                                                         <td>{{ '₦' . number_format($fund->amount, 2) }}</td>
 

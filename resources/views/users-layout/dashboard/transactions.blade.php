@@ -225,7 +225,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                                 <tr>
-                                    <td>${transaction.transaction_id}</td>
+                                    <td>${transaction.reference}</td>
                                     <td>${transaction.network}</td>
                                     <td>₦${transaction.amount}</td>
                                     <td>${transaction.tel}</td>
@@ -238,7 +238,7 @@
                                     }">
                                         ${transaction.status}
                                     </span></td>
-                                    <td><a href="transactionview?hash=${transaction.transaction_id}"><button class="btn btn-primary btn-sm">View</button></a></td>
+                                    <td><a href="transactionview?hash=${transaction.reference}"><button class="btn btn-primary btn-sm">View</button></a></td>
                                 </tr>
                             `);
                             });
@@ -299,7 +299,7 @@
 
                                 tbody.append(`
             <tr>
-                <td>${transaction.transaction_id}</td>
+                <td>${transaction.reference}</td>
                 <td>${networkName}</td>
                 <td>₦${transaction.amount}</td>
                 <td>${transaction.tel}</td>
@@ -311,7 +311,7 @@
                     </span>
                 </td>
                 <td>
-                    <a href="transactionview?hash=${transaction.transaction_id}">
+                    <a href="transactionview?hash=${transaction.reference}">
                         <button class="btn btn-primary btn-sm">View</button>
                     </a>
                 </td>
@@ -356,7 +356,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                                 <tr>
-                                    <td>${transaction.transaction_id}</td>
+                                    <td>${transaction.reference}</td>
                                     <td>${transaction.purchased_code}</td>
                                     <td>₦${transaction.amount}</td>
                                     <td>${transaction.tel}</td>
@@ -369,7 +369,7 @@
                                     }">
                                         ${transaction.status}
                                     </span></td>
-                                    <td><a href="transactionview?hash=${transaction.transaction_id}"><button class="btn btn-primary btn-sm">View</button></a></td>
+                                    <td><a href="transactionview?hash=${transaction.reference}"><button class="btn btn-primary btn-sm">View</button></a></td>
                                 </tr>
                             `);
                             });
@@ -410,7 +410,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                                 <tr>
-                                    <td>${transaction.transaction_id}</td>
+                                    <td>${transaction.reference}</td>
                                     <td>${transaction.network}</td>
                                     <td>₦${transaction.amount}</td>
                                     <td>${transaction.tel}</td>
@@ -424,7 +424,7 @@
                                     }">
                                         ${transaction.status}
                                     </span></td>
-                                    <td><a href="transactionview?hash=${transaction.transaction_id}"><button class="btn btn-primary btn-sm">View</button></a></td>
+                                    <td><a href="transactionview?hash=${transaction.reference}"><button class="btn btn-primary btn-sm">View</button></a></td>
                                 </tr>
                             `);
                             });
@@ -465,7 +465,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                                 <tr>
-                                    <td>${transaction.transaction_id}</td>
+                                    <td>${transaction.reference}</td>
                                     <td>${transaction.product_name}</td>
                                     <td>₦${transaction.amount}</td>
                                     <td>${transaction.tel}</td>
@@ -478,7 +478,7 @@
                                     }">
                                         ${transaction.status}
                                     </span></td>
-                                   <td><a href="transactionview?hash=${transaction.transaction_id}"><button class="btn btn-primary btn-sm">View</button></a></td>
+                                   <td><a href="transactionview?hash=${transaction.reference}"><button class="btn btn-primary btn-sm">View</button></a></td>
                                 </tr>
                             `);
                             });
@@ -519,7 +519,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                                 <tr>
-                                    <td>${transaction.transaction_id}</td>
+                                    <td>${transaction.reference}</td>
                                     <td>${transaction.product_name}</td>
                                     <td>₦${transaction.amount}</td>
                                     <td>${transaction.tel}</td>
@@ -573,7 +573,7 @@
                             $.each(data, function(index, transaction) {
                                 tbody.append(`
                         <tr>
-                            <td>${transaction.transaction_id}</td>
+                            <td>${transaction.reference}</td>
                             <td>${transaction.identity}</td>
                             <td>₦${transaction.amount}</td>
                             <td>${transaction.tel}</td>
@@ -586,7 +586,7 @@
                             }">
                                 ${transaction.status}
                             </span></td>
-                           <td><a href="transactionview?hash=${transaction.transaction_id}"><button class="btn btn-primary btn-sm">View</button></a></td>
+                           <td><a href="transactionview?hash=${transaction.reference}"><button class="btn btn-primary btn-sm">View</button></a></td>
                         </tr>
                     `);
                             });

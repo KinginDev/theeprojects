@@ -67,7 +67,7 @@
                                                 @foreach ($allTransactions as $transaction)
                                                     <tr>
                                                         <td><b>{{ strtoupper($transaction->username)  ?? 'N/A'}}</b></td>
-                                                        <td>{{ $transaction->transaction_id ?? 'N/A' }}</td>
+                                                        <td>{{ $transaction->reference ?? 'N/A' }}</td>
                                                         <td>{{ $transaction->network ?? 'N/A' }}</td>
                                                         <!-- Handle 'network' dynamically -->
                                                         <td>₦{{ number_format($transaction->amount, 2) ?? 'N/A' }}</td>
@@ -109,5 +109,5 @@
     </div>
     <!-- end main content-->
 
-    
+
 @endsection

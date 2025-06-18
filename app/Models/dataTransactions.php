@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +20,7 @@ class dataTransactions extends Model
         'tel',
         'plan',
         'amount',
-        'transaction_id',
+        'reference',
         'identity',
         'percent_profit',
         'current_bal',
