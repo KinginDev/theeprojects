@@ -28,7 +28,13 @@ class RedirectIfAuthenticated extends RedirectIfAuthenticatedMiddleware
 
                 case 'web':
                     if (Auth::guard($guard)->check()) {
-                        return redirect(route('user.dashboard'));
+                        return redirect(route('users.dashboard',
+                            ['slug' => Auth::guard('web')->user()->merchant->slug]));
+                    }
+                    break;
+                case 'admin':
+                    if (Auth::guard($guard)->check()) {
+                        return redirect(route('admin.dashboard'));
                     }
                     break;
 

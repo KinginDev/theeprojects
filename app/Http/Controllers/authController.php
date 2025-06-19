@@ -45,24 +45,16 @@ class authController extends Controller
         }
 
         // Attempt login with the provided credentials
-        if (Auth::attempt($credentials)) {
+        if (! Auth::guard('web')->attempt($credentials, $request->remember)) {
             // Authentication successful
-            $user = Auth::user();
-            session(['username' => $user->username]);
 
-            // Redirect based on user role
-            return match ($user->role) {
-                0, 1    => redirect()->route('admin.dashboard'),
-                2       => redirect()->route('dashboard'),
-                default => redirect()->route('login'), // Default route if role is not matched
-            };
-        } else {
-            // Log failed login attempt
-            Log::warning('Failed login attempt', ['login' => $login]);
+            return redirect(route('login'))->withErrors(['error' => 'Login details are not valid']);
         }
 
-        // Authentication failed
-        return redirect(route('login'))->withErrors(['error' => 'Login details are not valid']);
+        $user = Auth::guard('web')->user();
+        session(['username' => $user->username]);
+        return redirect()->route('users.dashboard')->with('success', 'Login successful!');
+
     }
 
     public function registration()

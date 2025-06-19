@@ -9,8 +9,8 @@
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
     <!-- CSS Dependencies -->
-    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet"
-        type="text/css" />
+    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}"
+        rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}"
@@ -81,96 +81,97 @@
                         <li class="menu-title">Menu</li>
 
 
-                            <!-- For other roles, display all menu items -->
-                            <li>
-                                <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
-                                    <i class="bi bi-grid"></i>
-                                    <span>Dashbaord</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('merchant.users', Auth::guard('merchant')->user()->id) }}" class="waves-effect">
-                                    <i class="ri-user-line"></i>
-                                    <span>Manage users</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('creditUserAccount') }}" class="waves-effect">
-                                    <i class="ri-user-line"></i>
-                                    <span>Credit User account</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminAirtime') }}" class="waves-effect">
-                                    <i class="ri-phone-line"></i>
-                                    <span>Airtime</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminData') }}" class="waves-effect">
-                                    <i class="ri-wifi-line"></i>
-                                    <span>Internet Data</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminElectricity') }}" class="waves-effect">
-                                    <i class="ri-lightbulb-flash-line"></i>
-                                    <span>Electricity</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminTv') }}" class="waves-effect">
-                                    <i class="ri-tv-line"></i>
-                                    <span>Tv Subscription</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminEducation') }}" class="waves-effect">
-                                    <i class="ri-tv-line"></i>
-                                    <span>Education</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('adminInsurance') }}" class="waves-effect">
-                                    <i class="ri-tv-line"></i>
-                                    <span>Insurance</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                    <i class="ri-bill-line"></i>
-                                    <span>Contact Users</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="{{ route('message') }}">Messages</a></li>
-                                    <li><a href="{{ route('notification') }}">Notifications</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                    <i class="ri-bill-line"></i>
-                                    <span>Settings</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="{{ route('site_setting') }}">Site Setting</a></li>
-                                    <li><a href="{{ route('edit_profile') }}">Edit Profile</a></li>
-                                    <li><a href="{{ route('add_account') }}">Add New User/Marchant</a></li>
-                                    <li><a href="{{ route('marchant') }}">View Marchant</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-title">Others</li>
-                            <li>
-                                <a href="{{ route('walletSummary.admin') }}" class="waves-effect">
-                                    <i class="ri-history-line"></i>
-                                    <span>Wallet summary</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('logout') }}" class="waves-effect">
-                                    <i class="ri-shut-down-line"></i>
-                                    <span>Logout</span>
-                                </a>
-                            </li>
+                        <!-- For other roles, display all menu items -->
+                        <li>
+                            <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
+                                <i class="bi bi-grid"></i>
+                                <span>Dashbaord</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('merchant.users', Auth::guard('merchant')->user()->id) }}"
+                                class="waves-effect">
+                                <i class="ri-user-line"></i>
+                                <span>Manage users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('merchant.credit.user') }}" class="waves-effect">
+                                <i class="ri-user-line"></i>
+                                <span>Credit User account</span>
+                            </a>
+                        </li>
+                        {{-- <li>
+                            <a href="{{ route('adminAirtime') }}" class="waves-effect">
+                                <i class="ri-phone-line"></i>
+                                <span>Airtime</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('adminData') }}" class="waves-effect">
+                                <i class="ri-wifi-line"></i>
+                                <span>Internet Data</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('adminElectricity') }}" class="waves-effect">
+                                <i class="ri-lightbulb-flash-line"></i>
+                                <span>Electricity</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('adminTv') }}" class="waves-effect">
+                                <i class="ri-tv-line"></i>
+                                <span>Tv Subscription</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('adminEducation') }}" class="waves-effect">
+                                <i class="ri-tv-line"></i>
+                                <span>Education</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('adminInsurance') }}" class="waves-effect">
+                                <i class="ri-tv-line"></i>
+                                <span>Insurance</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="ri-bill-line"></i>
+                                <span>Contact Users</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('message') }}">Messages</a></li>
+                                <li><a href="{{ route('notification') }}">Notifications</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="ri-bill-line"></i>
+                                <span>Settings</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('site_setting') }}">Site Setting</a></li>
+                                <li><a href="{{ route('edit_profile') }}">Edit Profile</a></li>
+                                <li><a href="{{ route('add_account') }}">Add New User/Marchant</a></li>
+                                <li><a href="{{ route('marchant') }}">View Marchant</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-title">Others</li>
+                        <li>
+                            <a href="{{ route('walletSummary.admin') }}" class="waves-effect">
+                                <i class="ri-history-line"></i>
+                                <span>Wallet summary</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('logout') }}" class="waves-effect">
+                                <i class="ri-shut-down-line"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li> --}}
                     </ul>
                 </div>
             </div>

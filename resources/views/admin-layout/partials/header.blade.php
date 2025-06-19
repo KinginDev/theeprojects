@@ -79,54 +79,6 @@
                     <ul class="metismenu list-unstyled" id="side-menu">
                         <li class="menu-title">Menu</li>
 
-
-                        @php
-                            // Retrieve the currently authenticated user
-                            $user = auth()->user();
-
-                            // Retrieve active pages for the authenticated user
-                            $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
-                        @endphp
-                        <!-- Check if user role is Merchant (1) -->
-                        @php
-                            $icons = [
-                                'admin.dashboard' => 'bi bi-grid', // Dashboard
-                                'manage' => 'ri-user-line', // Manage users
-                                'creditUserAccount' => 'ri-user-line', // Credit User account
-                                'adminAirtime' => 'ri-phone-line', // Airtime
-                                'adminData' => 'ri-wifi-line', // Internet Data
-                                'adminElectricity' => 'ri-lightbulb-flash-line', // Electricity
-                                'adminTv' => 'ri-tv-line', // Tv Subscription
-                                'adminEducation' => 'ri-book-line', // Education
-                                'adminInsurance' => 'ri-shield-line', // Insurance
-                                'message' => 'ri-message-line', // Messages
-                                'notification' => 'ri-notification-line', // Notifications
-                                'site_setting' => 'ri-settings-line', // Site Setting
-                                'edit_profile' => 'ri-pencil-line', // Edit Profile
-                                'add_account' => 'ri-add-line', // Add New User/Merchant
-                                'marchant' => 'ri-store-line', // View Merchant
-                                'walletSummary.admin' => 'ri-history-line', // Wallet summary
-                                'logout' => 'ri-shut-down-line', // Logout
-                            ];
-
-                        @endphp
-
-
-                        @if ($user->role == 1)
-                            @foreach ($pages as $page)
-                                @if ($page->id >= 1 && $page->id <= 17)
-                                    <li class="nav-item">
-                                        <a href="{{ route($page->route_name) }}"
-                                            class="nav-link waves-effect d-flex align-items-center">
-                                            <i class="{{ $icons[$page->route_name] ?? 'ri-menu-line' }} me-2"></i>
-                                            <span>{{ $page->route_title }}</span>
-                                            <span
-                                                class="badge rounded-pill bg-info ms-auto">{{ $page->status ? 'Active' : 'Inactive' }}</span>
-                                        </a>
-                                    </li>
-                                @endif
-                            @endforeach
-                        @else
                             <!-- For other roles, display all menu items -->
                             <li>
                                 <a href="{{ route('admin.dashboard') }}" class="waves-effect">
@@ -135,49 +87,49 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('manage') }}" class="waves-effect">
+                                <a href="{{ route('admin.manage') }}" class="waves-effect">
                                     <i class="ri-user-line"></i>
                                     <span>Manage users</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('creditUserAccount') }}" class="waves-effect">
+                                <a href="{{ route('admin.creditUserAccount') }}" class="waves-effect">
                                     <i class="ri-user-line"></i>
                                     <span>Credit User account</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminAirtime') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminAirtime') }}" class="waves-effect">
                                     <i class="ri-phone-line"></i>
                                     <span>Airtime</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminData') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminData') }}" class="waves-effect">
                                     <i class="ri-wifi-line"></i>
                                     <span>Internet Data</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminElectricity') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminElectricity') }}" class="waves-effect">
                                     <i class="ri-lightbulb-flash-line"></i>
                                     <span>Electricity</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminTv') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminTv') }}" class="waves-effect">
                                     <i class="ri-tv-line"></i>
                                     <span>Tv Subscription</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminEducation') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminEducation') }}" class="waves-effect">
                                     <i class="ri-tv-line"></i>
                                     <span>Education</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('adminInsurance') }}" class="waves-effect">
+                                <a href="{{ route('admin.adminInsurance') }}" class="waves-effect">
                                     <i class="ri-tv-line"></i>
                                     <span>Insurance</span>
                                 </a>
@@ -188,8 +140,8 @@
                                     <span>Contact Users</span>
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="{{ route('message') }}">Messages</a></li>
-                                    <li><a href="{{ route('notification') }}">Notifications</a></li>
+                                    <li><a href="{{ route('admin.message') }}">Messages</a></li>
+                                    <li><a href="{{ route('admin.notification') }}">Notifications</a></li>
                                 </ul>
                             </li>
                             <li>
@@ -198,26 +150,26 @@
                                     <span>Settings</span>
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="{{ route('site_setting') }}">Site Setting</a></li>
-                                    <li><a href="{{ route('edit_profile') }}">Edit Profile</a></li>
-                                    <li><a href="{{ route('add_account') }}">Add New User/Marchant</a></li>
-                                    <li><a href="{{ route('marchant') }}">View Marchant</a></li>
+                                    <li><a href="{{ route('admin.site_setting') }}">Site Setting</a></li>
+                                    <li><a href="{{ route('admin.edit_profile') }}">Edit Profile</a></li>
+                                    <li><a href="{{ route('admin.add_account') }}">Add New User/Marchant</a></li>
+                                    <li><a href="{{ route('admin.marchant') }}">View Marchant</a></li>
                                 </ul>
                             </li>
                             <li class="menu-title">Others</li>
                             <li>
-                                <a href="{{ route('walletSummary.admin') }}" class="waves-effect">
+                                <a href="{{ route('admin.walletSummary') }}" class="waves-effect">
                                     <i class="ri-history-line"></i>
                                     <span>Wallet summary</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('logout') }}" class="waves-effect">
+                                <a href="{{ route('admin.logout') }}" class="waves-effect">
                                     <i class="ri-shut-down-line"></i>
                                     <span>Logout</span>
                                 </a>
                             </li>
-                        @endif
+
                     </ul>
                 </div>
             </div>

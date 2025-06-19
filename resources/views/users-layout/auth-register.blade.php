@@ -134,10 +134,12 @@
                          @endif
                     </div>
 
-                    <h4 class="text-center font-size-18 text-bold-large"><b>Register to {{ Helper::merchant()->name}}</b></h4>
+                    <h4 class="text-center font-size-18 text-bold-large"><b>Register to {{ Helper::merchant()->name }}</b></h4>
 
                     <div class="p-3">
-                        <form action="{{ route('registrationAction') }}" method="post">
+                        <form action="{{ route('users.registrationAction', [
+                        'slug' => Helper::merchant()->slug,
+                        ]) }}" method="post">
                             @csrf
                             <div class="form-group mb-3 row">
                                 <div class="col-12">

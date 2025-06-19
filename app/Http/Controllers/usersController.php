@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Classes\Helper;
 use App\Models\AirtimeTransaction;
 use App\Models\dataTransactions;
 use App\Models\EducationTransaction;
@@ -112,7 +113,9 @@ class usersController extends Controller
         }
 
         // Handle the case where the user is not authenticated
-        return redirect()->route('users.login');
+        return redirect()->route('login', [
+            'slug' => Helper::merchant()->slug,
+        ]);
     }
 
     public function calculateTransactions(Request $request)

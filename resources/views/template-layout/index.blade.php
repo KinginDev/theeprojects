@@ -53,8 +53,10 @@
                         </li>
                     </ul>
                     <span class="navbar-text">
-                        <a href="{{ route('login') }}" class="btn p-2" style="color: {{ $configuration->template_color }};">Login</a>
-                        <a href="{{ route('registration') }}" class="btn text-white p-2" style="background-color: {{ $configuration->template_color }};">Register</a>
+                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn p-2" style="color: {{ $configuration->template_color }};">Login</a>
+                        <a href="{{ route('registration', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn text-white p-2" style="background-color: {{ $configuration->template_color }};">Register</a>
                     </span>
                 </div>
             </div>
@@ -71,8 +73,10 @@
                         <p class="mt-3">Top up phone airtime or internet data. Pay electricity bills; renew TV
                             subscriptions. Buy quality insurance covers, pay education bills, transfer funds and do more ...</p>
 
-                        <a href="{{ route('login') }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Login</a>
-                        <a href="{{ route('registration') }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Register</a>
+                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Login</a>
+                        <a href="{{ route('registration', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Register</a>
                     </div>
 
                     <div class="col-lg-6 col-md-12 col-sm-12">
@@ -82,7 +86,8 @@
                                 <!-- Quick Action Cards -->
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="a{{ route('login') }}" data-bs-toggle="modal"
+                                        <a href="a{{ route('login',  [
+                        'slug' => Helper::merchant()->slug]) }}" data-bs-toggle="modal"
                                             data-bs-target=".bs-example-modal-center1" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-phone-line" style="color: {{ $configuration->template_color }};"></i>
@@ -96,7 +101,8 @@
 
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="{{ route('login') }}" data-bs-toggle="modal"
+                                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" data-bs-toggle="modal"
                                             data-bs-target=".bs-example-modal-center2" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-wifi-line" style="color: {{ $configuration->template_color }};"></i>
@@ -110,7 +116,8 @@
 
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="{{ route('login') }}" data-bs-toggle="modal"
+                                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" data-bs-toggle="modal"
                                             data-bs-target=".bs-example-modal-center3" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-lightbulb-flash-line" style="color: {{ $configuration->template_color }};"></i>
@@ -126,7 +133,8 @@
                             <div class="row mt-4">
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="{{ route('login') }}" data-bs-toggle="modal"
+                                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" data-bs-toggle="modal"
                                             data-bs-target=".bs-example-modal-center4" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-tv-line" style="color: {{ $configuration->template_color }};"></i>
@@ -140,7 +148,8 @@
 
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="{{ route('login') }}" class="qbox">
+                                        <a href="{{ route('login', [
+                        'slug' => Helper::merchant()->slug]) }}" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-grid-line" style="color: {{ $configuration->template_color }};"></i>
                                             </div>
@@ -171,7 +180,8 @@
                         <br>
                         <div class="h4 rt" style="color: {{ $configuration->test_color }};">Access to all Services</div>
                         <p class="mt-3">Access all VTU services, tools, analytics, support and many more from a single dashboard as a normal user, reseller etc.</p>
-                        <a href="{{ route('registration') }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Get Started</a>
+                        <a href="{{ route('registration', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Get Started</a>
                     </div>
                 </div>
 
@@ -179,7 +189,8 @@
                     <div class="col-lg-6 col-md-12 col-sm-12">
                         <div class="h4 rt" style="color: {{ $configuration->test_color }};">Achieve much more. Reach a wider market</div>
                         <p class="mt-3">Provide your goods and services to an extended target of customers and prospects, while monitoring all transactions from initiation to payment.</p>
-                        <a href="{{ route('registration') }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Get Started</a>
+                        <a href="{{ route('registration', [
+                        'slug' => Helper::merchant()->slug]) }}" class="btn text-white get-started mt-3" style="background-color: {{ $configuration->template_color }};">Get Started</a>
                     </div>
 
                     <div class="col-lg-6 col-md-12 col-sm-12 sec3">

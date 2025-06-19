@@ -27,7 +27,7 @@ class adminController extends Controller
 {
     public function dashboard()
     {
-        $user             = Auth::user();                 // Get the currently authenticated user
+        $user             = Auth::guard('admin')->user(); // Get the currently authenticated user
         $userCount        = User::count();                // Get the total number of users
         $totalUserBalance = User::sum('account_balance'); // Get the total balance of all users
 
@@ -93,6 +93,8 @@ class adminController extends Controller
 
         // Decode the JSON response
         $data = json_decode($response, true);
+
+        dd($data);
 
         // Handle the data (you can check for the 'user' field here)
         $usersd = $data['user'] ?? null;

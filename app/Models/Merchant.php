@@ -11,13 +11,27 @@ class Merchant extends User
 
     protected const APP_DOMAIN = 'theeprojects.test';
 
-    public static function boot()
+    /**
+     * Get the users for the merchant.
+     */
+    public function users()
     {
-        parent::boot();
+        return $this->hasMany(User::class);
+    }
 
-        static::creating(function ($model) {
-            $model->domain = str_replace(' ', '_', strtolower($model->name)) . '.' . self::APP_DOMAIN;
-            $model->save();
-        });
+    /**
+     * Get the full domain for the merchant.
+     */
+    public function getDomainAttribute()
+    {
+        return $this->attributes['domain'] ?? $this->slug . '.' . env('APP_DOMAIN', self::APP_DOMAIN);
+    }
+
+    /**
+     * Check if a domain belongs to this merchant
+     */
+    public function hasDomain($domain)
+    {
+        return strtolower($this->domain) === strtolower($domain);
     }
 }

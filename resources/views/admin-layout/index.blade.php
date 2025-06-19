@@ -19,16 +19,9 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                            <h3 class="mb-sm-0">Hey {{ $user->username }} , Welcome</h4>
+                            <h3 class="mb-sm-0">Hey {{ $user->name }} , Welcome</h4>
 
-                                <div class="page-title-right">
-                                    <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Utility</a></li>
-                                        <li class="breadcrumb-item active">Dashboard page</li>
-                                    </ol>
-                                </div>
-
-
+                            {!! Helper::generateBreadCrumbs(("Dashboard Page")) !!}
 
                         </div>
                     </div>
@@ -55,7 +48,7 @@
 
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminAirtime') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminAirtime') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phone-line"></i>
                                                         </div>
@@ -69,7 +62,7 @@
 
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminData') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminData') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-wifi-line"></i>
                                                         </div>
@@ -84,7 +77,7 @@
 
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminElectricity') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminElectricity') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-lightbulb-flash-line"></i>
                                                         </div>
@@ -102,7 +95,7 @@
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminTv') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminTv') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-tv-line"></i>
                                                         </div>
@@ -116,7 +109,7 @@
 
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminInsurance') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminInsurance') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-dribbble-line"></i>
                                                         </div>
@@ -131,7 +124,7 @@
 
                                             <div class="col-4">
                                                 <div class="card p-2 br-2">
-                                                    <a href="{{ route('adminEducation') }}" class="qbox">
+                                                    <a href="{{ route('admin.adminEducation') }}" class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-plane-line"></i>
                                                         </div>

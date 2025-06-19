@@ -21,6 +21,7 @@ class User extends BaseUser
         'address',
         'password',
         'role',
+        'merchant_id', // Add merchant relationship
         'cal',
         'refferal_user',
         'refferal',
@@ -29,6 +30,14 @@ class User extends BaseUser
         'api_earners',
         'topuser_earners',
     ];
+
+    /**
+     * Get the merchant that owns the user.
+     */
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

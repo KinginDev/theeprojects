@@ -2,11 +2,14 @@
 namespace App\Http\Controllers\Merchant;
 
 use App\Http\Controllers\Controller;
+use App\Models\Merchant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+
     public function showLoginForm()
     {
         return view('merchant-layout.auth.login');
@@ -19,6 +22,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+
         // Validate and create a new merchant
         $request->validate([
             'name'     => 'required|string|max:255',
@@ -26,14 +30,14 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'terms'    => 'accepted',
         ]);
-
-        $merchant = \App\Models\Merchant::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'slug'     => Str::slug($request->name),
-            'phone'    => $request->phone,
-            'password' => bcrypt($request->password),
-        ]);
+        $merchant           = new Merchant();
+        $merchant->name     = $request->name;
+        $merchant->email    = $request->email;
+        $merchant->slug     = Str::slug($request->name);
+        $merchant->phone    = $request->phone;
+        $merchant->password = bcrypt($request->password);
+        $merchant->domain   = str_replace(' ', '_', strtolower($merchant->name)) . '.' . env('APP_DOMAIN');
+        $merchant->save();
 
         // Log the merchant in
         $credentials = $request->only('email', 'password');
@@ -42,18 +46,30 @@ class AuthController extends Controller
         }
 
         // Redirect to merchant dashboard
-        return redirect()->route('merchant.dashboard')->with('success', 'Registration successful! Welcome to your dashboard.');
+        return redirect()->intended(route('merchant.dashboard'))->with('success', 'Registration successful! Welcome to your dashboard.');
     }
 
     public function login(Request $request)
     {
-        // Validate and authenticate the merchant
-        // Redirect to dashboard on success
+        $request->validate([
+            'email'    => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
+            'remember' => 'boolean',
+        ]);
+
+        if (\Auth::guard('merchant')->attempt($request->only('email', 'password'), $request->remember)) {
+            // Authentication successful
+            return redirect()->route('merchant.dashboard')->with('success', 'Login successful!');
+        } else {
+            // Authentication failed
+            return redirect()->back()->withErrors(['email' => 'Invalid credentials provided.']);
+        }
     }
 
     public function logout(Request $request)
     {
         // Handle merchant logout
+        Auth::guard('merchant')->logout();
         return redirect()->route('merchant.login');
     }
 }
