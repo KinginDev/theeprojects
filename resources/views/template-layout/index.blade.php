@@ -54,8 +54,9 @@
                         </li>
                     </ul>
                     <span class="navbar-text">
-                        <a href="#" class="btn p-2" style="color: {{ $configuration->template_color }};">Login</a>
-                        <a href="#" class="btn text-white p-2"
+                        <a href="{{ route('login') }}" class="btn p-2"
+                            style="color: {{ $configuration->template_color }};">Login</a>
+                        <a href="{{ route('login') }}" class="btn text-white p-2"
                             style="background-color: {{ $configuration->template_color }};">Register</a>
                     </span>
                 </div>
@@ -74,9 +75,9 @@
                             subscriptions. Buy quality insurance covers, pay education bills, transfer funds and do more
                             ...</p>
 
-                        <a href="#" class="btn text-white get-started mt-3"
+                        <a href="{{ route('login') }}" class="btn text-white get-started mt-3"
                             style="background-color: {{ $configuration->template_color }};">Login</a>
-                        <a href="#" class="btn text-white get-started mt-3"
+                        <a href="{{ route('login') }}" class="btn text-white get-started mt-3"
                             style="background-color: {{ $configuration->template_color }};">Register</a>
                     </div>
 
