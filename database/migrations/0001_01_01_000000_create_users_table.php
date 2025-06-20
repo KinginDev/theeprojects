@@ -29,11 +29,9 @@ return new class extends Migration
             $table->string('api_earners');
             $table->integer('cal')->default(0);
             $table->timestamp('email_verified_at')->nullable();
-            $table->unsignedBigInteger(('merchant_id'))->nullable(); // Foreign key for merchants
             $table->rememberToken();
             $table->timestamps();
 
-            $table->foreign('merchant_id')->references('id')->on('merchants')->onDelete('set null');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
