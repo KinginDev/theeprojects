@@ -12,9 +12,6 @@ use App\Http\Controllers\utilitiesPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::domain('{slug}.theeprojects.test')->middleware(['identify.merchant'])->group(function () {
-    Route::get('/', function () {
-        return view('template-layout.index');
-    });
 
     Route::get('/user/login', [authController::class, 'login'])->name('users.login');
     Route::get('/user/registration', [authController::class, 'registration'])->name('users.registration');

@@ -5,6 +5,9 @@ use App\Http\Controllers\authController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest:web')->group(function () {
+    Route::get('/', function () {
+        return view('template-layout.index');
+    });
     #GENERAL auth routes, will change to a differnt login flow later
     Route::get('/login', function () {
         return view('welcome');
