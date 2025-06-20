@@ -4,7 +4,7 @@ use App\Http\Controllers\Merchant\AuthController;
 use App\Http\Controllers\Merchant\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::domain('theeprojects.test')->prefix('merchant')->name('merchant.')->group(function () {
+Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->group(function () {
     // Login Routes
     Route::get('/', function () {
         return "Help";
