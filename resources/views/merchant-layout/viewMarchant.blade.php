@@ -1,11 +1,9 @@
-@extends('merchant-layout.layouts.app')
+@extends('admin-layout.layouts.app')
 
-@section('title', 'Credit user account')
+@section('title', 'Dashboard Page')
 
 @section('content')
-    @php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <!-- ============================================================== -->
     <!-- Start right Content here -->
     <!-- ============================================================== -->
@@ -26,23 +24,18 @@
                                     <li class="breadcrumb-item active">Starter page</li>
                                 </ol>
                             </div>
-
-
-
                         </div>
                     </div>
                 </div>
                 <!-- end page title -->
 
                 <!-- Container to hold the main page elements-->
-
                 <div class="container main-tags">
                     <div class="row">
                         <div class="col-12">
                             <div class="col-lg-12 col-md-12 col-sm-12">
                                 <div class="card moni-card br-2">
-                                    <div class="h6">Transaction Flow</div>
-
+                                    <div class="h6">Your wallet summary.</div>
 
                                     <div class="table-responsive">
                                         <table class="table table-centered mb-0 align-middle table-hover table-nowrap"
@@ -50,13 +43,18 @@
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>#</th>
-
+                                                    <th>Name</th>
                                                     <th>Username</th>
-
+                                                    <th>Telephone</th>
+                                                    <th>Email</th>
                                                     <th>Account Balance</th>
-
+                                                    <th>Address</th>
+                                                    <th>Referral User</th>
+                                                    <th>Referral</th>
+                                                    <th>Referral Bonus</th>
                                                     <th>Role</th>
-
+                                                    <th>Created At</th>
+                                                    <th>Updated At</th>
                                                     <th>Status</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -66,22 +64,27 @@
                                                 @foreach ($users as $user)
                                                     <tr>
                                                         <td>{{ $i++ }}</td>
-
+                                                        <td>{{ $user->name }}</td>
                                                         <td>{{ $user->username }}</td>
-
-                                                        <td>{{ '₦' . number_format($user->account_balance, 2) }}</td>
-
+                                                        <td>{{ $user->tel }}</td>
+                                                        <td>{{ $user->email }}</td>
+                                                        <td>{{ '₦'.number_format($user->account_balance, 2) }}</td>
+                                                        <td>{{ $user->address }}</td>
+                                                        <td>{{ $user->refferal_user }}</td>
+                                                        <td>{{ $user->refferal }}</td>
+                                                        <td>{{ $user->refferal_bonus }}</td>
                                                         <td>
                                                             @if ($user->role == 0)
                                                                 <p class="btn-primary text-center">Admin</p>
                                                             @elseif ($user->role == 1)
-                                                                <p class="btn-secondary text-center">Sub Admin</p>
+                                                            <p class="btn-secondary text-center">Sub Admin</p>
                                                             @else
-                                                                <p class="btn-secondary text-center">User</p>
+                                                            <p class="btn-secondary text-center">User</p>
                                                             @endif
                                                         </td>
 
-
+                                                        <td>{{ $user->created_at }}</td>
+                                                        <td>{{ $user->updated_at }}</td>
                                                         <td>
                                                             @if ($user->cal == 0)
                                                                 Not active
@@ -90,10 +93,15 @@
                                                             @endif
                                                         </td>
                                                         <td>
+                                                            <a href="{{ route('manageSubAdmin', $user->id) }}"><button class="btn btn-primary">Manage-))</button></a>
 
-                                                            <a href="{{ route('merchant.add.fund', $user->id) }}"><button
-                                                                    class="btn btn-primary">Add Fund</button></a>
-
+                                                            @if ($user->cal == 0 && $user->role != 0)
+                                                            <a href="{{ route('activate', $user->id) }}"><button class="btn btn-secondary">Activate</button></a>
+                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                            @elseif ($user->cal == 1 && $user->role != 0)
+                                                            <a href="{{ route('deactivate', $user->id) }}"><button class="btn btn-warning">Deactivate</button></a>
+                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                            @endif
 
                                                         </td>
                                                     </tr>
@@ -108,67 +116,6 @@
                 </div>
                 <!-- Container to hold the main page elements ends here-->
 
-                <div class="container main-tags">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="col-lg-12 col-md-12 col-sm-12">
-                                <div class="card moni-card br-2">
-                                    <div class="h6">Manual Funding Approval</div>
-
-
-                                    <div class="table-responsive">
-                                        <table class="table table-centered mb-0 align-middle table-hover table-nowrap"
-                                            id="example">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>#</th>
-
-                                                    <th>Username</th>
-
-                                                    <th>Tel</th>
-
-                                                    <th>Transaction ID</th>
-
-                                                    <th>Amount</th>
-
-
-                                                    <th>Status</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php $i = 1; ?>
-                                                @foreach ($fundAccount as $fund)
-                                                    <tr>
-                                                        <td>{{ $i++ }}</td>
-
-                                                        <td>{{ $fund->username }}</td>
-                                                        <td>{{ $fund->tel }}</td>
-                                                        <td>{{ $fund->reference }}</td>
-
-                                                        <td>{{ '₦' . number_format($fund->amount, 2) }}</td>
-
-
-
-
-
-                                                        <td>{{ $fund->status }}</td>
-                                                        <td>
-
-                                                            <a href="{{ route('merchant.approve.fund', $fund->id) }}"><button
-                                                                    class="btn btn-primary">Approve Fund</button></a>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody><!-- end tbody -->
-                                        </table> <!-- end table -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div> <!-- container-fluid -->
         </div>
         <!-- End Page-content -->
@@ -181,11 +128,11 @@
                             document.write(new Date().getFullYear())
                         </script> © {{ $configuration->site_name }}.
                     </div>
-
                 </div>
             </div>
         </footer>
 
     </div>
     <!-- end main content-->
+
 @endsection

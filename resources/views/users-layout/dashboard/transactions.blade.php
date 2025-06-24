@@ -3,9 +3,7 @@
 @section('title', 'Transaction History')
 
 @section('content')
-    @php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <div class="main-content">
         <div class="page-content">
             <div class="container-fluid">

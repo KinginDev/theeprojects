@@ -3,9 +3,7 @@
 @section('title', 'Education Page')
 
 @section('content')
-@php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <!-- Preloader -->
     <div id="preloader">
         <div class="spinner-border text-primary" role="status">

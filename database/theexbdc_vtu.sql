@@ -271,10 +271,10 @@ INSERT INTO `education_transactions` (`id`, `username`, `product_name`, `type`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `eletricity_transactions`
+-- Table structure for table `electricity_transactions`
 --
 
-CREATE TABLE `eletricity_transactions` (
+CREATE TABLE `electricity_transactions` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `username` varchar(255) NOT NULL,
   `product_name` varchar(255) NOT NULL,
@@ -295,10 +295,10 @@ CREATE TABLE `eletricity_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `eletricity_transactions`
+-- Dumping data for table `electricity_transactions`
 --
 
-INSERT INTO `eletricity_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `reference`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `electricity_transactions` (`id`, `username`, `product_name`, `type`, `tel`, `amount`, `reference`, `purchased_code`, `response_description`, `transaction_date`, `identity`, `prev_bal`, `current_bal`, `percent_profit`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'henryleo4', 'ikeja-electric', 'prepaid', '09047933240', '1000', '20240824111489htyyo', 'Token : 26362054405982757802', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:14:02', 'ikeja-electric', '', '', '', 'successful', '2024-08-24 09:14:02', '2024-08-24 09:14:02'),
 (2, 'henryleo4', 'ikeja-electric', 'prepaid', '2349047933240', '1000', '20240824111689htyyo', 'Token : 26362054405982757802', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:16:15', 'ikeja-electric', '', '', '', 'successful', '2024-08-24 09:16:15', '2024-08-24 09:16:15'),
 (3, 'henryleo4', 'eko-electric', 'prepaid', '09047933240', '1000', '20240824111789htyyo', 'Token : 11786621902768210244', 'TRANSACTION SUCCESSFUL', '2024-08-24 10:17:56', 'eko-electric', '', '', '', 'successful', '2024-08-24 09:17:56', '2024-08-24 09:17:56'),
@@ -566,7 +566,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (10, '2024_07_29_194038_create_datatransactions_table', 4),
 (11, '2024_08_18_150245_education_transactions', 5),
 (12, '2024_08_23_121240_create_insurance_transactions_table', 6),
-(13, '2024_08_24_052507_create_eletricity_transactions_table', 7),
+(13, '2024_08_24_052507_create_electricity_transactions_table', 7),
 (14, '2024_08_24_053013_create_tv_transactions_table', 7),
 (15, '2024_08_28_173206_create_message_table', 8),
 (16, '2024_08_29_053757_create_notifications_table', 9),
@@ -1155,9 +1155,9 @@ ALTER TABLE `education_transactions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `eletricity_transactions`
+-- Indexes for table `electricity_transactions`
 --
-ALTER TABLE `eletricity_transactions`
+ALTER TABLE `electricity_transactions`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1293,9 +1293,9 @@ ALTER TABLE `education_transactions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
--- AUTO_INCREMENT for table `eletricity_transactions`
+-- AUTO_INCREMENT for table `electricity_transactions`
 --
-ALTER TABLE `eletricity_transactions`
+ALTER TABLE `electricity_transactions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --

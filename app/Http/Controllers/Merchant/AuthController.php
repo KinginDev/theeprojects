@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -30,14 +29,9 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'terms'    => 'accepted',
         ]);
-        $merchant           = new Merchant();
-        $merchant->name     = $request->name;
-        $merchant->email    = $request->email;
-        $merchant->slug     = Str::slug($request->name);
-        $merchant->phone    = $request->phone;
-        $merchant->password = bcrypt($request->password);
-        $merchant->domain   = str_replace(' ', '_', strtolower($merchant->name)) . '.' . env('APP_DOMAIN');
-        $merchant->save();
+
+        $data     = $request->only('name', 'email', 'phone', 'password');
+        $merchant = Merchant::createMerchant($data);
 
         // Log the merchant in
         $credentials = $request->only('email', 'password');

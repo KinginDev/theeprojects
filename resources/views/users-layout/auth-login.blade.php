@@ -2,9 +2,7 @@
 <html lang="en">
 
 <head>
-    @php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <meta charset="utf-8" />
     <title>Login page | {{ $configuration->site_name }} </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,8 +13,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Stylesheets -->
-    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet"
-        type="text/css" />
+    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}"
+        rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}"
@@ -151,7 +149,11 @@
                     <h4 class="text-center font-size-18 text-bold"><b>Sign In</b></h4>
 
                     <div class="p-3">
-                        <form action="{{ route('loginAction') }}" method="post">
+                        <form
+                            action="{{ route('users.loginAction', [
+                                'slug' => Helper::merchant()->slug,
+                            ]) }}"
+                            method="post">
                             @csrf
                             <div class="form-group mb-3 row">
                                 <div class="col-12">
@@ -190,7 +192,7 @@
                                             class="mdi mdi-lock"></i> Forgot your password?</a>
                                 </div>
                                 <div class="col-sm-5 mt-3">
-                                    <a href="{{ route('registration',) }}" class="text-muted"><i
+                                    <a href="{{ route('registration') }}" class="text-muted"><i
                                             class="mdi mdi-account-circle"></i> Create an account</a>
                                 </div>
                             </div>

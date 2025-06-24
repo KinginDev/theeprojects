@@ -8,5 +8,7 @@ enum ProductTypes: string {
     case TV          = 'tv';
     case EDUCATION   = 'education';
     case INSURANCE   = 'insurance';
+    case WALLET      = 'wallet';
+    case OTHER       = 'other';
     // Add more cases as needed
 }

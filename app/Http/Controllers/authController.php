@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Classes\Helper;
+use App\Models\Merchant;
+use App\Models\MerchantUser;
 use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -53,7 +55,9 @@ class authController extends Controller
 
         $user = Auth::guard('web')->user();
         session(['username' => $user->username]);
-        return redirect()->route('users.dashboard')->with('success', 'Login successful!');
+        return redirect()->route('users.dashboard', [
+            'slug' => Helper::merchant()->slug,
+        ])->with('success', 'Login successful!');
 
     }
 
@@ -66,18 +70,19 @@ class authController extends Controller
     {
         // Validation rules for the form inputs
         $validator = Validator::make($request->all(), [
-            'fname'    => 'required',
-            'username' => 'required|unique:users',
-            'email'    => 'required|email|unique:users',
-            'tel'      => [
+            'fname'       => 'required',
+            'username'    => 'required|unique:users',
+            'email'       => 'required|email|unique:users',
+            'tel'         => [
                 'required',
                 'max:20',
                 'min:6',
                 'unique:users',
-            ], // Corrected the comma issue here
-            'address'  => 'required',
-            'password' => 'required|max:20|min:6|confirmed',
-            'terms'    => 'accepted', // Ensure terms are accepted
+            ],
+            'address'     => 'required',
+            'password'    => 'required|max:20|min:6|confirmed',
+            'terms'       => 'accepted',
+            'merchant_id' => 'nullable|exists:merchants,id',
         ]);
 
         // Check if validation fails
@@ -87,20 +92,19 @@ class authController extends Controller
 
         // Default values for user registration
         $role           = 2;
-        $refferal_user  = $request->input('referral'); // Get referral username from the request
+        $refferal_user  = $request->input('referral');
         $refferal       = 0;
         $refferal_bonus = 0.0;
         $cal            = 1;
 
-                                                                  // Generate a unique user_id
-        $randomString = strtoupper(substr(md5(mt_rand()), 0, 8)); // Generate a random 8-character string
-        $latestUserId = User::max('id') + 1;                      // Fetch the next auto-increment ID
-        $userId       = 'UID' . $randomString . $latestUserId;    // Combine strings to form a unique user ID
+        $randomString = strtoupper(substr(md5(mt_rand()), 0, 8));
+        $latestUserId = User::max('id') + 1;
+        $userId       = "UID{$randomString}{$latestUserId}";
 
         // Data array for creating a new user
         $data = [
             'name'           => $request->fname,
-            'user_id'        => $userId, // Assign the generated user_id
+            'user_id'        => $userId,
             'username'       => $request->username,
             'address'        => $request->address,
             'email'          => $request->email,
@@ -108,39 +112,53 @@ class authController extends Controller
             'password'       => Hash::make($request->password),
             'role'           => $role,
             'cal'            => $cal,
-            'refferal_user'  => $refferal_user ?? null, // Set nullable if referral user is not provided
+            'refferal_user'  => $refferal_user ?? null,
             'refferal'       => $refferal,
             'refferal_bonus' => $refferal_bonus,
-            'merchant_id'    => Helper::merchant()->id,
         ];
 
         // Create the user
         $user = User::create($data);
 
-        if ($user) {
-            // Handle referral logic if there's a referral user
-            if ($refferal_user) {
-                $referrer = User::where('user_id', $refferal_user)->first();
-
-                if ($referrer) {
-
-                    $referrer->increment('refferal');
-
-                    // Create referral record
-                    Referral::create([
-                        'user_id'           => $referrer->user_id, // ID of the referring user
-                        'referral_user_id'  => $user->user_id,     // ID of the referred user
-                        'referral_username' => $user->username,    // Referred user's username
-                    ]);
-                }
-            }
-
-            // Redirect to the login page with success message
-            return redirect(route('login'))->with('success', 'Registration successful, login to access the dashboard.');
-        } else {
-            // Redirect to the registration page with error message
-            return redirect(route('registration'))->with('error', 'Registration failed, try again.');
+        if (! $user) {
+            return redirect()->back()->withErrors(['error' => 'User registration failed']);
         }
+
+        // Handle referral logic if there's a referral user
+        if ($refferal_user) {
+            $referrer = User::where('user_id', $refferal_user)->first();
+            if ($referrer) {
+                $referrer->increment('refferal');
+                Referral::create([
+                    'user_id'           => $referrer->user_id,
+                    'referral_user_id'  => $user->user_id,
+                    'referral_username' => $user->username,
+                ]);
+            }
+        }
+
+        $merchant = Helper::merchant();
+        if (! $merchant) {
+            $merchant = Merchant::where('slug', $request->merchant_slug)->first();
+        }
+
+        // Check if the user is associated with a merchant
+        $merchantUser = MerchantUser::where('user_id', $user->id)
+            ->where('merchant_id', $merchant->id)
+            ->first();
+
+        if (! $merchantUser) {
+            MerchantUser::create([
+                'merchant_id' => $merchant->id,
+                'user_id'     => $user->id,
+            ]);
+        }
+
+        Auth::guard('web')->login($user);
+
+        return redirect(route('users.login', [
+            'slug' => $merchant->slug,
+        ]))->with('success', 'Registration successful, login to access the dashboard.');
     }
 
     public function forget_password()

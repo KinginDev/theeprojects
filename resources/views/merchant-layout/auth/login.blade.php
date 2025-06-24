@@ -2,9 +2,7 @@
 <html lang="en">
 
 <head>
-    @php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <meta charset="utf-8" />
     <title>Login page | {{ $configuration->site_name }} </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

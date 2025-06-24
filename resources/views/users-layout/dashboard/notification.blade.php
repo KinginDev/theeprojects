@@ -3,9 +3,7 @@
 @section('title', 'User Notifications')
 
 @section('content')
-@php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
 <div class="main-content">
 
     <div class="page-content">

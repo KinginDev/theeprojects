@@ -4,9 +4,7 @@
 @section('title', 'Manage Merchant Account')
 
 @section('content')
-@php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <!-- ============================================================== -->
     <!-- Start right Content here -->
     <!-- ============================================================== -->
@@ -103,14 +101,14 @@
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            <a href="{{ route('edit.user', $user->id) }}"><button class="btn btn-primary">Edit</button></a>
+                                                            <a href="{{ route('merchant.edit.user', $user->id) }}"><button class="btn btn-primary">Edit</button></a>
 
                                                             @if ($user->cal == 0 )
-                                                            <a href="{{ route('activate', $user->id) }}"><button class="btn btn-secondary">Activate</button></a>
-                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                            <a href="{{ route('merchant.activate', $user->id) }}"><button class="btn btn-secondary">Activate</button></a>
+                                                            <a href="{{ route('merchant.delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
                                                             @elseif ($user->cal == 1 )
-                                                            <a href="{{ route('deactivate', $user->id) }}"><button class="btn btn-warning">Deactivate</button></a>
-                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                            <a href="{{ route('merchant.deactivate', $user->id) }}"><button class="btn btn-warning">Deactivate</button></a>
+                                                            <a href="{{ route('merchant.delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
                                                             @endif
 
                                                         </td>

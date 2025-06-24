@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('secret_key')->nullable();
             $table->string('site_token')->nullable();
             $table->string('monnify_api_key')->nullable();
+            $table->string('monnify_percent')->nullable();
             $table->string('monnify_contract_code')->nullable();
             $table->string('airtime_api_url')->nullable();
             $table->string('transaction_api_url')->nullable();
@@ -43,17 +44,21 @@ return new class extends Migration
             $table->string('header_color')->nullable();
             $table->string('template_color')->nullable();
             $table->string('test_color')->nullable();
-            $table->string('site_name')->nullable(); // Add site name
-            $table->string('site_logo')->nullable(); // Add site logo
+            $table->string('site_name')->nullable();       // Add site name
+            $table->string('site_logo')->nullable();       // Add site logo
+            $table->string('company_name')->nullable();    // Add company name
+            $table->string('company_address')->nullable(); // Add company address
+            $table->string('company_phone')->nullable();   // Add company phone
+            $table->string('company_email')->nullable();   // Add company phone
 
-            $table->string('site_bank_name')->nullable(); // Add site logo
-            $table->string('site_bank_account_name')->nullable(); // Add site logo
-            $table->string('site_bank_account_account')->nullable(); // Add site logo
-            $table->string('bonus')->nullable(); // Bonus
-            $table->text('site_bank_comment')->nullable(); // Add site logo
-            $table->text('whatsapp_number')->nullable(); // Add site logo
-            $table->text('welcome_message')->nullable(); // Add site logo
-            $table->text('email')->nullable(); // Add site email
+            $table->string('site_bank_name')->nullable();            // Add site bank name
+            $table->string('site_bank_account_name')->nullable();    // Add site bank account name
+            $table->string('site_bank_account_account')->nullable(); // Add site bank account number
+            $table->string('bonus')->nullable();                     // Bonus
+            $table->text('site_bank_comment')->nullable();           // Add site bank comment
+            $table->text('whatsapp_number')->nullable();             // Add WhatsApp number
+            $table->text('welcome_message')->nullable();             // Add welcome message
+            $table->text('email')->nullable();                       // Add site email
             $table->timestamps();
         });
     }

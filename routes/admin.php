@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('admin')->name('admin.')->group(function () {
     // Guest routes
     Route::middleware('guest:admin')->group(function () {
-        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 
-        Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+        Route::post('login', [AuthController::class, 'login'])->name('login.submit');
 
-        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     });
 
     // Authenticated routes
@@ -52,6 +52,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/marchant', [adminController::class, 'marchant'])->name('marchant');
         Route::get('/manageSubAdmin/{id}', [adminController::class, 'manageSubAdmin'])->name('manageSubAdmin');
         Route::post('/update-page-status/{id}/{action}', [adminController::class, 'updatePageStatus'])->name('updatePageStatus');
+
+        Route::get('/admin/monnify-fee', [adminController::class, 'getMonnifyFee'])->name('admin.getMonnifyFee');
 
         // // Merchant management
         // Route::resource('merchants', MerchantController::class);

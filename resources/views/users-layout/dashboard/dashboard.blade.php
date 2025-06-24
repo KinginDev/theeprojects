@@ -57,8 +57,9 @@
                                             style="background-color: {{ $configuration->template_color }} !important; color: white;">
                                             <h6 class="mb-0">Total Balance</h6>
                                             <a href="{{ route('users.usertransactions', [
-                                            'slug' => Helper::merchant()->slug
-                                            ]) }}" class="text-white small">Transaction
+                                                'slug' => Helper::merchant()->slug,
+                                            ]) }}"
+                                                class="text-white small">Transaction
                                                 History</a>
                                         </div>
                                         <div class="card-body p-4">
@@ -104,8 +105,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
                                                     <a href="{{ route('users.airtime', [
-                                                    'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phone-line"></i>
                                                         </div>
@@ -120,8 +122,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
                                                     <a href="{{ route('users.data', [
-                                                        'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-wifi-line"></i>
                                                         </div>
@@ -137,8 +140,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
                                                     <a href="{{ route('users.electricity', [
-                                                        'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class=" ri-lightbulb-flash-line"></i>
                                                         </div>
@@ -156,8 +160,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2">
                                                     <a href="{{ route('users.tv', [
-                                                        'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-tv-line"></i>
                                                         </div>
@@ -268,7 +273,8 @@
                                                         <h5
                                                             style="color: {{ $configuration->template_color }} !important;">
                                                             Refer people to
-                                                            {{ $configuration->site_name }} and get {{ $configuration->bonus }}% of the referees
+                                                            {{ $configuration->site_name }} and get
+                                                            {{ $configuration->bonus }}% of the referees
                                                             first funding and also get ₦500 when the referee upgrades to
                                                             topuser(note, it's capped at 1,500 naira)</h5>
                                                         @php
@@ -316,8 +322,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2 bg-dark">
                                                     <a href="{{ route('users.usertransactions', [
-                                                        'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phon-line"></i>
                                                         </div>
@@ -334,8 +341,9 @@
                                             <div class="col-6">
                                                 <div class="card p-2 br-2 bg-dark">
                                                     <a href="{{ route('users.usersupport', [
-                                                        'slug' => Helper::merchant()->slug
-                                                    ]) }}" class="qbox">
+                                                        'slug' => Helper::merchant()->slug,
+                                                    ]) }}"
+                                                        class="qbox">
                                                         <div class="item-box">
                                                             <i class="ri-phon-line"></i>
                                                         </div>
@@ -359,8 +367,9 @@
                                                     <div class="col-6">
                                                         <div class="card p-2 br-2 bg-dark">
                                                             <a href="{{ route('users.walletSummary', [
-                                                                'slug' => Helper::merchant()->slug
-                                                            ]) }}" class="qbox">
+                                                                'slug' => Helper::merchant()->slug,
+                                                            ]) }}"
+                                                                class="qbox">
                                                                 <div class="item-box">
                                                                     <i class="ri-phone-line"></i>
                                                                     <!-- Use the appropriate icon class -->
@@ -515,6 +524,7 @@
                 <div class="modal-body">
                     <form id="monnifyForm">
                         @csrf
+
                         <div class="mb-3">
                             <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
                                 <span class="account-name"><b>Account Username:</b> {{ $userData->username }}</span>
@@ -825,6 +835,9 @@
                 var transactionCharge = (amount * monnifyFee) / 100;
                 var totalAmount = amount + transactionCharge; // Total to be sent to Monnify
 
+
+                #FIX: Initialize in controller, create a fund_trsancction record, and
+                return the paymenturl
                 MonnifySDK.initialize({
                     amount: totalAmount.toFixed(2), // Include the Monnify fee
                     currency: "NGN",
@@ -851,7 +864,7 @@
                             data: {
                                 _token: '{{ csrf_token() }}',
                                 authorizedAmount: response
-                                .authorizedAmount, // Amount Monnify processed
+                                    .authorizedAmount, // Amount Monnify processed
                                 originalAmount: amount, // Original amount entered by the user
                                 message: response.message,
                                 paymentReference: response.paymentReference,
@@ -864,7 +877,7 @@
                                         title: "Success!",
                                         html: response.message +
                                             '<br><br><a href="{{ route('users.dashboard', [
-                                                'slug' => Helper::merchant()->slug
+                                                'slug' => Helper::merchant()->slug,
                                             ]) }}" class="btn btn-primary">View Reflect Balance</a>',
                                         icon: "success",
                                         text: response.message,
@@ -918,7 +931,7 @@
                         // If the user clicks OK, submit the request via AJAX
                         $.ajax({
                             url: '{{ route('users.upgradeTopuser', [
-                                'slug' => Helper::merchant()->slug
+                                'slug' => Helper::merchant()->slug,
                             ]) }}',
                             type: 'POST',
                             data: {

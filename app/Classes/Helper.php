@@ -1,6 +1,7 @@
 <?php
 namespace App\Classes;
 
+use App\Models\Setting;
 use Illuminate\Support\Str;
 
 class Helper
@@ -29,5 +30,43 @@ class Helper
                     <li class='breadcrumb-item active'>{$currentPageName}</li>
                 </ol>
             </div>";
+    }
+
+    /**
+     * Get the settings for the application.
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public static function settings()
+    {
+        $settings = Setting::first();
+        if (! $settings) {
+            return null;
+        }
+        return $settings;
+    }
+
+    public static function getUserLucyRoseData($apiToken)
+    {
+        $client = new \GuzzleHttp\Client();
+
+        dd($apiToken);
+
+        try {
+            $response = $client->request('GET', 'https://lucysrosedata.com/api/user/', [
+                'headers' => [
+                    'Authorization' => 'Token ' . $apiToken,
+                ],
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            return response()->json(['error' => 'Invalid API token or user not found.'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while fetching data.'], 500);
+        }
     }
 }

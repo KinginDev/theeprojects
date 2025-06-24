@@ -9,6 +9,7 @@
         "giggsey/libphonenumber-for-php": "^8.13",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+        "monnify/monnify-laravel": "^1.0",
         "opcodesio/log-viewer": "^3.17"
     },
     "require-dev": {

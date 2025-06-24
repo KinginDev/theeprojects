@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\adminController;
+use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\authController;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('app.domain'))->group(function () {
+
+    Route::any('/webhook/process', [allPaymentController::class, 'processWebhook'])->name('webhook.process');
+    Route::any('/process/callback', [allPaymentController::class, 'processCallback'])->name('process.callback');
 
     Route::middleware('guest:web')->group(function () {
         Route::get('/', function () {

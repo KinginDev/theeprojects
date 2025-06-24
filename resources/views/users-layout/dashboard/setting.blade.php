@@ -3,9 +3,7 @@
 @section('title', 'Setting')
 
 @section('content')
-    @php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <div class="main-content">
         <div class="page-content">
             <div class="container-fluid">
@@ -45,7 +43,10 @@
                     <div class="col-lg-8 mx-auto">
                         <div class="card">
                             <div class="card-body">
-                                <form action="{{ route('users.update.profile', $userData->id) }}" method="POST">
+                                <form action="{{ route('users.update.profile', [
+                                'slug' => Helper::merchant()->slug,
+                                'id' => $userData->id,
+                                ]) }}" method="POST">
                                     @csrf
                                     @method('PUT')
 

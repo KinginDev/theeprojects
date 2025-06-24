@@ -103,49 +103,6 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                     <ul class="metismenu list-unstyled" id="side-menu">
                         <li class="menu-title">Menu</li>
 
-                        @php
-                            // Retrieve the currently authenticated user
-                            $user = auth()->user();
-
-                            // Retrieve active pages for the authenticated user
-                            $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
-                        @endphp
-
-                        <!-- Check if user role is Merchant (1) -->
-                        @php
-                            $icons = [
-                                'dashboard' => 'bi bi-grid',
-                                'airtime' => 'ri-phone-line',
-                                'data' => 'ri-wifi-line',
-                                'electricity' => 'ri-lightbulb-flash-line',
-                                'tv' => 'ri-tv-line',
-                                'education' => 'ri-book-line',
-                                'insurance' => 'ri-shield-line',
-                                'usertransactions' => 'ri-history-line',
-                                'usersupport' => 'ri-customer-service-line',
-                                'user.setting' => 'ri-settings-line',
-                                'logout' => 'ri-shut-down-line',
-                                'fund-wallet' => 'ri-bill-line',
-                            ];
-                        @endphp
-
-                        @if ($user->role == 2)
-                            @foreach ($pages as $page)
-                                @if ($page->id >= 18 && $page->id <= 33)
-                                    <li class="nav-item">
-                                        <a href="{{ route("users.{$page->route_name}", [
-                                            'slug' => Helper::merchant()->slug
-                                        ]) }}"
-                                            class="nav-link waves-effect d-flex align-items-center">
-                                            <i class="{{ $icons[$page->route_name] ?? 'ri-menu-line' }} me-2"></i>
-                                            <span>{{ $page->route_title }}</span>
-                                            <span
-                                                class="badge rounded-pill bg-info ms-auto">{{ $page->action ? 'Active' : 'Inactive' }}</span>
-                                        </a>
-                                    </li>
-                                @endif
-                            @endforeach
-                        @else
                             <!-- For other roles, display all menu items -->
                             <li>
                                 <a href="{{ route('users.dashboard', [
@@ -253,7 +210,6 @@ $configuration = \App\Models\Setting::first(); // Adjust the model path if neces
                                     <span>Logout</span>
                                 </a>
                             </li>
-                        @endif
                     </ul>
                 </div>
             </div>

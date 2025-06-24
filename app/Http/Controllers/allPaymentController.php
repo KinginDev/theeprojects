@@ -1,12 +1,18 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Classes\Helper;
 use App\Models\FundTransaction;
+use App\Models\Merchant;
 use App\Models\Notification;
 use App\Models\Setting;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Monnify\MonnifyLaravel\Facades\Monnify;
 
 class allPaymentController extends Controller
 {
@@ -70,6 +76,124 @@ class allPaymentController extends Controller
         }
     }
 
+    public function makePayment(Request $request)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        // Retrieve the authenticated user
+        $user = Auth::user();
+
+        if (Auth::guard('web')->check()) {
+            $user          = Auth::guard('web')->user();
+            $configuration = Helper::merchant()->preferences;
+        } else if (Auth::guard('merchant')->check()) {
+            $user          = Auth::guard('merchant')->user();
+            $configuration = $user->preferences;
+        } else {
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Unauthorized access.',
+            ], 401);
+        }
+
+        // Generate a unique transaction ID
+
+        $transaction = DB::transaction(function () use ($user, $validatedData, $request) {
+
+            if (Auth::guard('merchant')->check()) {
+                $transaction = Transaction::initialize([
+                    'transactable_type' => Merchant::class,
+                    'transactable_id'   => $user->id,
+
+                    'amount'            => $validatedData['amount'],
+                    'type'              => $request->type,
+                    'payload'           => [
+                        'Merchant Name'   => $user->name,
+                        'Merchant domain' => $user->domain, // Initially pending until confirmed
+                    ],
+                ]);
+
+                // Insert the new fund transaction
+                $wt                    = new WalletTransaction();
+                $wt->wallet_owner_id   = $user->id;
+                $wt->wallet_owner_type = Merchant::class;
+                $wt->wallet_id         = $user->wallet->id;
+                $wt->transaction_id    = $transaction->id;
+                $wt->amount            = $validatedData['amount'];
+                $wt->save();
+            }
+
+            DB::commit();
+
+            return $transaction;
+        });
+
+        $data = [
+            'amount'             => $transaction->amount,
+            'customerName'       => $user->name,
+            'customerEmail'      => $user->email,
+            'paymentReference'   => $transaction->reference,
+            'paymentDescription' => 'Payment for Service',
+            'currencyCode'       => 'NGN',
+            'contractCode'       => config('monnify.contract_code'),
+            'redirectUrl'        => route('process.callback'),
+            'paymentMethods'     => ['CARD', 'ACCOUNT_TRANSFER'],
+        ];
+
+        $response = Monnify::transactions()->initialise($data);
+
+        return redirect($response['body']['responseBody']['checkoutUrl']);
+
+    }
+
+    public function processCallback(Request $request)
+    {
+        $ref = $request->input('paymentReference');
+
+        $transaction = Transaction::where('reference', $ref)->first();
+
+        if (! $transaction) {
+            return redirect()->route('dashboard')->with('error', 'Invalid.');
+        } else {
+            // Handle successful transaction
+            $transaction->status = 'success';
+
+            if ($transaction->type) {
+                $this->{"handle" . ucfirst($transaction->type)}($transaction);
+            }
+        }
+
+        if ($transaction->transactable_type === Merchant::class) {
+            $merchant = Merchant::find($transaction->transactable_id);
+            if ($merchant) {
+                $merchant->wallet->increment('balance', floatval($transaction->amount));
+            }
+            return redirect()->route('merchant.dashboard')->with('success', 'Transaction successful.');
+        } elseif ($transaction->transactable_type === User::class) {
+            if (Auth::guard('web')->check()) {
+                $user = User::find($transaction->transactable_id);
+
+                if ($user) {
+                    $user->wallet->increment('balance', floatval($transaction->amount));
+                }
+
+                return redirect()->route('users.dashboard', [
+                    'slug' => Helper::merchant()->slug,
+                ])->with('success', 'Transaction successful.');
+            }
+
+        }
+
+    }
+
+    public function handleWallet($transaction)
+    {
+
+    }
+
     public function manualFunding(Request $request)
     {
         // Validate the request
@@ -110,5 +234,10 @@ class allPaymentController extends Controller
                 'error'   => $e->getMessage(),
             ]);
         }
+    }
+
+    public function processWebhook(Request $request)
+    {
+        dd($request->all());
     }
 }

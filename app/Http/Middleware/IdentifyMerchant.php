@@ -24,6 +24,7 @@ class IdentifyMerchant
             ->first();
 
         if (! $merchant) {
+
             abort(404, 'Merchant not found');
         }
 

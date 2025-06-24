@@ -3,9 +3,7 @@
 @section('title', 'Dashboard Page')
 
 @section('content')
-@php
-        $configuration = \App\Models\Setting::first(); // Adjust the model path if necessary
-    @endphp
+
     <!-- ============================================================== -->
     <!-- Start right Content here -->
     <!-- ============================================================== -->

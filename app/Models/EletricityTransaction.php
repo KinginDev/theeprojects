@@ -8,7 +8,7 @@ class EletricityTransaction extends Model
 {
     use HasFactory;
 
-    protected $table = 'eletricity_transactions'; // Explicitly specify the table name
+    protected $table = 'electricity_transactions'; // Explicitly specify the table name
 
     protected $fillable = [
         'username',

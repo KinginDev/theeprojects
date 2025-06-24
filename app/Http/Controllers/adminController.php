@@ -9,7 +9,7 @@ use App\Models\FundTransaction;
 use App\Models\InsuranceTransaction;
 use App\Models\Notification;
 use App\Models\Pages;
-use App\Models\percentage;
+use App\Models\Percentage;
 use App\Models\Referral;
 use App\Models\Setting;
 use App\Models\TvTransactions;
@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class adminController extends Controller
 {
@@ -94,8 +93,6 @@ class adminController extends Controller
         // Decode the JSON response
         $data = json_decode($response, true);
 
-        dd($data);
-
         // Handle the data (you can check for the 'user' field here)
         $usersd = $data['user'] ?? null;
 
@@ -132,7 +129,7 @@ class adminController extends Controller
 
     public function addCharge($id)
     {
-        $airtimes = percentage::find($id);
+        $airtimes = Percentage::find($id);
         return view('admin-layout.addChargeAirtime', compact('airtimes'));
     }
 
@@ -228,105 +225,13 @@ class adminController extends Controller
         return view('admin-layout.approveFund', compact('funding'));
     }
 
-    public function fundUser(Request $request, $id)
-    {
-        $request->validate([
-            'amount' => 'required|numeric', // Ensure the amount is numeric
-        ]);
-
-        $user          = User::find($id);
-        $configuration = Setting::first();
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        $amount = $request->input('amount');
-        // $user->account_balance += $amount;
-
-        if ($user->save()) {
-            // Record the transaction in the fund_transactions table
-            $transaction = FundTransaction::create([
-                'user_id'     => $user->id,
-                'username'    => $user->username,
-                'tel'         => $user->tel,
-                'amount'      => $amount,
-                'reference'   => 'TXN-' . now()->format('YmdHis') . Str::random(5),
-                'identity'    => 'Manual Funding',
-                'status'      => 'Success',
-                'prev_bal'    => $user->account_balance,
-                'current_bal' => $user->account_balance += $amount,
-            ]);
-
-            // Check if this is the first funding for the user
-            $isFirstFunding = FundTransaction::where('user_id', $user->user_id)->count() === 1;
-
-            // Handle referral bonus logic for the first funding
-            if ($isFirstFunding && ! empty($user->refferal_user)) {
-                $referrer = User::where('user_id', $user->refferal_user)->first();
-
-                if ($referrer) {
-                    $referralBonus = ($amount * $configuration->bonus) / 100; // Calculate 5% of the original amount
-                    $referrer->increment('account_balance', $referralBonus);
-                    $referrer->increment('refferal_bonus', $referralBonus);
-                }
-            }
-            return response()->json(['message' => 'User update successful'], 200);
-        } else {
-            return response()->json(['message' => 'User update failed'], 500);
-        }
-    }
-
-    public function approveFundUser(Request $request, $id)
-    {
-        // Validate the request to ensure 'amount' is numeric and required
-        $request->validate([
-            'amount' => 'required|numeric',
-        ]);
-
-        // Find the FundTransaction by ID
-        $funding = FundTransaction::find($id);
-
-        // Check if the funding transaction exists
-        if (! $funding) {
-            return response()->json(['message' => 'Funding transaction not found'], 404);
-        }
-
-        // Retrieve the username from the funding transaction
-        $userfund = $funding->username;
-
-        // Find the user based on the username
-        $user = User::where('username', $userfund)->first();
-
-        // Check if the user exists
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        // Update the funding transaction status from 'pending' to 'SUCCESS'
-        $funding->status = 'SUCCESS';
-        $funding->save(); // Save the updated status
-
-        // Retrieve the amount from the request input
-        $amount = $request->input('amount');
-
-        // Add the amount to the user's account balance
-        $user->account_balance += $amount;
-
-        // Save the updated user balance
-        if ($user->save()) {
-            return response()->json(['message' => 'User update successful'], 200);
-        } else {
-            return response()->json(['message' => 'User update failed'], 500);
-        }
-    }
-
     public function adminAirtime()
     {
         // Retrieve all airtime transactions
         $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
 
         // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
+        $airtimes = Percentage::where('service', [
             'MTN_Airtime_VTU',
             'Airtel_Airtime_VTU',
             'GLO_Airtime_VTU',
@@ -354,7 +259,7 @@ class adminController extends Controller
         $apiPercent   = $request->input('api_percent');
 
         // Find the airtime record with the specified ID
-        $airtime = percentage::find($id);
+        $airtime = Percentage::find($id);
 
         // Check if airtime record exists
         if (! $airtime) {
@@ -377,39 +282,12 @@ class adminController extends Controller
         }
     }
 
-    public function adminData()
-    {
-
-        // Retrieve all airtime transactions
-        $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
-
-        // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
-            'MTN_SME_Data',
-            'MTN_SME2_Data',
-            'MTN_GIFTING_Data',
-            'MTN_CORPORATE_GIFTING_Data',
-            'Airtel_GIFTING_Data',
-            'Airtel_CORPORATE_GIFTING_Data',
-            'GLO_GIFTING_Data',
-            'GLO_CORPORATE_GIFTING_Data',
-            '9mobile_GIFTING_Data',
-            '9mobile_CORPORATE_GIFTING_Data',
-        ])->get();
-
-        $data_transaction = dataTransactions::all();
-        return view('admin-layout.data', [
-            'airtimes'         => $airtimes,
-            'data_transaction' => $data_transaction,
-        ]);
-    }
-
     public function adminElectricity()
     {
         // Retrieve all airtime transactions
         $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
         // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
+        $airtimes = Percentage::where('service', [
             'Aba_Electric_Payment_-_ABEDC',
             'Abuja_Electricity_Distribution_Company_-_AEDC',
             'Benin_Electricity_-_BEDC',
@@ -435,7 +313,7 @@ class adminController extends Controller
     {
 
         // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
+        $airtimes = Percentage::where('service', [
             'Gotv_Payment',
             'Dstv_Payment',
             'Startime_Payment',
@@ -565,7 +443,7 @@ class adminController extends Controller
     public function adminEducation()
     {
         // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
+        $airtimes = Percentage::where('service', [
             'WAEC_Result_Checker_PIN',
             'WAEC_Registration_PIN',
 
@@ -581,7 +459,7 @@ class adminController extends Controller
     public function adminInsurance()
     {
         // Retrieve only the percentages for specific services
-        $airtimes = percentage::whereIn('service', [
+        $airtimes = Percentage::where('service', [
             'Personal_Accident_Insurance',
             'Third_Party_Motor_Insurance_-_Universal_Insurance',
 
@@ -732,12 +610,12 @@ class adminController extends Controller
             ->merge($tvTransactions)
             ->sortByDesc('created_at');
 
-        return view('admin-layout.wallet', compact('allTransactions'));
+        return view('merchant-layout.wallet', compact('allTransactions'));
     }
 
     public function add_account()
     {
-        return view('admin-layout.add_account');
+        return view('merchant-layout.add_account');
     }
 
     public function addnewAccount(Request $request)

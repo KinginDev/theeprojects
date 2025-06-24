@@ -34,9 +34,16 @@ class User extends BaseUser
     /**
      * Get the merchant that owns the user.
      */
-    public function merchant()
+    public function merchants()
     {
-        return $this->belongsTo(Merchant::class);
+        return $this->hasManyThrough(
+            Merchant::class,
+            MerchantUser::class,
+            'user_id',    // Foreign key on the MerchantUser table
+            'id',         // Foreign key on the Merchant table
+            'id',         // Local key on the User table
+            'merchant_id' // Local key on the MerchantUser table
+        );
     }
 
     /**
@@ -60,5 +67,21 @@ class User extends BaseUser
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    /**
+     * Get all transactions for this user
+     */
+    public function transactions()
+    {
+        return $this->morphMany(Transaction::class, 'transactable');
+    }
+
+    /**
+     * Get the user's wallet
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'owner_id', 'id');
     }
 }
