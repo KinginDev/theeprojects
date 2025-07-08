@@ -18,9 +18,7 @@ Route::middleware(['identify.merchant'])->group(function () {
     // Handle custom domains
     Route::group([], function () {
     Route::get('/', function () {
-        return redirect()->route('users.login', [
-            'slug' => Helper::merchant()->slug,
-        ]);
+        return redirect()->route('users.login');
     })->name('users.home');
     Route::prefix('user')->name('users.')->group(function () {
         Route::get('/login', [authController::class, 'login'])->name('login');
