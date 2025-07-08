@@ -2,8 +2,10 @@
 namespace App\Providers;
 
 use App\Classes\Helper;
+use App\Helpers\MenuHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -48,6 +50,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('admin-layout.*', function ($view) {
             $settings = Helper::settings();
             $view->with('configuration', $settings);
+        });
+
+        // Register a blade directive for menus
+        Blade::directive('menu', function ($expression) {
+            return "<?php echo App\Classes\Helper::renderMenu($expression); ?>";
         });
     }
 }

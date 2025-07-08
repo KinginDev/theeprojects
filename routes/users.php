@@ -10,6 +10,7 @@ use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
 use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\transactionController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\utilitiesPaymentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
@@ -17,9 +18,10 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 Route::middleware(['require.merchant'])->group(function () {
     // Handle custom domains
     Route::group([], function () {
-    Route::get('/', function () {
-        return redirect()->route('users.login');
-    })->name('users.home');
+
+    Route::get('/', [PageController::class, 'index'])->name('merchant.home');
+     Route::get('page/{slug}', [PageController::class, 'show'])->name('merchant.page.show');
+
     Route::prefix('user')->name('users.')->group(function () {
         Route::get('/login', [authController::class, 'login'])->name('login');
         Route::get('/registration', [authController::class, 'registration'])->name('registration');

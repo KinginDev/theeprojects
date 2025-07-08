@@ -559,9 +559,11 @@ class DashboardController extends Controller
     public function site_setting()
     {
         $settings = Setting::first();
-        $user     = Auth::user();
+        $user     = Auth::guard('merchant')->user();
         $target   = storage_path('app/public');
         $link     = public_path('storage');
+
+        $merchant = $user;
 
         // Check if the symbolic link already exists
         if (! file_exists($link)) {
@@ -569,7 +571,7 @@ class DashboardController extends Controller
 
         }
 
-        return view('merchant-layout.site-setting', compact('settings', 'user'));
+        return view('merchant-layout.site-setting', compact('settings', 'user', 'merchant'));
     }
 
     public function edit_profile()
@@ -657,7 +659,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $validatedData = $request->validate(array_merge([
+        $validatedData = $request->validate([
             'site_name'                 => 'required|string|max:255',
             'site_logo'                 => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'api_key'                   => 'required|string',
@@ -667,43 +669,44 @@ class DashboardController extends Controller
             'monnify_contract_code'     => 'required|string',
             'header_color'              => 'required|string',
             'template_color'            => 'required|string',
-            'test_color'                => 'required|string',
-            'site_bank_name'            => 'required|string',
-            'site_bank_account_name'    => 'required|string',
-            'site_bank_account_account' => 'required|string',
-            'site_bank_comment'         => 'required|string',
-            'whatsapp_number'           => 'required|string',
-            'welcome_message'           => 'required|string',
-            'email'                     => 'required|string',
-            'monnify_percent'           => 'required|string',
-            'bonus'                     => 'required|string',
-            'company_phone'             => 'required|string',
-            'company_address'           => 'required|string',
-            'company_email'             => 'required|string',
-        ], $user->role == 0 ? [
-            'airtime_api_url'                     => 'required|url',
-            'transaction_api_url'                 => 'required|url',
-            'data_network_api_url'                => 'required|url',
-            'data_api_url'                        => 'required|url',
-            'data_mtn'                            => 'required|url',
-            'data_airtime'                        => 'required|url',
-            'electricity_pay_api_url'             => 'required|url',
-            'electricity_verify_api_url'          => 'required|url',
-            'tv_bouquet_api_url'                  => 'required|url',
-            'tv_billcode_api_url'                 => 'required|url',
-            'education_waec_registration_api_url' => 'required|url',
-            'education_waec_api_url'              => 'required|url',
-            'education_jamb_api_url'              => 'required|url',
-            'education_check_result_api_url'      => 'required|url',
-            'education_jamb_verify_api_url'       => 'required|url',
-            'insurance_health_insurance_api_url'  => 'required|url',
-            'insurance_personal_accident_api_url' => 'required|url',
-            'insurance_ui_insure_api_url'         => 'required|url',
-            'insurance_state_api_url'             => 'required|url',
-            'insurance_color_api_url'             => 'required|url',
-            'insurance_brand_api_url'             => 'required|url',
-            'insurance_engine_capacity_api_url'   => 'required|url',
-        ] : []));
+            'test_color'                => 'nullable|string',
+            'site_bank_name'            => 'nullable|string',
+            'site_bank_account_name'    => 'nullable|string',
+            'site_bank_account_account' => 'nullable|string',
+            'site_bank_comment'         => 'nullable|string',
+            'whatsapp_number'           => 'nullable|string',
+            'welcome_message'           => 'nullable|string',
+            'email'                     => 'nullable|string',
+            'monnify_percent'           => 'nullable|string',
+            'bonus'                     => 'nullable|string',
+            'company_phone'             => 'nullable|string',
+            'company_address'           => 'nullable|string',
+            'company_email'             => 'nullable|string',
+
+            'airtime_api_url'                     => 'nullable|url',
+            'transaction_api_url'                 => 'nullable|url',
+            'data_network_api_url'                => 'nullable|url',
+            'data_api_url'                        => 'nullable|url',
+            'data_mtn'                            => 'nullable|url',
+            'data_airtime'                        => 'nullable|url',
+            'electricity_pay_api_url'             => 'nullable|url',
+            'electricity_verify_api_url'          => 'nullable|url',
+            'tv_bouquet_api_url'                  => 'nullable|url',
+            'tv_billcode_api_url'                 => 'nullable|url',
+            'education_waec_registration_api_url' => 'nullable|url',
+            'education_waec_api_url'              => 'nullable|url',
+            'education_jamb_api_url'              => 'nullable|url',
+            'education_check_result_api_url'      => 'nullable|url',
+            'education_jamb_verify_api_url'       => 'nullable|url',
+            'insurance_health_insurance_api_url'  => 'nullable|url',
+            'insurance_personal_accident_api_url' => 'nullable|url',
+            'insurance_ui_insure_api_url'         => 'nullable|url',
+            'insurance_state_api_url'             => 'nullable|url',
+            'insurance_color_api_url'             => 'nullable|url',
+            'insurance_brand_api_url'             => 'nullable|url',
+            'insurance_engine_capacity_api_url'   => 'nullable|url',
+            'external_domain'           => 'nullable|string|regex:/^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/'
+        ]);
 
         $settings = Setting::first();
 
@@ -714,8 +717,22 @@ class DashboardController extends Controller
             $settings->site_logo = $request->file('site_logo')->store('logos', 'public');
         }
 
+
+        $merchant = Auth::guard('merchant')->user();
+        // Update merchant's external domain if provided
+        if ($request->filled('external_domain')) {
+            $externalDomain = strtolower($request->external_domain);
+            // Only update if it's different from current
+            if ($merchant->domain !== $externalDomain) {
+                $merchant->domain = $externalDomain;
+                $merchant->save();
+
+            }
+        }
+
         // Mass assign validated data (without 'site_logo')
         $settings->fill(collect($validatedData)->except('site_logo')->all());
+
 
         // Save settings
         if ($settings->save()) {

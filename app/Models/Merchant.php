@@ -14,6 +14,8 @@ class Merchant extends User
 
     protected $with = ['preferences'];
 
+    protected $appends = ['external_domain'];
+
     protected const APP_DOMAIN = 'theeprojects.test';
 
     /**
@@ -57,14 +59,52 @@ class Merchant extends User
         return $this->hasOne(Wallet::class, 'owner_id', 'id');
     }
 
-    /**
-     * Get the full domain for the merchant.
-     */
-    public function getDomainAttribute()
+
+
+
+    // Method to get the homepage
+    public function getHomePage()
     {
-        return $this->attributes['domain'] ?? $this->slug . '.' . env('APP_DOMAIN', self::APP_DOMAIN);
+        return $this->pages()
+            ->where('is_published', true)
+            ->where('is_home', true)
+            ->first();
     }
 
+    public function pages()
+    {
+        return $this->hasMany(MerchantPage::class, 'merchant_id', 'id');
+    }
+
+    public function menus()
+    {
+        return $this->hasMany(MerchantMenu::class, 'merchant_id', 'id');
+    }
+
+    // Update the getDomainAttribute method to accommodate direct domain setting
+    public function getDomainAttribute()
+    {
+            // If domain is already set (and not a subdomain of our app), return it as-is
+            if (isset($this->attributes['domain']) &&
+                !str_contains($this->attributes['domain'], env('APP_DOMAIN', self::APP_DOMAIN))) {
+                return $this->attributes['domain'];
+            }
+
+            // Otherwise return the default subdomain
+            return $this->attributes['domain'] ?? $this->slug . '.' . env('APP_DOMAIN', self::APP_DOMAIN);
+        }
+
+        // Update or add the getExternalDomainActiveAttribute method
+        public function getExternalDomainActiveAttribute()
+        {
+            // Check if external_domain_active is set in attributes
+            if (isset($this->attributes['external_domain_active'])) {
+                return (bool)$this->attributes['external_domain_active'];
+            }
+
+            // Default to false
+            return false;
+        }
     /**
      * Check if a domain belongs to this merchant
      */

@@ -23,12 +23,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css">
-    @yield('styles')
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.1.2/js/dataTables.bootstrap5.js"></script>
+
+    @stack('before_styles')
+    @yield('styles')
+    @stack('after_styles')
 </head>
 
 <body data-topbar="dark">
@@ -74,126 +78,136 @@
 
         <div class="vertical-menu">
             <div data-simplebar class="h-100">
-                <div id="sidebar-menu">
-                    <ul class="metismenu list-unstyled" id="side-menu">
-                        <li class="menu-title">Menu</li>
+            <div id="sidebar-menu">
+                <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title">Menu</li>
 
 
-                        <!-- For other roles, display all menu items -->
-                        <li>
-                            <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
-                                <i class="bi bi-grid"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.users', Auth::guard('merchant')->user()->id) }}"
-                                class="waves-effect">
-                                <i class="ri-user-line"></i>
-                                <span>Manage users</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.credit.user') }}" class="waves-effect">
-                                <i class="ri-user-line"></i>
-                                <span>Credit User account</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.transactions') }}" class="waves-effect">
-                                <i class="ri-tv-line"></i>
-                                <span>Transactions</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.airtime') }}" class="waves-effect">
-                                <i class="ri-phone-line"></i>
-                                <span>Airtime</span>
-                            </a>
-                        </li>
+                <!-- For other roles, display all menu items -->
+                <li>
+                    <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.users', Auth::guard('merchant')->user()->id) }}"
+                    class="waves-effect">
+                    <i class="ri-user-line"></i>
+                    <span>Manage users</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.credit.user') }}" class="waves-effect">
+                    <i class="ri-user-line"></i>
+                    <span>Credit User account</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.transactions') }}" class="waves-effect">
+                    <i class="ri-tv-line"></i>
+                    <span>Transactions</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.airtime') }}" class="waves-effect">
+                    <i class="ri-phone-line"></i>
+                    <span>Airtime</span>
+                    </a>
+                </li>
 
-                        <li>
-                            <a href="{{ route('merchant.data') }}" class="waves-effect">
-                                <i class="ri-wifi-line"></i>
-                                <span>Internet Data</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.electricity') }}" class="waves-effect">
-                                <i class="ri-lightbulb-flash-line"></i>
-                                <span>Electricity</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.tv') }}" class="waves-effect">
-                                <i class="ri-tv-line"></i>
-                                <span>Tv Subscription</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.education') }}" class="waves-effect">
-                                <i class="ri-tv-line"></i>
-                                <span>Education</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.insurance') }}" class="waves-effect">
-                                <i class="ri-tv-line"></i>
-                                <span>Insurance</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="ri-bill-line"></i>
-                                <span>Contact Users</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('merchant.message') }}">Messages</a></li>
-                                <li><a href="{{ route('merchant.notification') }}">Notifications</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="ri-bill-line"></i>
-                                <span>Settings</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('merchant.site_setting') }}">Site Setting</a></li>
-                                <li><a href="{{ route('merchant.edit_profile') }}">Edit Profile</a></li>
-                                <li><a href="{{ route('merchant.add_account') }}">Add New User/Marchant</a></li>
-                                <li><a href="{{ route('merchant.marchant') }}">View Marchant</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-title">Others</li>
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="ri-bill-line"></i>
-                                <span>Fund Wallet</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('merchant.dashboard', ['action' => 'showModal']) }}">ATM/Transfer
-                                        Funding</a></li>
-                                <li><a href="#">Automated Bank Funding</a></li>
-                                <li><a href="#">Manual Bank Funding</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="{{ route('merchant.walletSummary') }}" class="waves-effect">
-                                <i class="ri-history-line"></i>
-                                <span>Wallet summary</span>
-                            </a>
-                        </li>
-                        <li>
-                            <form id="logout-form" action="{{ route('merchant.logout') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                            <a href="#" class="waves-effect" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="ri-shut-down-line"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li>
+                <li>
+                    <a href="{{ route('merchant.data') }}" class="waves-effect">
+                    <i class="ri-wifi-line"></i>
+                    <span>Internet Data</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.electricity') }}" class="waves-effect">
+                    <i class="ri-lightbulb-flash-line"></i>
+                    <span>Electricity</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.tv') }}" class="waves-effect">
+                    <i class="ri-tv-line"></i>
+                    <span>Tv Subscription</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.education') }}" class="waves-effect">
+                    <i class="ri-tv-line"></i>
+                    <span>Education</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.insurance') }}" class="waves-effect">
+                    <i class="ri-tv-line"></i>
+                    <span>Insurance</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="ri-pages-line"></i>
+                    <span>CMS</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="{{ route('merchant.pages.index') }}">Pages</a></li>
+                    <li><a href="{{ route('merchant.menus.index') }}">Menus</a></li>
                     </ul>
-                </div>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="ri-bill-line"></i>
+                    <span>Contact Users</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="{{ route('merchant.message') }}">Messages</a></li>
+                    <li><a href="{{ route('merchant.notification') }}">Notifications</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="ri-bill-line"></i>
+                    <span>Settings</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="{{ route('merchant.site_setting') }}">Site Setting</a></li>
+                    <li><a href="{{ route('merchant.edit_profile') }}">Edit Profile</a></li>
+                    <li><a href="{{ route('merchant.add_account') }}">Add New User/Marchant</a></li>
+                    <li><a href="{{ route('merchant.marchant') }}">View Marchant</a></li>
+                    </ul>
+                </li>
+                <li class="menu-title">Others</li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="ri-bill-line"></i>
+                    <span>Fund Wallet</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="{{ route('merchant.dashboard', ['action' => 'showModal']) }}">ATM/Transfer
+                        Funding</a></li>
+                    <li><a href="#">Automated Bank Funding</a></li>
+                    <li><a href="#">Manual Bank Funding</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ route('merchant.walletSummary') }}" class="waves-effect">
+                    <i class="ri-history-line"></i>
+                    <span>Wallet summary</span>
+                    </a>
+                </li>
+                <li>
+                    <form id="logout-form" action="{{ route('merchant.logout') }}" method="POST" style="display: none;">
+                    @csrf
+                    </form>
+                    <a href="#" class="waves-effect" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="ri-shut-down-line"></i>
+                    <span>Logout</span>
+                    </a>
+                </li>
+                </ul>
+            </div>
             </div>
         </div>
     </div>

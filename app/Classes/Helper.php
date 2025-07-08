@@ -4,6 +4,7 @@ namespace App\Classes;
 use App\Models\Setting;
 use App\Models\Merchant;
 use Illuminate\Support\Str;
+use App\Models\MerchantMenu;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Helper
@@ -103,5 +104,38 @@ class Helper
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred while fetching data.'], 500);
         }
+    }
+
+      /**
+     * Render a menu by name or location
+     *
+     * @param mixed $merchant
+     * @param string $location
+     * @param string|null $name
+     * @return string
+     */
+    public static function renderMenu($merchant, $location = 'header', $name = null)
+    {
+        // Get the menu by name or location
+        $query = MerchantMenu::where('merchant_id', $merchant->id)
+            ->where('is_active', true);
+
+        if ($name) {
+            $menu = $query->where('name', $name)->first();
+        } else {
+            $menu = $query->where('location', $location)->first();
+        }
+
+        if (!$menu) {
+            return '';
+        }
+
+        // Get all menu items organized in a tree
+        $menuItems = $menu->getTree();
+
+        return view('components.menu', [
+            'menuItems' => $menuItems,
+            'merchant' => $merchant,
+        ])->render();
     }
 }

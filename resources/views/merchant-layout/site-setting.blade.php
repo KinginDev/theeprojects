@@ -59,6 +59,13 @@
                                 <i class="bi bi-code-square me-2"></i>API Settings
                             </button>
                         </li>
+                         <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="domain-tab" data-bs-toggle="tab" data-bs-target="#domain"
+                                type="button" role="tab" aria-controls="domain" aria-selected="false"
+                                data-tab-id="domain">
+                                <i class="bi bi-globe me-2"></i>Domain Settings
+                            </button>
+                        </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance"
                                 type="button" role="tab" aria-controls="appearance" aria-selected="false"
@@ -254,6 +261,93 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Domain Settings Tab -->
+<div class="tab-pane fade" id="domain" role="tabpanel">
+    <div class="settings-section">
+        <div class="settings-section-header">
+            <h5 class="mb-4">Domain Configuration</h5>
+        </div>
+
+        <!-- Current Domain Info -->
+        <div class="alert alert-info mb-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Current Domain</strong>
+            </div>
+            <p class="mb-1">Your current domain: <strong>{{ $merchant->domain }}</strong></p>
+            @if(str_contains($merchant->domain, env('APP_DOMAIN')))
+                <small class="text-muted">This is your default subdomain.</small>
+            @else
+                <small class="text-muted">This is your custom domain.</small>
+            @endif
+        </div>
+
+        <!-- External Domain Settings -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Domain Settings</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="external_domain" class="form-label">Custom Domain</label>
+                            <div class="input-group">
+                                <input type="text"
+                                    class="form-control @error('external_domain') is-invalid @enderror"
+                                    id="external_domain"
+                                    name="external_domain"
+                                    placeholder="example.com"
+                                    value="{{ old('external_domain', $merchant->domain) }}">
+                                @if(!str_contains($merchant->domain, env('APP_DOMAIN')) && $merchant->external_domain_active)
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="bi bi-check-circle-fill"></i> Active
+                                    </span>
+                                @elseif(!str_contains($merchant->domain, env('APP_DOMAIN')) && !$merchant->external_domain_active)
+                                    <span class="input-group-text bg-warning text-dark">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Pending
+                                    </span>
+                                @endif
+                                @error('external_domain')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <small class="form-text text-muted">Enter your domain without "http://" or "www" (e.g., example.com)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DNS Setup Instructions -->
+                <div class="mt-4">
+                    <h6 class="text-primary mb-3"><i class="bi bi-lightbulb me-2"></i>How to set up your custom domain</h6>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-2">To connect your custom domain, add the following DNS records at your domain registrar:</p>
+                        <ol class="mb-0">
+                            <li class="mb-2">
+                                <strong>A Record:</strong>
+                                <ul class="ps-3">
+                                    <li>Host: @ or leave empty</li>
+                                    <li>Value: 123.456.789.123 (Our server IP)</li>
+                                    <li>TTL: 3600 or automatic</li>
+                                </ul>
+                            </li>
+                            <li class="mb-2">
+                                <strong>CNAME Record:</strong>
+                                <ul class="ps-3">
+                                    <li>Host: www</li>
+                                    <li>Value: {{ explode('.', $merchant->domain)[0] }}.{{ env('APP_DOMAIN') }}.</li>
+                                    <li>TTL: 3600 or automatic</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <p class="mt-3 mb-1 text-muted"><small>Note: DNS changes may take up to 48 hours to propagate globally.</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                             <!-- Appearance Tab -->
                             <div class="tab-pane fade" id="appearance" role="tabpanel">

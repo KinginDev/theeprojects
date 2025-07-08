@@ -37,7 +37,41 @@
     }
 
 </script>
+
+<!-- Toast notifications for session messages -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for success message
+        @if(session('success'))
+            Swal.fire({
+                toast: true,
+                icon: 'success',
+                title: "{{ session('success') }}",
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 10000,
+                timerProgressBar: true
+            });
+        @endif
+
+        // Check for error message
+        @if(session('error'))
+            Swal.fire({
+                toast: true,
+                icon: 'error',
+                title: "{{ session('error') }}",
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 20000,
+                timerProgressBar: true
+            });
+        @endif
+    });
+</script>
+
+@stack('before_scripts')
 @yield('scripts')
+@stack('after_scripts')
 </body>
 
 </html>

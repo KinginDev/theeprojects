@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\Merchant\AuthController;
+use App\Http\Controllers\Merchant\MenuController;
+use App\Http\Controllers\Merchant\PageController;
+use App\Http\Controllers\Merchant\MenuItemController;
 use App\Http\Controllers\Merchant\DashboardController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
@@ -81,4 +84,17 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
 
         Route::put('/settings-update', [DashboardController::class, 'updateSetting'])->name('settings.update');
     });
+
+
+ // CMS - Pages
+    Route::resource('pages', PageController::class);
+
+    // CMS - Menus
+    Route::resource('menus', MenuController::class);
+
+    // CMS - Menu Items
+    Route::post('menus/{menu}/items', [MenuItemController::class, 'store'])->name('menu-items.store');
+    Route::put('menu-items/{menuItem}', [MenuItemController::class, 'update'])->name('menu-items.update');
+    Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->name('menu-items.destroy');
+    Route::post('menus/{menu}/reorder', [MenuItemController::class, 'reorder'])->name('menu-items.reorder');
 });
