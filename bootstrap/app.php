@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\Helper;
 use App\Models\Merchant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,10 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'guest'             => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'identify.merchant' => \App\Http\Middleware\IdentifyMerchant::class, #get merchant for each user
+            'auth'              => \App\Http\Middleware\Authenticate::class,
+            'verified'         => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
 
+        // Apply identify.merchant middleware globally to ensure it runs early
         $middleware->web([
-
+            \App\Http\Middleware\IdentifyMerchant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -31,23 +35,34 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Auth\AuthenticationException $e,
             \Illuminate\Http\Request $request
         ) {
-            // if ($request->expectsJson()) {
-            //     return response()->json(['message' => 'Unauthenticated.'], 401);
-            // }
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
 
             $guard = $e->guards()[0] ?? null;
-            // dd($guard);
 
-            $host     = $request->getHost();
-            $slug     = explode('.', $host)[0];
-            $merchant = Merchant::where('slug', $slug)->first();
+            // Get host information
+            $host = $request->getHost();
+            $hostParts = explode('.', $host);
+            $isSubdomain = count($hostParts) > 2 || (count($hostParts) === 2 && !str_contains($host, 'www'));
+
+            // For subdomains, handle user authentication
+            if ($isSubdomain && $guard === 'web') {
+                $subdomain = $hostParts[0];
+                $merchant = \App\Models\Merchant::where('domain', $host)
+                    ->orWhere('slug', $subdomain)
+                    ->first();
+
+                if ($merchant) {
+                    return redirect()->guest(route('users.login', ['slug' => $merchant->slug]));
+                }
+            }
 
             $login = match ($guard) {
                 'merchant' => route('merchant.login'),
-                'admin'    => route('admin.login'),
-                default    => $merchant
-                ? route('users.login', ['slug' => $merchant->slug])
-                : route('login'),
+                'admin' => route('admin.login'),
+                'web' => route('merchant.login'), // Default to merchant login if no subdomain match
+                default => route('merchant.login'),
             };
 
             return redirect()->guest($login);

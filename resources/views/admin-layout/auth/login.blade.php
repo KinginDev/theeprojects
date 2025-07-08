@@ -13,8 +13,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Stylesheets -->
-    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet"
-        type="text/css" />
+    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}"
+        rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}"
@@ -153,8 +153,8 @@
                             @csrf
                             <div class="form-group mb-3 row">
                                 <div class="col-12">
-                                    <input class="form-control" type="text" required
-                                        placeholder="Email" id="user" name="email">
+                                    <input class="form-control" type="text" required placeholder="Email"
+                                        id="user" name="email">
                                 </div>
                             </div>
 
@@ -184,13 +184,10 @@
 
                             <div class="form-group mb-0 row mt-2">
                                 <div class="col-sm-7 mt-3">
-                                    <a href="{{ route('forget_password') }}" class="text-muted"><i
+                                    <a href="{{ route('admin.forget_password') }}" class="text-muted"><i
                                             class="mdi mdi-lock"></i> Forgot your password?</a>
                                 </div>
-                                <div class="col-sm-5 mt-3">
-                                    <a href="{{ route('registration',) }}" class="text-muted"><i
-                                            class="mdi mdi-account-circle"></i> Create an account</a>
-                                </div>
+
                             </div>
                         </form>
                     </div>

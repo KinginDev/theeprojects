@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Admin Notifications')
 
@@ -15,12 +15,9 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0" style="color: #FF6600 !important;">Admin Notifications</h4>
+                            <h4 class="mb-sm-0" style="color: #FF6600 !important;">Merchant Notifications</h4>
                             <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
-                                    <li class="breadcrumb-item active">Notifications</li>
-                                </ol>
+                                {!!Helper::generateBreadCrumbs( 'Notifications')!!}
                             </div>
                         </div>
                     </div>
@@ -38,15 +35,20 @@
                             <div class="card-body">
                                 <div class="list-group">
                                     @foreach ($notifications as $notification)
-                                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <a href="#"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
-                                                <i class="bi bi-bell-fill text-warning me-3"></i> <!-- Adjust icon based on type -->
+                                                <i class="bi bi-bell-fill text-warning me-3"></i>
+                                                <!-- Adjust icon based on type -->
                                                 <div>
-                                                    <h6 class="mb-1" style="text-transform: capitalize;">{{ $notification->username }}</h6>
-                                                    <p class="mb-0 text-muted" style="text-transform: capitalize;">{{ $notification->message }}</p>
+                                                    <h6 class="mb-1" style="text-transform: capitalize;">
+                                                        {{ $notification->username }}</h6>
+                                                    <p class="mb-0 text-muted" style="text-transform: capitalize;">
+                                                        {{ $notification->message }}</p>
                                                 </div>
                                             </div>
-                                            <span class="badge bg-primary rounded-pill">{{ $notification->created_at->diffForHumans() }}</span>
+                                            <span
+                                                class="badge bg-primary rounded-pill">{{ $notification->created_at->diffForHumans() }}</span>
                                         </a>
                                     @endforeach
                                     <!-- No Notifications Message -->

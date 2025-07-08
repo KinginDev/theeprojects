@@ -19,28 +19,29 @@ class RedirectIfAuthenticated extends RedirectIfAuthenticatedMiddleware
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
+            if (Auth::guard($guard ?? 'web')->check()) {
+                // Get current user and their type
+                $user = Auth::guard($guard ?? 'web')->user();
 
-            switch ($guard) {
-                case 'merchant':
-                    if (Auth::guard($guard)->check()) {
-                        return redirect(route('merchant.dashboard'));
-                    }
-                    break;
+                // Handle merchant users on subdomain
+                if ($guard === 'web' && $user->merchant) {
+                    return redirect()->route('users.dashboard', [
+                        'slug' => $user->merchant->slug
+                    ]);
+                }
 
-                case 'web':
-                    if (Auth::guard($guard)->check()) {
-                        return redirect(route('users.dashboard',
-                            ['slug' => Auth::guard('web')->user()->merchant->slug]));
-                    }
-                    break;
-                case 'admin':
-                    if (Auth::guard($guard)->check()) {
-                        return redirect(route('admin.dashboard'));
-                    }
-                    break;
+                // Handle merchant admin
+                if ($guard === 'merchant') {
+                    return redirect()->route('merchant.dashboard');
+                }
 
+                // Handle system admin
+                if ($guard === 'admin') {
+                    return redirect()->route('admin.dashboard');
+                }
             }
         }
+
         return $next($request);
     }
 }

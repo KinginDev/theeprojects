@@ -54,9 +54,9 @@
                         </li>
                     </ul>
                     <span class="navbar-text">
-                        <a href="{{ route('login') }}" class="btn p-2"
+                        <a href="{{ route('home') }}" class="btn p-2"
                             style="color: {{ $configuration->template_color }};">Login</a>
-                        <a href="{{ route('login') }}" class="btn text-white p-2"
+                        <a href="{{ route('home') }}" class="btn text-white p-2"
                             style="background-color: {{ $configuration->template_color }};">Register</a>
                     </span>
                 </div>
@@ -75,9 +75,9 @@
                             subscriptions. Buy quality insurance covers, pay education bills, transfer funds and do more
                             ...</p>
 
-                        <a href="{{ route('login') }}" class="btn text-white get-started mt-3"
+                        <a href="{{ route('home') }}" class="btn text-white get-started mt-3"
                             style="background-color: {{ $configuration->template_color }};">Login</a>
-                        <a href="{{ route('login') }}" class="btn text-white get-started mt-3"
+                        <a href="{{ route('home') }}" class="btn text-white get-started mt-3"
                             style="background-color: {{ $configuration->template_color }};">Register</a>
                     </div>
 
@@ -89,8 +89,8 @@
                                 <!-- Quick Action Cards -->
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target=".bs-example-modal-center1"
-                                            class="qbox">
+                                        <a href="#" data-bs-toggle="modal"
+                                            data-bs-target=".bs-example-modal-center1" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-phone-line"
                                                     style="color: {{ $configuration->template_color }};"></i>
@@ -104,8 +104,8 @@
 
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target=".bs-example-modal-center2"
-                                            class="qbox">
+                                        <a href="#" data-bs-toggle="modal"
+                                            data-bs-target=".bs-example-modal-center2" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-wifi-line"
                                                     style="color: {{ $configuration->template_color }};"></i>
@@ -119,8 +119,8 @@
 
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target=".bs-example-modal-center3"
-                                            class="qbox">
+                                        <a href="#" data-bs-toggle="modal"
+                                            data-bs-target=".bs-example-modal-center3" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-lightbulb-flash-line"
                                                     style="color: {{ $configuration->template_color }};"></i>
@@ -136,8 +136,8 @@
                             <div class="row mt-4">
                                 <div class="col-4">
                                     <div class="card p-2 br-2">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target=".bs-example-modal-center4"
-                                            class="qbox">
+                                        <a href="#" data-bs-toggle="modal"
+                                            data-bs-target=".bs-example-modal-center4" class="qbox">
                                             <div class="item-box">
                                                 <i class="ri-tv-line"
                                                     style="color: {{ $configuration->template_color }};"></i>
@@ -183,8 +183,10 @@
 
                     <div class="col-lg-6 col-md-12 col-sm-12">
                         <br>
-                        <div class="h4 rt" style="color: {{ $configuration->test_color }};">Access to all Services</div>
-                        <p class="mt-3">Access all VTU services, tools, analytics, support and many more from a single
+                        <div class="h4 rt" style="color: {{ $configuration->test_color }};">Access to all Services
+                        </div>
+                        <p class="mt-3">Access all VTU services, tools, analytics, support and many more from a
+                            single
                             dashboard as a normal user, reseller etc.</p>
                         <a href="#" class="btn text-white get-started mt-3"
                             style="background-color: {{ $configuration->template_color }};">Get Started</a>
@@ -193,7 +195,8 @@
 
                 <div class="row mt-5 flex-column-reverse flex-sm-row">
                     <div class="col-lg-6 col-md-12 col-sm-12">
-                        <div class="h4 rt" style="color: {{ $configuration->test_color }};">Achieve much more. Reach a
+                        <div class="h4 rt" style="color: {{ $configuration->test_color }};">Achieve much more. Reach
+                            a
                             wider market</div>
                         <p class="mt-3">Provide your goods and services to an extended target of customers and
                             prospects, while monitoring all transactions from initiation to payment.</p>
@@ -279,18 +282,17 @@
                                 style="border-color: {{ $configuration->template_color }};">
                                 <div class="mb-3">
                                     <label for="contactName" class="form-label">Name</label>
-                                    <input type="text" class="form-control" id="contactName" placeholder="Your Name"
-                                        required>
+                                    <input type="text" class="form-control" id="contactName"
+                                        placeholder="Your Name" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="contactEmail" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="contactEmail" placeholder="Your Email"
-                                        required>
+                                    <input type="email" class="form-control" id="contactEmail"
+                                        placeholder="Your Email" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="contactMessage" class="form-label">Message</label>
-                                    <textarea class="form-control" id="contactMessage" rows="4"
-                                        placeholder="Your Message" required></textarea>
+                                    <textarea class="form-control" id="contactMessage" rows="4" placeholder="Your Message" required></textarea>
                                 </div>
                                 <button type="submit" class="btn w-100"
                                     style="background-color: {{ $configuration->template_color }}; color: white;">Send
@@ -309,13 +311,13 @@
                                 <ul class="list-unstyled">
                                     <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"
                                             style="color: {{ $configuration->template_color }};"></i><strong>Address:</strong>
-                                        {{$configuration->company_address}}</li>
+                                        {{ $configuration->company_address }}</li>
                                     <li class="mb-2"><i class="bi bi-envelope-fill me-2"
                                             style="color: {{ $configuration->template_color }};"></i><strong>Email:</strong>
-                                        {{$configuration->company_email}}</li>
+                                        {{ $configuration->company_email }}</li>
                                     <li class="mb-2"><i class="bi bi-telephone-fill me-2"
                                             style="color: {{ $configuration->template_color }};"></i><strong>Phone:</strong>
-                                        {{$configuration->company_phone}}</li>
+                                        {{ $configuration->company_phone }}</li>
                                 </ul>
                                 <div class="social-links mt-3">
                                     <a href="#" class="text-dark me-3"><i class="bi bi-facebook"
@@ -349,14 +351,14 @@
 
         <!-- Bootstrap JS and other scripts -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-            integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-            crossorigin="anonymous"></script>
+            integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
-            integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
-            crossorigin="anonymous"></script>
+            integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous">
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-            crossorigin="anonymous"></script>
+            integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
+        </script>
     </div>
 </body>
 

@@ -84,7 +84,7 @@
                                                             <span>{{ $airtime->updated_at }}</span>
                                                         </td>
                                                         <td class="status-pending">
-                                                            <a href="{{ route('add.charge', $airtime->id) }}">
+                                                            <a href="{{ route('admin.add.charge', $airtime->id) }}">
                                                                 <button class="btn btn-primary">TOP UP +</button>
                                                             </a>
 

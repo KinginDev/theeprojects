@@ -1,26 +1,42 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\Merchant\AuthController;
 use App\Http\Controllers\Merchant\DashboardController;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->group(function () {
     // Login Routes
     Route::get('/', function () {
         return "Help";
     })->name('home');
-    Route::middleware('guest:merchant')->group(function () {
-        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('login', [AuthController::class, 'login'])->name('login.submit');
-        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-    });
+
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/forget/password', [AuthController::class, 'showForgetPasswordPage'])->name('show.password');
+    Route::post('/forget/password', [AuthController::class, 'sendPasswordRequest'])->name('forget.password');
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('update.password');
+
+    // Email verification routes for merchants
+    Route::get('/email/verify', function () {
+        return view('merchant-layout.auth.verify');
+    })->middleware('auth:merchant')->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/merchant/dashboard')->with('success', 'Email verified successfully!');
+    })->middleware(['auth:merchant', 'signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:merchant', 'throttle:6,1'])->name('verification.send');
 
     //Register Routes
     Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('register', [AuthController::class, 'register'])->name('register.submit');
     // Protected Routes
-    Route::middleware('auth:merchant')->group(function () {
+    Route::middleware(['auth:merchant', 'verified'])->group(function () {
         Route::post('/make/payment', [allPaymentController::class, 'makePayment'])->name('make.payment');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -32,7 +48,7 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
         Route::get('/delete/{id}', [DashboardController::class, 'delete'])->name('delete');
         Route::post('/fund/{id}', [DashboardController::class, 'fundUser'])->name('fund.user');
         Route::post('/approveFund/{id}', [DashboardController::class, 'approveFundUser'])->name('approveFund.user');
-        Route::post('create/{merchantId}', [DashboardController::class, 'createUser'])->name('users.create');
+        Route::post('create/{merchantId}', [DashboardController::class, 'createUser'])->name('create.user');
 
         Route::get('/user/credit/account', [DashboardController::class, 'creditUserAccount'])->name('credit.user');
         Route::get('/add/fund/{userId}', [DashboardController::class, 'addFund'])->name('add.fund');
@@ -51,6 +67,9 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
         Route::get('/marchant', [DashboardController::class, 'marchant'])->name('marchant');
         Route::get('/site_setting', [DashboardController::class, 'site_setting'])->name('site_setting');
         Route::get('/edit_profile', [DashboardController::class, 'edit_profile'])->name('edit_profile');
+        Route::put('/edit/{id}/profile', [DashboardController::class, 'updateProfile'])->name('update.profile');
+        Route::post('/fund/charge/all/{id}', [DashboardController::class, 'addChargeAirtimeUser'])->name('addChargeAirtime.user');
+
         Route::get('/walletSummary', [DashboardController::class, 'walletSummaryMerchant'])->name('walletSummary');
         Route::get('/message/user/{id}', [DashboardController::class, 'messageUser'])->name('message.user');
         Route::get('/add/account', [DashboardController::class, 'add_account'])->name('add_account');
@@ -58,6 +77,8 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
         // add more routes here
 
         Route::get('/monnify-fee', [DashboardController::class, 'getMonnifyFee'])->name('getMonnifyFee');
+        Route::get('/transactions', [DashboardController::class, 'transactions'])->name('transactions');
 
+        Route::put('/settings-update', [DashboardController::class, 'updateSetting'])->name('settings.update');
     });
 });

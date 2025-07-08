@@ -2,9 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AirtimeTransaction;
-use App\Models\dataTransactions;
+use App\Models\DataTransaction;
 use App\Models\EducationTransaction;
-use App\Models\EletricityTransaction;
+use App\Models\ElectricityTransaction;
 use App\Models\FundTransaction;
 use App\Models\InsuranceTransaction;
 use App\Models\Notification;
@@ -12,7 +12,7 @@ use App\Models\Pages;
 use App\Models\Percentage;
 use App\Models\Referral;
 use App\Models\Setting;
-use App\Models\TvTransactions;
+use App\Models\TvTransaction;
 use App\Models\User;
 use App\Models\UserMessage;
 use Illuminate\Http\Request;
@@ -26,6 +26,7 @@ class adminController extends Controller
 {
     public function dashboard()
     {
+ // Temporary debug line
         $user             = Auth::guard('admin')->user(); // Get the currently authenticated user
         $userCount        = User::count();                // Get the total number of users
         $totalUserBalance = User::sum('account_balance'); // Get the total balance of all users
@@ -35,11 +36,11 @@ class adminController extends Controller
 
         // Get total debited amounts from each transaction type (all users)
         $totalAirtimeDebited     = AirtimeTransaction::sum('amount');
-        $totalDataDebited        = DataTransactions::sum('amount');
+        $totalDataDebited        = DataTransaction::sum('amount');
         $totalEducationDebited   = EducationTransaction::sum('amount');
-        $totalElectricityDebited = EletricityTransaction::sum('amount');
+        $totalElectricityDebited = ElectricityTransaction::sum('amount');
         $totalInsuranceDebited   = InsuranceTransaction::sum('amount');
-        $totalTvDebited          = TvTransactions::sum('amount');
+        $totalTvDebited          = TvTransaction::sum('amount');
 
         // Calculate total debited amount from all transactions combined
         $totalDebitedAmount = $totalAirtimeDebited + $totalDataDebited + $totalEducationDebited +
@@ -302,7 +303,7 @@ class adminController extends Controller
             'Yola_Electric_Disco_Payment_-_YEDC',
         ])->get();
 
-        $eletricity_transaction = EletricityTransaction::all();
+        $eletricity_transaction = ElectricityTransaction::all();
         return view('admin-layout.electricity', [
             'airtimes'               => $airtimes,
             'eletricity_transaction' => $eletricity_transaction,
@@ -320,7 +321,7 @@ class adminController extends Controller
             'Showmax_Payment',
         ])->get();
 
-        $tv_transaction = TvTransactions::orderBy('created_at', 'desc')->get();
+        $tv_transaction = TvTransaction::orderBy('created_at', 'desc')->get();
         return view('admin-layout.cableTv', [
             'airtimes'       => $airtimes,
             'tv_transaction' => $tv_transaction,
@@ -592,17 +593,17 @@ class adminController extends Controller
     {
         // Fetch and merge transactions
         $airtimeTransactions     = AirtimeTransaction::orderBy('created_at', 'desc')->get();
-        $dataTransactions        = DataTransactions::orderBy('created_at', 'desc')->get();
+        $DataTransaction         = DataTransaction::orderBy('created_at', 'desc')->get();
         $educationTransactions   = EducationTransaction::orderBy('created_at', 'desc')->get();
-        $electricityTransactions = EletricityTransaction::orderBy('created_at', 'desc')->get();
+        $electricityTransactions = ElectricityTransaction::orderBy('created_at', 'desc')->get();
         $fundTransactions        = FundTransaction::orderBy('created_at', 'desc')->get();
         $insuranceTransactions   = InsuranceTransaction::orderBy('created_at', 'desc')->get();
-        $tvTransactions          = TvTransactions::orderBy('created_at', 'desc')->get();
+        $tvTransactions          = TvTransaction::orderBy('created_at', 'desc')->get();
 
         // Combine and sort all transactions
         $allTransactions = collect()
             ->merge($airtimeTransactions)
-            ->merge($dataTransactions)
+            ->merge($DataTransaction)
             ->merge($educationTransactions)
             ->merge($electricityTransactions)
             ->merge($fundTransactions)

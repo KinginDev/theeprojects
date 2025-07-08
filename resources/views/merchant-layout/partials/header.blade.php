@@ -9,8 +9,8 @@
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
     <!-- CSS Dependencies -->
-    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet"
-        type="text/css" />
+    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}"
+        rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
     <link href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}"
@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css">
+    @yield('styles')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -82,7 +83,7 @@
                         <li>
                             <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
                                 <i class="bi bi-grid"></i>
-                                <span>Dashbaord</span>
+                                <span>Dashboard</span>
                             </a>
                         </li>
                         <li>
@@ -96,6 +97,12 @@
                             <a href="{{ route('merchant.credit.user') }}" class="waves-effect">
                                 <i class="ri-user-line"></i>
                                 <span>Credit User account</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('merchant.transactions') }}" class="waves-effect">
+                                <i class="ri-tv-line"></i>
+                                <span>Transactions</span>
                             </a>
                         </li>
                         <li>
@@ -177,7 +184,10 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('merchant.logout') }}" class="waves-effect">
+                            <form id="logout-form" action="{{ route('merchant.logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                            <a href="#" class="waves-effect" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="ri-shut-down-line"></i>
                                 <span>Logout</span>
                             </a>

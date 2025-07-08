@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -67,11 +67,11 @@
                                                             <div class="transaction-icon">
                                                                 <div class="icon-hold">
                                                                     @if ($airtime->service == 'MTN_Airtime_VTU')
-                                                                        <img src="/assets/images/brands/Mtn.png"
-                                                                            width="35" alt="MTN Logo">
+                                                                        <img src="/assets/images/brands/Mtn.png" width="35"
+                                                                            alt="MTN Logo">
                                                                     @elseif ($airtime->service == 'Airtel_Airtime_VTU')
-                                                                        <img src="/assets/images/brands/Airtel.png"
-                                                                            width="35" alt="Airtel Logo">
+                                                                        <img src="/assets/images/brands/Airtel.png" width="35"
+                                                                            alt="Airtel Logo">
                                                                     @elseif ($airtime->service == 'GLO_Airtime_VTU')
                                                                         <img src="https://img.icons8.com/?size=100&id=d1bmMtlAQFUr&format=png&color=000000"
                                                                             width="35" alt="GLO Logo">
@@ -144,28 +144,28 @@
                                             <tbody>
                                                 <?php $i = 1; ?>
                                                 @foreach ($airtime_transaction as $transaction)
-                                                    <tr>
-                                                        <td>
+                                                                <tr>
+                                                                    <td>
 
-                                                            <h6 class="mb-0"><?php echo $i++; ?></h6>
-                                    </div>
+                                                                        <h6 class="mb-0"><?php    echo $i++; ?></h6>
+                                                    </div>
 
-                                    </td>
-                                    <td>{{ $transaction->username }}</td>
+                                                    </td>
+                                                    <td>{{ $transaction->username }}</td>
 
-                                    <td>{{ $transaction->network }}</td>
-                                    <td>{{ $transaction->tel }}</td>
-                                    <td>₦{{ $transaction->amount }}</td>
-                                    <td>{{ $transaction->reference }}</td>
-                                    <td>{{ $transaction->identity }}</td>
-                                    <td>{{ $transaction->status }}</td>
-
-
+                                                    <td>{{ $transaction->network }}</td>
+                                                    <td>{{ $transaction->tel }}</td>
+                                                    <td>₦{{ $transaction->amount }}</td>
+                                                    <td>{{ $transaction->reference }}</td>
+                                                    <td>{{ $transaction->identity }}</td>
+                                                    <td>{{ $transaction->status }}</td>
 
 
-                                    <td class="status-pending">{{ $transaction->created_at }}</td>
-                                    </tr>
-                                    @endforeach
+
+
+                                                    <td class="status-pending">{{ $transaction->created_at }}</td>
+                                                    </tr>
+                                                @endforeach
                                     </tbody><!-- end tbody -->
                                     </table> <!-- end table -->
                                 </div>

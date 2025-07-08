@@ -1,71 +1,163 @@
 <?php
 namespace App\Http\Controllers\Merchant;
 
-use App\Http\Controllers\Controller;
-use App\Models\AirtimeTransaction;
-use App\Models\dataTransactions;
-use App\Models\EducationTransaction;
-use App\Models\EletricityTransaction;
-use App\Models\FundTransaction;
-use App\Models\InsuranceTransaction;
+use App\Models\User;
+use App\Models\Wallet;
+use App\Models\Setting;
 use App\Models\Merchant;
-use App\Models\MerchantPreferences;
+use App\Models\Percentage;
+use App\Models\Transaction;
+use App\Models\UserMessage;
 use App\Models\MerchantUser;
 use App\Models\Notification;
-use App\Models\Percentage;
-use App\Models\Setting;
-use App\Models\TvTransactions;
-use App\Models\User;
-use App\Models\UserMessage;
-use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
+use App\Models\TvTransaction;
+use App\Models\DataTransaction;
+use App\Models\FundTransaction;
+use App\Models\WalletTransaction;
+use App\Models\AirtimeTransaction;
+use Illuminate\Support\Facades\DB;
+use App\Models\MerchantPreferences;
+use App\Http\Controllers\Controller;
+use App\Models\EducationTransaction;
+use App\Models\InsuranceTransaction;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use App\Models\ElectricityTransaction;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $user             = Auth::guard('merchant')->user();                                              // Get the currently authenticated user
-        $userCount        = User::count();                                                                // Get the total number of users
-        $totalUserBalance = MerchantUser::where('merchant_id', $user->id)->get()->sum('account_balance'); // Get the total balance of all users
+        $user = Auth::guard('merchant')->user();
 
-                                                    // Check the action query parameter
-        $action    = $request->query('action', ''); // Default to empty string if not set
+        // Get users associated with this merchant
+        $merchantUsers = MerchantUser::where('merchant_id', $user->id)->get();
+
+        $userCount        = $merchantUsers->count();
+        $totalUserBalance = $merchantUsers->pluck('user_id')->map(function ($userId) {
+            return User::find($userId)->wallet->balance ?? 0;
+        })->sum();
+
+        // Check the action query parameter
+        $action    = $request->query('action', '');
         $hideModal = ($action === 'hideModal');
         $showModal = ($action === 'showModal');
-        // $notifications = Notification::where('username', $user->username)->get();
 
-        // Get total credited amount from FundTransaction
+        // Get merchant's user IDs
+        $merchantUserIds = $merchantUsers->pluck('user_id')->toArray();
 
-        $totalCreditedAmount = WalletTransaction::where('wallet_owner_id', $user->id)->where('wallet_owner_type', Merchant::class)->sum('amount');
+        // Get total credited amount for all merchant users
+        $totalCreditedAmount = WalletTransaction::whereIn('wallet_owner_id', $merchantUserIds)
+            ->where('wallet_owner_type', User::class)
+            ->where('type', 'credit')
+            ->sum('amount');
 
-        // Get total debited amounts from each transaction type (all users)
-        $totalAirtimeDebited     = AirtimeTransaction::sum('amount');
-        $totalDataDebited        = DataTransactions::sum('amount');
-        $totalEducationDebited   = EducationTransaction::sum('amount');
-        $totalElectricityDebited = EletricityTransaction::sum('amount');
-        $totalInsuranceDebited   = InsuranceTransaction::sum('amount');
-        $totalTvDebited          = TvTransactions::sum('amount');
+        // Get total debited amounts from each transaction type
+        $totalAirtimeDebited     = AirtimeTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
+        $totalDataDebited        = DataTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
+        $totalEducationDebited   = EducationTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
+        $totalElectricityDebited = ElectricityTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
+        $totalInsuranceDebited   = InsuranceTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
+        $totalTvDebited          = TvTransaction::whereIn('user_id', $merchantUserIds)->sum('amount');
 
-        // Calculate total debited amount from all transactions combined
+        // Calculate total debited amount
         $totalDebitedAmount = $totalAirtimeDebited + $totalDataDebited + $totalEducationDebited +
             $totalElectricityDebited + $totalInsuranceDebited + $totalTvDebited;
 
-        $totalUserBalance = $user->wallet->balance ?? 0; // Get the user's wallet balance
+        // Get transactions by service type for the pie chart
+        $serviceTransactions = [
+            'Airtime'     => $totalAirtimeDebited,
+            'Data'        => $totalDataDebited,
+            'Education'   => $totalEducationDebited,
+            'Electricity' => $totalElectricityDebited,
+            'Insurance'   => $totalInsuranceDebited,
+            'TV'          => $totalTvDebited,
+        ];
+
+        // Get last 6 months transactions for the graph
+        $last6Months = collect();
+        for ($i = 5; $i >= 0; $i--) {
+            $month             = now()->subMonths($i);
+            $monthTransactions = Transaction::whereIn('transactable_id', $merchantUserIds)
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('amount');
+            $last6Months->push([
+                'month'  => $month->format('M'),
+                'amount' => $monthTransactions,
+            ]);
+        }
+
+        // Get recent transactions
+        $recentTransactions = Transaction::whereIn('transactable_id', $merchantUserIds)
+
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Get the merchant's wallet balance
+        $merchantBalance = Wallet::where('owner_type', Merchant::class)
+            ->where('owner_id', $user->id)
+            ->value('balance');
 
         return view('merchant-layout.dashboard.index', [
-            'showModal' => $showModal,
-            // 'notifications' => $notifications,
-            'hideModal' => $hideModal,
-        ], compact('user', 'userCount', 'totalUserBalance', 'totalCreditedAmount', 'totalDebitedAmount', 'totalUserBalance'));
+            'showModal'           => $showModal,
+            'hideModal'           => $hideModal,
+            'user'                => $user,
+            'userCount'           => $userCount,
+            'totalUserBalance'    => $totalUserBalance,
+            'totalCreditedAmount' => $totalCreditedAmount,
+            'totalDebitedAmount'  => $totalDebitedAmount,
+            'merchantBalance'     => $merchantBalance,
+            'serviceTransactions' => $serviceTransactions,
+            'last6Months'         => $last6Months,
+            'recentTransactions'  => $recentTransactions,
+        ]);
     }
 
     public function getMerchantUsers($merchantId)
     {
         $merchant = Merchant::where('id', $merchantId)->first();
         $users    = $merchant->users()->get();
-        return view('merchant-layout.users.all-users')->with(compact('users'));
+
+        // Get user statistics
+        $totalUsers    = $users->count();
+        $activeUsers   = $users->where('cal', 1)->count();
+        $inactiveUsers = $users->where('cal', 0)->count();
+        $totalBalance  = Wallet::where('owner_type', User::class)
+            ->whereIn('owner_id', $users->pluck('id'))
+            ->sum('balance');
+
+        // Get new users this month
+        $newUsersThisMonth = $users->filter(function ($user) {
+            return $user->created_at->isCurrentMonth();
+        })->count();
+
+        // Get top users by balance
+        $topUsers = Wallet::where('owner_type', User::class)
+            ->whereIn('owner_id', $users->pluck('id'))
+            ->orderByDesc('balance')
+            ->take(5)
+            ->get();
+
+        // Get recent transactions for all users
+        $recentTransactions = Transaction::whereIn('transactable_id', $users->pluck('id'))
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('merchant-layout.users.all-users', compact(
+            'users',
+            'totalUsers',
+            'activeUsers',
+            'inactiveUsers',
+            'totalBalance',
+            'newUsersThisMonth',
+            'topUsers',
+            'recentTransactions'
+        ));
     }
 
     public function editUser($id)
@@ -163,7 +255,7 @@ class DashboardController extends Controller
     {
         $merchant    = Auth::guard('merchant')->user();
         $users       = $merchant->users()->get();
-        $fundAccount = FundTransaction::where('identity', 'like', '%Manual Funding%')
+        $fundAccount = WalletTransaction::where('provider', 'like', '%Manual Funding%')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -179,8 +271,11 @@ class DashboardController extends Controller
      */
     public function addFund($userId)
     {
-        $user = User::find($userId);
-        return view('merchant-layout.user.addFund', compact('user'));
+        $user            = User::find($userId);
+        $merchantBalance = Wallet::where('owner_type', Merchant::class)
+            ->where('owner_id', $user->id)
+            ->value('balance');
+        return view('merchant-layout.addFund', compact('user', 'merchantBalance'));
     }
 
     /**
@@ -197,48 +292,68 @@ class DashboardController extends Controller
     public function fundUser(Request $request, $id)
     {
         $request->validate([
-            'amount' => 'required|numeric', // Ensure the amount is numeric
+            'amount' => 'required|numeric|min:0.01',
         ]);
 
-        $user          = User::find($id);
-        $configuration = Setting::first();
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
+        $user     = User::findOrFail($id);
+        $amount   = $request->input('amount');
+        $merchant = Auth::user();
+
+        // Get merchant's wallet
+        $merchantWallet = Wallet::where('owner_id', $merchant->id)
+            ->where('owner_type', Merchant::class)
+            ->first();
+
+        if (! $merchantWallet || $merchantWallet->balance < $amount) {
+            return response()->json([
+                'message'         => 'Insufficient merchant balance',
+                'merchantBalance' => $merchantWallet ? $merchantWallet->balance : 0,
+            ], 400);
         }
 
-        $amount = $request->input('amount');
-        // $user->account_balance += $amount;
+        DB::beginTransaction();
+        try {
+            // Deduct from merchant's wallet
+            $merchantWallet->decrement('balance', $amount);
 
-        if ($user->save()) {
-            // Record the transaction in the fund_transactions table
-            $transaction = FundTransaction::create([
-                'user_id'     => $user->id,
-                'username'    => $user->username,
-                'tel'         => $user->tel,
-                'amount'      => $amount,
-                'reference'   => 'TXN-' . now()->format('YmdHis') . Str::random(5),
-                'identity'    => 'Manual Funding',
-                'status'      => 'Success',
-                'prev_bal'    => $user->account_balance,
-                'current_bal' => $user->account_balance += $amount,
+            $transaction = Transaction::initialize([
+                'transactable_type' => Merchant::class,
+                'transactable_id'   => $user->id,
+
+                'amount'            => $amount['amount'],
+                'type'              => $request->type,
+                'kind'              => 'debit',
+                'payload'           => [
+                    'Merchant Name'   => $user->name,
+                    'Merchant domain' => $user->domain, // Initially pending until confirmed
+                ],
+                'provider'          => 'Manual Funding',
             ]);
 
-            // Check if this is the first funding for the user
-            $isFirstFunding = FundTransaction::where('user_id', $user->user_id)->count() === 1;
+            // Create merchant wallet transaction
+            WalletTransaction::create([
+                'wallet_owner_id'   => $merchant->id,
+                'wallet_owner_type' => Merchant::class,
+                'wallet_id'         => $merchantWallet->id,
+                'transaction_id'    => $transaction->id,
+                'type'              => 'debit',
+                'amount'            => $amount,
+                'status'            => 'pending',
+                'provider'          => 'Manual Funding',
+            ]);
 
-            // Handle referral bonus logic for the first funding
-            if ($isFirstFunding && ! empty($user->refferal_user)) {
-                $referrer = User::where('user_id', $user->refferal_user)->first();
+            // Add to user's balance
+            $user->wallet->increment('balance', $amount);
 
-                if ($referrer) {
-                    $referralBonus = ($amount * $configuration->bonus) / 100; // Calculate 5% of the original amount
-                    $referrer->increment('account_balance', $referralBonus);
-                    $referrer->increment('refferal_bonus', $referralBonus);
-                }
-            }
-            return response()->json(['message' => 'User update successful'], 200);
-        } else {
-            return response()->json(['message' => 'User update failed'], 500);
+            DB::commit();
+            return response()->json([
+                'message'         => 'Fund transfer successful',
+                'transaction'     => $transaction,
+                'merchantBalance' => $merchantWallet->balance,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['message' => 'Fund transfer failed: ' . $e->getMessage()], 500);
         }
     }
 
@@ -292,7 +407,7 @@ class DashboardController extends Controller
         $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
 
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'MTN_Airtime_VTU',
             'Airtel_Airtime_VTU',
             'GLO_Airtime_VTU',
@@ -317,7 +432,7 @@ class DashboardController extends Controller
         $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
 
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'MTN_SME_Data',
             'MTN_SME2_Data',
             'MTN_GIFTING_Data',
@@ -330,7 +445,7 @@ class DashboardController extends Controller
             '9mobile_CORPORATE_GIFTING_Data',
         ])->get();
 
-        $data_transaction = dataTransactions::all();
+        $data_transaction = DataTransaction::all();
         return view('merchant-layout.data', [
             'airtimes'         => $airtimes,
             'data_transaction' => $data_transaction,
@@ -342,7 +457,7 @@ class DashboardController extends Controller
         // Retrieve all airtime transactions
         $airtime_transaction = AirtimeTransaction::orderBy('created_at', 'desc')->get();
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'Aba_Electric_Payment_-_ABEDC',
             'Abuja_Electricity_Distribution_Company_-_AEDC',
             'Benin_Electricity_-_BEDC',
@@ -357,7 +472,7 @@ class DashboardController extends Controller
             'Yola_Electric_Disco_Payment_-_YEDC',
         ])->get();
 
-        $eletricity_transaction = EletricityTransaction::all();
+        $eletricity_transaction = ElectricityTransaction::all();
         return view('merchant-layout.electricity', [
             'airtimes'               => $airtimes,
             'eletricity_transaction' => $eletricity_transaction,
@@ -368,14 +483,14 @@ class DashboardController extends Controller
     {
 
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'Gotv_Payment',
             'Dstv_Payment',
             'Startime_Payment',
             'Showmax_Payment',
         ])->get();
 
-        $tv_transaction = TvTransactions::orderBy('created_at', 'desc')->get();
+        $tv_transaction = TvTransaction::orderBy('created_at', 'desc')->get();
         return view('merchant-layout.cableTv', [
             'airtimes'       => $airtimes,
             'tv_transaction' => $tv_transaction,
@@ -385,7 +500,7 @@ class DashboardController extends Controller
     public function merchantEducation()
     {
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'WAEC_Result_Checker_PIN',
             'WAEC_Registration_PIN',
 
@@ -401,7 +516,7 @@ class DashboardController extends Controller
     public function merchantInsurance()
     {
         // Retrieve only the percentages for specific services
-        $airtimes = Percentage::where('service', [
+        $airtimes = Percentage::whereIn('service', [
             'Personal_Accident_Insurance',
             'Third_Party_Motor_Insurance_-_Universal_Insurance',
 
@@ -467,19 +582,28 @@ class DashboardController extends Controller
 
     public function walletSummaryMerchant()
     {
+        $merchant = Auth::guard('merchant')->user();
+
+        $mercchantUserIDs = MerchantUser::where('merchant_id', $merchant->id)
+            ->pluck('user_id')
+            ->toArray();
         // Fetch and merge transactions
-        $airtimeTransactions     = AirtimeTransaction::orderBy('created_at', 'desc')->get();
-        $dataTransactions        = DataTransactions::orderBy('created_at', 'desc')->get();
-        $educationTransactions   = EducationTransaction::orderBy('created_at', 'desc')->get();
-        $electricityTransactions = EletricityTransaction::orderBy('created_at', 'desc')->get();
-        $fundTransactions        = FundTransaction::orderBy('created_at', 'desc')->get();
-        $insuranceTransactions   = InsuranceTransaction::orderBy('created_at', 'desc')->get();
-        $tvTransactions          = TvTransactions::orderBy('created_at', 'desc')->get();
+        $airtimeTransactions     = AirtimeTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
+        $DataTransaction         = DataTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
+        $educationTransactions   = EducationTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
+        $electricityTransactions = ElectricityTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
+
+        $fundTransactions        = WalletTransaction::whereIn('wallet_owner_id', $mercchantUserIDs)
+        ->where('wallet_owner_type', User::class)
+        ->orderBy('created_at', 'desc')->get();
+
+        $insuranceTransactions   = InsuranceTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
+        $tvTransactions          = TvTransaction::whereIn('user_id', $mercchantUserIDs)->orderBy('created_at', 'desc')->get();
 
         // Combine and sort all transactions
         $allTransactions = collect()
             ->merge($airtimeTransactions)
-            ->merge($dataTransactions)
+            ->merge($DataTransaction)
             ->merge($educationTransactions)
             ->merge($electricityTransactions)
             ->merge($fundTransactions)
@@ -519,7 +643,6 @@ class DashboardController extends Controller
     {
         // Retrieve the monnify_percent from the Setting model
         $auth = Auth::guard('merchant')->user();
-        dd('' . $auth->id . '');
         $settings = MerchantPreferences::where('merchant_id', $auth->id)->first();
 
         // If no value is found, fallback to a default (e.g., 1.7)
@@ -528,6 +651,238 @@ class DashboardController extends Controller
         return response()->json([
             'fee' => $monnifyFee,
         ]);
+    }
+
+    public function updateSetting(Request $request)
+    {
+        $user = Auth::user();
+
+        $validatedData = $request->validate(array_merge([
+            'site_name'                 => 'required|string|max:255',
+            'site_logo'                 => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'api_key'                   => 'required|string',
+            'secret_key'                => 'required|string',
+            'site_token'                => 'required|string',
+            'monnify_api_key'           => 'required|string',
+            'monnify_contract_code'     => 'required|string',
+            'header_color'              => 'required|string',
+            'template_color'            => 'required|string',
+            'test_color'                => 'required|string',
+            'site_bank_name'            => 'required|string',
+            'site_bank_account_name'    => 'required|string',
+            'site_bank_account_account' => 'required|string',
+            'site_bank_comment'         => 'required|string',
+            'whatsapp_number'           => 'required|string',
+            'welcome_message'           => 'required|string',
+            'email'                     => 'required|string',
+            'monnify_percent'           => 'required|string',
+            'bonus'                     => 'required|string',
+            'company_phone'             => 'required|string',
+            'company_address'           => 'required|string',
+            'company_email'             => 'required|string',
+        ], $user->role == 0 ? [
+            'airtime_api_url'                     => 'required|url',
+            'transaction_api_url'                 => 'required|url',
+            'data_network_api_url'                => 'required|url',
+            'data_api_url'                        => 'required|url',
+            'data_mtn'                            => 'required|url',
+            'data_airtime'                        => 'required|url',
+            'electricity_pay_api_url'             => 'required|url',
+            'electricity_verify_api_url'          => 'required|url',
+            'tv_bouquet_api_url'                  => 'required|url',
+            'tv_billcode_api_url'                 => 'required|url',
+            'education_waec_registration_api_url' => 'required|url',
+            'education_waec_api_url'              => 'required|url',
+            'education_jamb_api_url'              => 'required|url',
+            'education_check_result_api_url'      => 'required|url',
+            'education_jamb_verify_api_url'       => 'required|url',
+            'insurance_health_insurance_api_url'  => 'required|url',
+            'insurance_personal_accident_api_url' => 'required|url',
+            'insurance_ui_insure_api_url'         => 'required|url',
+            'insurance_state_api_url'             => 'required|url',
+            'insurance_color_api_url'             => 'required|url',
+            'insurance_brand_api_url'             => 'required|url',
+            'insurance_engine_capacity_api_url'   => 'required|url',
+        ] : []));
+
+        $settings = Setting::first();
+
+        if ($request->hasFile('site_logo')) {
+            if ($settings->site_logo) {
+                Storage::disk('public')->delete($settings->site_logo);
+            }
+            $settings->site_logo = $request->file('site_logo')->store('logos', 'public');
+        }
+
+        // Mass assign validated data (without 'site_logo')
+        $settings->fill(collect($validatedData)->except('site_logo')->all());
+
+        // Save settings
+        if ($settings->save()) {
+            return redirect()->route('merchant.site_setting')->with('success', 'Settings updated successfully.');
+        }
+
+        return redirect()->route('merchant.site_setting')->with('error', 'Failed to update settings.');
+    }
+
+    public function transactions()
+    {
+        $merchant = Auth::guard('merchant')->user();
+
+        $merchantUserIds = MerchantUser::where('merchant_id', $merchant->id)
+            ->pluck('user_id')
+            ->toArray();
+
+        $airtimeTransactions = AirtimeTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $dataTransactions = DataTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $electricityTransactions = ElectricityTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $tvTransactions = TvTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $educationTransactions = EducationTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $insuranceTransactions = InsuranceTransaction::whereIn('user_id', $merchantUserIds)
+            ->latest()
+            ->get();
+
+        $walletTransactions = WalletTransaction::whereIn('wallet_owner_id', $merchantUserIds)->with('owner')
+            ->where('wallet_owner_type', User::class)
+            ->latest()
+            ->get();
+
+        return view('merchant-layout.transactions', compact(
+            'airtimeTransactions',
+            'dataTransactions',
+            'electricityTransactions',
+            'tvTransactions',
+            'educationTransactions',
+            'insuranceTransactions',
+            'walletTransactions'
+        ));
+    }
+
+    /**
+     * Update the merchant's profile.
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+      public function updateProfile(Request $request, $id)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'name'     => 'required|string|max:255',
+            'tel'      => 'required|string|max:15',
+            'address'  => 'required|string',
+            'password' => 'nullable|confirmed|min:6',
+            'upgrade'  => 'nullable|integer',
+        ]);
+
+        $user = User::findOrFail($id);
+        $isUpgradedToTopUser = false;
+
+        if (isset($validatedData['upgrade'])) {
+            // Reset all earners to 0 initially
+            $user->smart_earners   = 0;
+            $user->topuser_earners = 0;
+            $user->api_earners     = 0;
+
+            // Set the specific earner field based on upgrade value
+            switch ($validatedData['upgrade']) {
+                case 1:
+                    $user->smart_earners = 1;
+                    break;
+                case 2:
+                    $user->topuser_earners = 1;
+                    $isUpgradedToTopUser   = true; // Mark as upgraded to topuser
+                    break;
+                case 3:
+                    $user->api_earners = 1;
+                    break;
+                default:
+                    // Handle unexpected values if necessary
+                    break;
+            }
+        }
+
+        // Update basic user information
+        $user->name    = $validatedData['name'];
+        $user->tel     = $validatedData['tel'];
+        $user->address = $validatedData['address'];
+
+        // If password is provided, hash and update it
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validatedData['password']);
+        }
+
+        // Check if the user was referred and upgraded to topuser
+        if ($isUpgradedToTopUser && ! empty($user->refferal_user)) {
+            // Find the referrer
+            $referrer = User::where('username', $user->refferal_user)->first();
+
+            if ($referrer) {
+                // Add 500 to the referrer's balance
+                $referrer->wallet->increment('balance', 500);
+                $referrer->increment('refferal_bonus', 500);
+            }
+        }
+
+        // Save the user
+        $user->save();
+
+        // Redirect or return response
+        return redirect()->route('merchant.edit.user', ['id' => $user->id])
+            ->with('success', 'User updated successfully.');
+    }
+
+     public function addChargeAirtimeUser(Request $request, $id)
+    {
+        // Validate the inputs
+        $request->validate([
+            'smart_earners' => 'required|string',
+            'top_users'     => 'required|string',
+            'api_percent'   => 'required|string',
+        ]);
+
+        // Retrieve the validated inputs
+        $smartEarners = $request->input('smart_earners');
+        $topUsers     = $request->input('top_users');
+        $apiPercent   = $request->input('api_percent');
+
+        // Find the airtime record with the specified ID
+        $airtime = Percentage::find($id);
+
+        // Check if airtime record exists
+        if (! $airtime) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        // Update the percentage fields with the given values
+        $airtime->smart_earners_percent   = $smartEarners;
+        $airtime->topuser_earners_percent = $topUsers;
+        $airtime->api_earners_percent     = $apiPercent;
+
+        // Save the changes and handle the response
+        try {
+            $airtime->save();
+            return response()->json(['message' => 'Charge updated successfully']);
+        } catch (\Exception $e) {
+            // Log the exception if needed
+            Log::error('Failed to update charge: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to update charge'], 500);
+        }
     }
 
 }

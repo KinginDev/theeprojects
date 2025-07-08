@@ -1,569 +1,261 @@
+@php
+    use App\Classes\Helper;
+@endphp
+
 @extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
 @section('content')
+    <!-- ApexCharts -->
+    <link href="https://cdn.jsdelivr.net/npm/apexcharts@3.40.0/dist/apexcharts.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.40.0/dist/apexcharts.min.js"></script>
+
     @if (isset($hideModal) && $hideModal)
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
                 $('.bs-example-modal-center1').modal('hide');
             });
         </script>
     @elseif(isset($showModal) && $showModal)
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
                 $('.bs-example-modal-center1').modal('show');
             });
         </script>
     @endif
-    <!-- ============================================================== -->
-    <!-- Start right Content here -->
-    <!-- ============================================================== -->
-    <div class="main-content">
 
+    <div class="main-content">
         <div class="page-content">
             <div class="container-fluid">
-
-                <!-- start page title -->
-                <div class="row">
+                <!-- Welcome Section -->
+                <div class="row mb-4">
                     <div class="col-12">
-                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                            <h3 class="mb-sm-0">Hey {{ $user->name }} , Welcome</h4>
-
-                                {!! Helper::generateBreadCrumbs('Dashboard Page') !!}
-
+                        <div class="page-title-box d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-0 font-size-18">Welcome Back!</h4>
+                                <p class="text-muted mb-0">{{ $user->name }}</p>
+                                <p class="text-muted mb-0"><small><i
+                                            class="ri-global-line me-1"></i>{{ Auth::guard('merchant')->user()->domain }}</small>
+                                </p>
+                            </div>
+                            {!! Helper::generateBreadCrumbs('Dashboard Page') !!}
                         </div>
                     </div>
                 </div>
-                <!-- end page title -->
 
-                <!-- Container to hold the main page elements-->
-
-                <div class="container main-tags p-0">
-                    <div class="row">
-                        <div class=" col-lg-4 col-md-12 col-sm-12">
-                            <div class="row flex-column">
-
-
-
-                                <div class="col-md-12 col-sm-12">
-                                    <div class="quick mb-3">
-                                        <div class="h6">Quick Action</div><br>
-                                        <div class="row">
-                                            <div class="card p-3">
-                                                <p class="fw-bolder">Account Balance:
-                                                    ₦{{ number_format($totalUserBalance, 2) }}</p>
-                                            </div>
-
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminAirtime') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class="ri-phone-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Airtime</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminData') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class=" ri-wifi-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Data</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminElectricity') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class=" ri-lightbulb-flash-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Electricity</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminTv') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class="ri-tv-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Tv</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminInsurance') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class="ri-dribbble-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Insurance</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="col-4">
-                                                <div class="card p-2 br-2">
-                                                    <a href="{{ route('admin.adminEducation') }}" class="qbox">
-                                                        <div class="item-box">
-                                                            <i class=" ri-plane-line"></i>
-                                                        </div>
-                                                        <div class="text mt-2">
-                                                            <p class="text-dark">Education</p>
-                                                        </div>
-
-                                                    </a>
-                                                </div>
-                                            </div>
-
-
-
-
-
-
-                                        </div>
-
-
-
-
-                                    </div>
-
-                                </div>
-                                <div class="col-md-12 col-sm-12">
-                                    <div class="quick mb-3">
-                                        <div class="h6">Quick Action</div><br>
-                                        <img src="{{ asset('/assets/images/img2.png') }}" alt="" width="100%">
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-                        </div>
-
-
-                        <div class="col-lg-8 col-md-12 col-sm-12">
-                            <div class="row flex-column">
-                                <div class="col-md-12 col-sm-12">
-                                    <div class="card p-4 br-2">
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-12 mt-md-3">
-                                                <div class="box">
-                                                    <div class="ico">
-                                                        <i class="ri-exchange-dollar-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total Users</div>
-                                                    <div class="h4 mt-3"><span>{{ $userCount }}</span></div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-up text-success"></i> Users
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-3">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total Users Fund</div>
-                                                    <div class="h4 mt-3">
-                                                        <span>₦</span><span>{{ number_format($totalUserBalance, 2) }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> Users
-                                                        Fund</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-3">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total Credited amount</div>
-                                                    <div class="h4 mt-3">
-                                                        <span>₦</span><span>{{ number_format($totalCreditedAmount, 2) }}</span>
-                                                    </div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> From
-                                                        Installed Date</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-3">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total debited amount</div>
-                                                    <div class="h4 mt-3">
-                                                        <span>₦</span><span>{{ number_format($totalDebitedAmount, 2) }}</span>
-                                                    </div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> From
-                                                        Installed Date</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {{-- <div class="row">
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="box">
-                                                    <div class="ico">
-                                                        <i class="ri-exchange-dollar-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">To</div>
-                                                    <div class="h4 mt-3"><span>₦</span><span>280,000.00</span></div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-up text-success"></i> From last month</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-0">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total debited amount</div>
-                                                    <div class="h4 mt-3"><span>₦</span><span>70,000.00</span></div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> From last month</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-0">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total debited amount</div>
-                                                    <div class="h4 mt-3"><span>₦</span><span>70,000.00</span></div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> From last month</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12 mt-sm-4 mt-md-0">
-                                                <div class="box">
-                                                    <div class="ico re">
-                                                        <i class="ri-wallet-line"></i>
-                                                    </div>
-                                                    <div class="h6 text-gray">Total debited amount</div>
-                                                    <div class="h4 mt-3"><span>₦</span><span>70,000.00</span></div>
-                                                    <div class="mt-3"><i class="bi bi-arrow-down text-danger"></i> From last month</div>
-                                                </div>
-                                            </div>
-                                        </div> --}}
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-
-
-                    </div>
-                </div>
-                @php
-                    // Retrieve active pages for the authenticated user
-                    $pages = \App\Models\Pages::where('action', 1)->get(); // Adjust the model path if necessary
-                @endphp
-                @foreach ($pages as $page)
-                    @if ($page->id == 35 && $page->action == 1)
-                        <div class="container my-5">
-                            <!-- Card container for the admin action -->
-                            <div class="card shadow-sm rounded">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-4">Generate CSV of All User Emails</h5>
-
-                                    <!-- Description -->
-                                    <p class="text-muted">Click the button below to download a CSV file containing all
-                                        email
-                                        addresses of users in the system.</p>
-
-                                    <!-- Generate CSV Button -->
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <button class="btn shadow-sm text-white" id="generate-csv-btn"
-                                            style="background-color: {{ $configuration->template_color }};">
-                                            <i class="bi bi-file-earmark-arrow-down"></i> Generate CSV
-                                        </button>
-                                        <p class="text-success" id="success-message" style="display: none;">CSV file
-                                            generated
-                                            successfully!</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                @endforeach
-                <script>
-                    $(document).ready(function() {
-                        $('#generate-csv-btn').on('click', function() {
-                            // Send a request to generate the CSV file
-                            $.ajax({
-                                url: '{{ route('admin.generateUserEmailsCSV') }}', // Ensure this points to the correct route
-                                method: 'GET',
-                                xhrFields: {
-                                    responseType: 'blob' // This ensures the browser handles the download
-                                },
-                                success: function(response, status, xhr) {
-                                    // Handle download
-                                    var filename = xhr.getResponseHeader('Content-Disposition').split(
-                                        'filename=')[1].replace(/"/g, '');
-                                    var blob = new Blob([response], {
-                                        type: 'text/csv'
-                                    });
-                                    var link = document.createElement('a');
-                                    link.href = window.URL.createObjectURL(blob);
-                                    link.download = filename;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                    $('#success-message').show(); // Show success message
-                                },
-                                error: function(err) {
-                                    alert('Error generating CSV. Please try again.');
-                                }
-                            });
-                        });
-                    });
-                </script>
-
-
-
-
-                <!-- Container to hold the main page elements ends here-->
-
-            </div> <!-- container-fluid -->
-            @foreach ($pages as $page)
-                @if ($page->id == 34 && $page->action == 1)
-                    <div class="container my-5">
-                        <!-- Card container for the form -->
-                        <div class="card shadow-sm rounded">
+                <!-- Stats Cards Row -->
+                <div class="row mb-4">
+                    <!-- Total Balance -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card h-100 border-left-primary shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title mb-4">Sales & Accounting</h5>
-
-                                <!-- Form Row -->
-                                <form id="calculate-form">
-                                    <div class="row mb-3">
-                                        <!-- Start Date -->
-                                        <div class="col-md-4">
-                                            <label for="startDate" class="form-label">Start Date</label>
-                                            <div class="input-group rounded">
-                                                <span class="input-group-text bg-primary text-white"><i
-                                                        class="bi bi-calendar"></i></span>
-                                                <input type="date" class="form-control border-0" id="startDate"
-                                                    placeholder="Select start date" required>
-                                            </div>
-                                        </div>
-
-                                        <!-- End Date -->
-                                        <div class="col-md-4">
-                                            <label for="endDate" class="form-label">End Date</label>
-                                            <div class="input-group rounded">
-                                                <span class="input-group-text bg-primary text-white"><i
-                                                        class="bi bi-calendar"></i></span>
-                                                <input type="date" class="form-control border-0" id="endDate"
-                                                    placeholder="Select end date" required>
-                                            </div>
-                                        </div>
-
-                                        <!-- Calculate Button -->
-                                        <div class="col-md-4 d-flex align-items-end">
-                                            <button type="submit" class="btn w-100 text-white rounded shadow-sm"
-                                                style="background-color: {{ $configuration->template_color }};">
-                                                <i class="bi bi-calculator"></i> Calculate
-                                            </button>
-                                        </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase">
+                                        Merchant Balance
                                     </div>
-                                </form>
+                                    <div class="avatar-sm rounded-circle bg-soft-primary">
+                                        <i class="ri-wallet-3-line font-size-24 avatar-title text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold">₦{{ number_format($merchantBalance, 2) }}</div>
+                                <div class="text-sm text-muted mt-2">Available Balance</div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Transaction Summary Section (Hidden by default) -->
-                        <div class="container my-5" id="transaction-summary" style="display: none;">
-                            <div class="row text-center">
-                                <div class="col-md-6">
-                                    <div class="p-3 mb-3 bg-light shadow-sm rounded">
-                                        <h3 class="text-success" id="credit-transaction">Credit Transaction: ₦0.00</h3>
+                    <!-- Total Users -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card h-100 border-left-success shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase">
+                                        Total Users
+                                    </div>
+                                    <div class="avatar-sm rounded-circle bg-soft-success">
+                                        <i class="ri-team-line font-size-24 avatar-title text-success"></i>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="p-3 mb-3 bg-light shadow-sm rounded">
-                                        <h3 class="text-danger" id="debit-transaction">Debit Transaction: ₦0.00</h3>
-                                    </div>
-                                </div>
+                                <div class="h5 mb-0 font-weight-bold">{{ number_format($userCount) }}</div>
+                                <div class="text-sm text-muted mt-2">Registered Users</div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Transaction Cards -->
-                            <div class="row mt-4 g-4">
-                                <div class="col-md-3">
-                                    <div class="card shadow-sm rounded h-100">
-                                        <div class="card-body">
-                                            <p>MTN Data Sold</p>
-                                            <p class="text-primary" id="mtn-data-sold">₦0.00 (0GB)</p>
-                                            <p>MTN Airtime Sold</p>
-                                            <p class="text-success" id="mtn-airtime-sold">₦0.00</p>
-                                        </div>
+                    <!-- Total Credited -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card h-100 border-left-info shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase">
+                                        Total Credited
+                                    </div>
+                                    <div class="avatar-sm rounded-circle bg-soft-info">
+                                        <i class="ri-arrow-up-circle-line font-size-24 avatar-title text-info"></i>
                                     </div>
                                 </div>
-
-                                <div class="col-md-3">
-                                    <div class="card shadow-sm rounded h-100">
-                                        <div class="card-body">
-                                            <p>GLO Data Sold</p>
-                                            <p class="text-primary" id="glo-data-sold">₦0.00 (0GB)</p>
-                                            <p>GLO Airtime Sold</p>
-                                            <p class="text-success" id="glo-airtime-sold">₦0.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="card shadow-sm rounded h-100">
-                                        <div class="card-body">
-                                            <p>9MOBILE Data Sold</p>
-                                            <p class="text-primary" id="9mobile-data-sold">₦0.00 (0GB)</p>
-                                            <p>9MOBILE Airtime Sold</p>
-                                            <p class="text-success" id="9mobile-airtime-sold">₦0.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="card shadow-sm rounded h-100">
-                                        <div class="card-body">
-                                            <p>AIRTEL Data Sold</p>
-                                            <p class="text-primary" id="airtel-data-sold">₦0.00 (0GB)</p>
-                                            <p>AIRTEL Airtime Sold</p>
-                                            <p class="text-success" id="airtel-airtime-sold">₦0.00</p>
-                                        </div>
-                                    </div>
+                                <div class="h5 mb-0 font-weight-bold">₦{{ number_format($totalCreditedAmount, 2) }}</div>
+                                <div class="text-sm text-success mt-2">
+                                    <i class="ri-arrow-up-line"></i> Total Inflow
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
-            @endforeach
-            <script>
-                $(document).ready(function() {
-                    $('#calculate-form').on('submit', function(e) {
-                        e.preventDefault(); // Prevent form submission
 
-                        // Validate both dates are filled
-                        const startDate = $('#startDate').val();
-                        const endDate = $('#endDate').val();
+                    <!-- Total Debited -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card h-100 border-left-warning shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase">
+                                        Total Debited
+                                    </div>
+                                    <div class="avatar-sm rounded-circle bg-soft-warning">
+                                        <i class="ri-arrow-down-circle-line font-size-24 avatar-title text-warning"></i>
+                                    </div>
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold">₦{{ number_format($totalDebitedAmount, 2) }}</div>
+                                <div class="text-sm text-danger mt-2">
+                                    <i class="ri-arrow-down-line"></i> Total Outflow
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        console.log('startDate ' + startDate);
-                        console.log('endDate ' + endDate);
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <!-- Transaction History Chart -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow-sm">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Transaction Overview</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="transaction-history" style="height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
 
-                        if (startDate && endDate) {
-                            // Fetch the transaction summary via AJAX
-                            $.ajax({
-                                url: '/calculate-transactions',
-                                method: 'POST',
-                                data: {
-                                    _token: '{{ csrf_token() }}',
-                                    startDate: startDate,
-                                    endDate: endDate
-                                },
-                                success: function(response) {
-                                    console.log(response);
-                                    if (response.status === 'success') {
-                                        const data = response.data;
+                    <!-- Service Distribution Chart -->
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow-sm">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Service Distribution</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="service-distribution" style="height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                        // Update the DOM with the transaction summary
-                                        $('#credit-transaction').text('Credit Transaction: ₦' + data
-                                            .totalCreditedAmount.toFixed(2));
-                                        $('#debit-transaction').text('Debit Transaction: ₦' + data
-                                            .totalDebitedAmount.toFixed(2));
-
-                                        // Update individual cards
-                                        $('#mtn-data-sold').text('₦' + data.airtime.mtn_data_sold
-                                            .toFixed(2));
-                                        $('#mtn-airtime-sold').text('₦' + data.airtime.mtn_airtime_sold
-                                            .toFixed(2));
-
-                                        $('#glo-data-sold').text('₦' + data.airtime.glo_data_sold
-                                            .toFixed(2));
-                                        $('#glo-airtime-sold').text('₦' + data.airtime.glo_airtime_sold
-                                            .toFixed(2));
-
-                                        $('#9mobile-data-sold').text('₦' + data.airtime[
-                                            '9mobile_data_sold'].toFixed(2));
-                                        $('#9mobile-airtime-sold').text('₦' + data.airtime[
-                                            '9mobile_airtime_sold'].toFixed(2));
-
-                                        $('#airtel-data-sold').text('₦' + data.airtime.airtel_data_sold
-                                            .toFixed(2));
-                                        $('#airtel-airtime-sold').text('₦' + data.airtime
-                                            .airtel_airtime_sold.toFixed(2));
-
-                                        // Show the transaction summary
-                                        $('#transaction-summary').fadeIn();
-                                    }
-                                },
-                                error: function(err) {
-                                    // Log the error to the console for debugging
-                                    console.error('Error:', err);
-
-                                    // Extract and display detailed error message
-                                    let errorMessage =
-                                        'Error calculating transactions. Please try again.';
-                                    if (err.responseJSON && err.responseJSON.message) {
-                                        errorMessage = err.responseJSON.message;
-                                    } else if (err.statusText) {
-                                        errorMessage = `${err.status}: ${err.statusText}`;
-                                    }
-                                    alert(errorMessage);
-                                }
-                            });
-                        } else {
-                            alert('Please select both start and end dates.');
-                        }
-                    });
-                });
-            </script>
-        </div>
-        <!-- End Page-content -->
-
-        <footer class="footer">
-            <div class="container-fluid">
+                <!-- Quick Actions and Recent Transactions -->
                 <div class="row">
-                    <div class="col-sm-12 col-md-12 text-center">
-                        <script>
-                            document.write(new Date().getFullYear())
-                        </script> © {{ $configuration->site_name }}.
+                    <!-- Quick Actions -->
+                    <div class="col-xl-4 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.airtime') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-phone-line font-size-24 d-block mb-2 text-primary"></i>
+                                            <span class="text-muted small">Airtime</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.data') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-wifi-line font-size-24 d-block mb-2 text-info"></i>
+                                            <span class="text-muted small">Data</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.electricity') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-lightbulb-flash-line font-size-24 d-block mb-2 text-warning"></i>
+                                            <span class="text-muted small">Power</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.tv') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-tv-line font-size-24 d-block mb-2 text-danger"></i>
+                                            <span class="text-muted small">TV</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.insurance') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-shield-check-line font-size-24 d-block mb-2 text-success"></i>
+                                            <span class="text-muted small">Insurance</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ route('merchant.education') }}"
+                                            class="text-center d-block p-3 rounded hover-shadow">
+                                            <i class="ri-book-open-line font-size-24 d-block mb-2 text-primary"></i>
+                                            <span class="text-muted small">Education</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Recent Transactions -->
+                    <div class="col-xl-8 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Recent Transactions</h6>
+                                <a href="{{ route('merchant.transactions') }}" class="btn btn-sm btn-primary shadow-sm">
+                                    View All
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Amount</th>
+                                                <th>Flow</th>
+                                                <th>Type</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($recentTransactions as $transaction)
+                                                <tr>
+                                                    <td>{{ $transaction->owner->name }}</td>
+                                                    <td>₦{{ number_format($transaction->amount, 2) }}</td>
+                                                    <td>
+                                                        @if($transaction->kind == 'credit')
+                                                            <span class="badge bg-soft-success text-success">Credit</span>
+                                                        @else
+                                                            <span class="badge bg-soft-danger text-danger">Debit</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ \Str::title($transaction->type) }}</td>
+                                                    <td>{{ $transaction->created_at->format('M d, Y') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </footer>
-
+        </div>
     </div>
-    <!-- end main content-->
 
-
-
-    <div class="modal fade bs-example-modal-center1" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+ <div class="modal fade bs-example-modal-center1" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-3">
@@ -572,12 +264,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('merchant.make.payment') }}" method="POST">
+                    <form action="{{ route('merchant.make.payment') }}" method="post">
                         @csrf
                         <input type="hidden" name="type" value="wallet">
                         <div class="mb-3">
                             <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
-                                <span class="account-name"><b>Merchant Name:</b> {{ $user->name }}</span>
+                                <span class="account-name"><b>Account Username:</b> {{ $user->username }}</span>
                             </div>
                         </div>
 
@@ -609,269 +301,187 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div class="modal fade mySmallModalfund" tabindex="-1" role="dialog" aria-labelledby="mySmallModalfund"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-                <div class="modal-header">
-                    <h5 class="modal-title">Fund Account Manual</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="fundForm">
-                        @csrf
-
-                        <!-- Bank Information Display -->
-                        <div class="mb-3">
-                            <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
-                                <span class="account-name"><b>Bank Name:</b> {{ $configuration->site_bank_name }}</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
-                                <span class="account-name"><b>Bank Account Username:</b>
-                                    {{ $configuration->site_bank_account_name }}</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
-                                <span class="account-name"><b>Bank Account Number:</b>
-                                    {{ $configuration->site_bank_account_account }}</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="p-3" style="background-color:rgba(255, 102, 0,0.2); color: rgb(255, 102, 0);">
-                                <span class="account-name"><b>Comment:</b> {{ $configuration->site_bank_comment }}</span>
-                            </div>
-                        </div>
-
-                        <div class="container my-5">
-                            <div class="card shadow-sm border-0 rounded">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title mb-4">Notice!</h4>
-                                    <p class="card-text text-muted">If you have any questions or need further assistance,
-                                        feel free to chat with us on WhatsApp.</p>
-                                    <p class="text-muted mb-4">Click the button below to chat directly with our support
-                                        team.</p>
-
-                                    <!-- WhatsApp Button -->
-                                    <a href="https://wa.me/{{ $configuration->whatsapp_number ?? '00000000000' }}?text={{ urlencode($configuration->welcome_message ?? 'Hello! I have just made a manual funding request.') }}"
-                                        class="btn btn-success btn-lg d-flex justify-content-center align-items-center mx-auto"
-                                        style="width: fit-content;">
-                                        <i class="bi bi-whatsapp me-2"></i> Chat on WhatsApp
-                                    </a>
-
-                                    <!-- Success Message -->
-                                    <p class="mt-3 text-success">We’re here to assist you!</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bootstrap Icons (for WhatsApp icon) -->
-                        <link rel="stylesheet"
-                            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
-
-                        <!-- Form Fields for Manual Funding -->
-                        {{-- <div class="mb-3">
-                            <label>Bank Paid To</label>
-                            <input type="text" class="form-control p-12" required placeholder="Bank paid to"
-                                name="bankTo" id="bankTo" />
-                            <p class="text-danger" id="error1"></p>
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Reference or Narration*</label>
-                            <input type="text" class="form-control p-12" required placeholder="Narration"
-                                name="narrate" id="narrate" />
-                            <p class="text-danger" id="error2"></p>
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Amount*</label>
-                            <input type="number" class="form-control p-12" required placeholder="Enter amount"
-                                name="amountTo" id="amountTo" />
-                            <p class="text-danger" id="error3"></p>
-                        </div>
-
-                        <!-- Calculations -->
-                        <div class="mb-3 d-flex justify-content-between">
-                            <span>Transaction Charge</span>
-                            <span class="text-primary" id="transactionChargeTo">₦0</span>
-                        </div>
-                        <hr>
-                        <div class="mb-3 d-flex justify-content-between">
-                            <span>Total</span>
-                            <span class="text-primary" id="totalTo">₦0</span>
-                        </div>
-                        <hr>
-
-                        <div class="mb-3">
-                            <button type="button" class="btn btn-org w-100 p-2" id="manualFunding">Continue</button>
-                        </div> --}}
-                    </form>
-
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <script>
-        $(document).ready(function() {
-            $('#amountTo').on('input', function() {
-                var amount = parseFloat($(this).val());
-                if (!isNaN(amount) && amount > 0) {
-                    var transactionCharge = 50;
-                    var total = amount + transactionCharge;
-
-                    $('#transactionChargeTo').text('₦' + transactionCharge.toFixed(2));
-                    $('#totalTo').text('₦' + total.toFixed(2));
-                } else {
-                    $('#transactionChargeTo').text('₦0');
-                    $('#totalTo').text('₦0');
-                }
-            });
-
-            $('#manualFunding').on('click', function(e) {
-                e.preventDefault(); // Prevent the default form submission
-
-                // Clear previous error messages
-                $('#error1').text('');
-                $('#error2').text('');
-                $('#error3').text('');
-
-                // Validate form fields
-                var isValid = true;
-                var bankTo = $('#bankTo').val().trim();
-                var narrate = $('#narrate').val().trim();
-                var amountTo = $('#amountTo').val().trim();
-
-                if (!bankTo) {
-                    $('#error1').text('Bank paid to is required.');
-                    isValid = false;
-                }
-
-                if (!narrate) {
-                    $('#error2').text('Reference or Narration is required.');
-                    isValid = false;
-                }
-
-                if (!amountTo || isNaN(amountTo) || parseFloat(amountTo) <= 0) {
-                    $('#error3').text('Valid amount is required.');
-                    isValid = false;
-                }
-
-                if (isValid) {
-                    // Get form data
-                    var formData = {
-                        _token: $('input[name=_token]').val(), // CSRF token
-                        bankTo: bankTo,
-                        narrate: narrate,
-                        amountTo: amountTo
-                    };
-
-                    $.ajax({
-                        url: '/user/fundmanual', // Your form submission URL
-                        type: 'POST',
-                        data: formData,
-                        success: function(response) {
-                            $('.mySmallModalfund').modal('hide');
-                            // Handle the success response
-                            if (response.status === 'success') {
-                                Swal.fire({
-                                    title: "Success!",
-                                    html: response.message +
-                                        '<br><br><a href="/dashboard" class="btn btn-primary">View Reflect Balance</a>',
-                                    icon: "success",
-                                    showConfirmButton: false // Hide the default OK button
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Error",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            // Handle the error response
-                            Swal.fire({
-                                title: "Failed!",
-                                text: 'Something went wrong, please try again.',
-                                icon: "error"
-                            });
-                            console.error('Submission failed:', error);
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-
-
-
-    <script>
-        function copyToClipboard(elementId, buttonId) {
-            // Get the input and button elements
-            const inputElement = document.getElementById(elementId);
-            const buttonElement = document.getElementById(buttonId);
-
-            // Temporarily enable the input to select text
-            inputElement.disabled = false;
-            inputElement.select();
-            inputElement.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand("copy");
-            inputElement.disabled = true;
-
-            // Change button text to 'Copied'
-            buttonElement.textContent = 'Copied!';
-
-            // Revert button text back to 'Copy' after 3 seconds
-            setTimeout(() => {
-                buttonElement.textContent = buttonId === 'copy_link_btn' ? 'Copy Link' : 'Copy Code';
-            }, 3000);
+    <style>
+        .border-left-primary {
+            border-left: 4px solid #4e73df !important;
         }
-    </script>
 
+        .border-left-success {
+            border-left: 4px solid #1cc88a !important;
+        }
+
+        .border-left-info {
+            border-left: 4px solid #36b9cc !important;
+        }
+
+        .border-left-warning {
+            border-left: 4px solid #f6c23e !important;
+        }
+
+        .bg-soft-primary {
+            background-color: rgba(78, 115, 223, 0.1) !important;
+        }
+
+        .bg-soft-success {
+            background-color: rgba(28, 200, 138, 0.1) !important;
+        }
+
+        .bg-soft-info {
+            background-color: rgba(54, 185, 204, 0.1) !important;
+        }
+
+        .bg-soft-warning {
+            background-color: rgba(246, 194, 62, 0.1) !important;
+        }
+
+        .hover-shadow:hover {
+            box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15) !important;
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .font-size-24 {
+            font-size: 24px !important;
+        }
+
+        .avatar-sm {
+            height: 3rem;
+            width: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-title {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    <!-- Initialize Charts -->
     <script>
-        $(document).ready(function() {
-            let monnifyFee;
+        $(document).ready(function () {
+            // Function to get query parameters from URL
+            function getQueryParam(param) {
+                let searchParams = new URLSearchParams(window.location.search);
+                return searchParams.get(param);
+            }
 
-            // Fetch the Monnify fee from the server
-            $.get('/merchant/monnify-fee', function(response) {
-                if (response.fee) {
-                    monnifyFee = parseFloat(response.fee); // Set the fee dynamically from the response
-                } else {
-                    alert("Unable to fetch Monnify fee. Please try again later.");
+            // Get hash from URL and tab from query parameter
+            let hash = window.location.hash;
+            let queryTab = getQueryParam('tab');
+
+            // Determine which tab to show
+            let tabId = '';
+            if (hash) {
+                tabId = hash.substring(1);
+                // Remove query parameters while keeping the hash
+                window.history.replaceState(null, null, window.location.pathname + hash);
+            } else if (queryTab) {
+                tabId = queryTab;
+            }
+
+            // Show the tab if we have an ID
+            if (tabId) {
+                let tabElement = $(`#entityDetailsTab a[href="#${tabId}"]`);
+                if (tabElement.length) {
+                    tabElement.tab('show');
                 }
-            }).fail(function() {
-                alert("Failed to fetch Monnify fee. Check your connection or contact support.");
+            }
+
+            // Handle tab clicks
+            $('#entityDetailsTab a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+                // Update URL hash without adding to browser history
+                let tabId = $(this).attr('href').substring(1);
+                window.history.replaceState(null, null, `#${tabId}`);
             });
-
-            // Update transaction charge and total dynamically on input
-            $('#amount').on('input', function() {
-                var amount = parseFloat($(this).val());
-                if (!isNaN(amount) && monnifyFee !== undefined) {
-                    // Calculate transaction charge and total amount
-                    var transactionCharge = (amount * monnifyFee) / 100;
-                    var total = amount + transactionCharge;
-
-                    // Update the transaction charge and total in the UI
-                    $('#transactionCharge').text('₦' + transactionCharge.toFixed(2));
-                    $('#total').text('₦' + total.toFixed(2));
-                } else {
-                    $('#transactionCharge').text('₦0');
-                    $('#total').text('₦0');
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // Transaction History Chart
+            var transactionOptions = {
+                series: [{
+                    name: 'Transactions',
+                    data: @json($last6Months->pluck('amount'))
+                }],
+                chart: {
+                    type: 'area',
+                    height: 350,
+                    toolbar: {
+                        show: false
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 2
+                },
+                xaxis: {
+                    categories: @json($last6Months->pluck('month'))
+                },
+                colors: ['#4e73df'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.1,
+                        stops: [0, 90, 100]
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return '₦' + val.toLocaleString()
+                        }
+                    }
                 }
-            });
+            };
 
+            var transactionChart = new ApexCharts(document.querySelector("#transaction-history"), transactionOptions);
+            transactionChart.render();
 
+            // Service Distribution Chart
+            var serviceData = @json($serviceTransactions);
+            var serviceOptions = {
+                series: Object.values(serviceData),
+                chart: {
+                    type: 'donut',
+                    height: 350
+                },
+                labels: Object.keys(serviceData),
+                colors: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                legend: {
+                    position: 'bottom'
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return '₦' + val.toLocaleString()
+                        }
+                    }
+                }
+            };
+
+            var serviceChart = new ApexCharts(document.querySelector("#service-distribution"), serviceOptions);
+            serviceChart.render();
         });
     </script>
-
-
-
-
 @endsection

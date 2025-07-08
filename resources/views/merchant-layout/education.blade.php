@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -84,7 +84,7 @@
                                                             <span>{{ $airtime->updated_at }}</span>
                                                         </td>
                                                         <td class="status-pending">
-                                                            <a href="{{ route('add.charge', $airtime->id) }}">
+                                                            <a href="{{ route('admin.add.charge', $airtime->id) }}">
                                                                 <button class="btn btn-primary">TOP UP +</button>
                                                             </a>
 
@@ -129,28 +129,28 @@
                                             <tbody>
                                                 <?php $i = 1; ?>
                                                 @foreach ($education_transaction as $transaction)
-                                                    <tr>
-                                                        <td>
+                                                                <tr>
+                                                                    <td>
 
-                                                            <h6 class="mb-0"><?php echo $i++; ?></h6>
-                                    </div>
+                                                                        <h6 class="mb-0"><?php    echo $i++; ?></h6>
+                                                    </div>
 
-                                    </td>
-                                    <td>{{ $transaction->username }}</td>
+                                                    </td>
+                                                    <td>{{ $transaction->username }}</td>
 
-                                    <td>{{ $transaction->purchased_code }}</td>
-                                    <td>{{ $transaction->tel }}</td>
-                                    <td>₦{{ $transaction->amount }}</td>
-                                    <td>{{ $transaction->reference }}</td>
-                                    <td>{{ $transaction->identity }}</td>
-                                    <td>{{ $transaction->status }}</td>
-
-
+                                                    <td>{{ $transaction->purchased_code }}</td>
+                                                    <td>{{ $transaction->tel }}</td>
+                                                    <td>₦{{ $transaction->amount }}</td>
+                                                    <td>{{ $transaction->reference }}</td>
+                                                    <td>{{ $transaction->identity }}</td>
+                                                    <td>{{ $transaction->status }}</td>
 
 
-                                    <td class="status-pending">{{ $transaction->created_at }}</td>
-                                    </tr>
-                                    @endforeach
+
+
+                                                    <td class="status-pending">{{ $transaction->created_at }}</td>
+                                                    </tr>
+                                                @endforeach
                                     </tbody><!-- end tbody -->
                                     </table> <!-- end table -->
                                 </div>

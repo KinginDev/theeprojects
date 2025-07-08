@@ -3,15 +3,16 @@ namespace App\Http\Controllers;
 
 use App\Classes\Helper;
 use App\Models\AirtimeTransaction;
-use App\Models\dataTransactions;
+use App\Models\DataTransaction;
 use App\Models\EducationTransaction;
-use App\Models\EletricityTransaction;
+use App\Models\ElectricityTransaction;
 use App\Models\FundTransaction;
 use App\Models\InsuranceTransaction;
 use App\Models\Notification;
-use App\Models\Setting;
-use App\Models\TvTransactions;
+use App\Models\TvTransaction;
 use App\Models\User;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,101 +22,93 @@ class usersController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
 
-        if ($user) {
-            // Retrieve all data for the user from the database
-            $userData = User::where('id', $user->id)->first();
-            $username = $userData->username;
-                                                            // Check the action query parameter
-            $action        = $request->query('action', ''); // Default to empty string if not set
-            $hideModal     = ($action === 'hideModal');
-            $showModal     = ($action === 'showModal');
-            $notifications = Notification::where('username', $user->username)->get();
+        // Retrieve all data for the user from the database
+        $userData = User::where('id', $user->id)->first();
+        $username = $userData->username;
+                                                        // Check the action query parameter
+        $action        = $request->query('action', ''); // Default to empty string if not set
+        $hideModal     = ($action === 'hideModal');
+        $showModal     = ($action === 'showModal');
+        $notifications = Notification::where('username', $user->username)->get();
 
-            $totalDebitedAmount = AirtimeTransaction::where('username', $user->username)->sum('amount') +
-            DataTransactions::where('username', $user->username)->sum('amount') +
-            TvTransactions::where('username', $user->username)->sum('amount') +
-            InsuranceTransaction::where('username', $user->username)->sum('amount') +
-            EletricityTransaction::where('username', $user->username)->sum('amount') +
-            EducationTransaction::where('username', $user->username)->sum('amount');
+        $totalDebitedAmount = AirtimeTransaction::where('user_id', $user->user_id)->sum('amount') +
+        DataTransaction::where('user_id', $user->id)->sum('amount') +
+        TvTransaction::where('user_id', $user->id)->sum('amount') +
+        InsuranceTransaction::where('user_id', $user->id)->sum('amount') +
+        ElectricityTransaction::where('user_id', $user->id)->sum('amount') +
+        EducationTransaction::where('user_id', $user->id)->sum('amount');
 
-            $totalCreditedAmount       = FundTransaction::where('username', $user->username)->sum('amount');
-            $totalCreditedTransactions = FundTransaction::where('username', $user->username)->count();
+        $totalCreditedAmount       = WalletTransaction::with('transaction')->where('wallet_owner_type', User::class)->where('wallet_owner_id', $user->id)->where('type', 'credit')->sum('amount');
+        $totalCreditedTransactions = WalletTransaction::where('wallet_owner_id', $user->id)->where('wallet_owner_type', User::class)->where('type', 'credit')->count();
 
-            $totalAirtimeTransactions     = AirtimeTransaction::where('username', $user->username)->count();
-            $totalDataTransactions        = DataTransactions::where('username', $user->username)->count();
-            $totalTvTransactions          = TvTransactions::where('username', $user->username)->count();
-            $totalEducationTransactions   = EducationTransaction::where('username', $user->username)->count();
-            $totalElectricityTransactions = EletricityTransaction::where('username', $user->username)->count();
-            $totalInsuranceTransactions   = InsuranceTransaction::where('username', $user->username)->count();
+        $totalAirtimeTransactions     = AirtimeTransaction::where('user_id', $user->id)->count();
+        $totalDataTransaction         = DataTransaction::where('user_id', $user->id)->count();
+        $totalTvTransaction           = TvTransaction::where('user_id', $user->id)->count();
+        $totalEducationTransactions   = EducationTransaction::where('user_id', $user->id)->count();
+        $totalElectricityTransactions = ElectricityTransaction::where('user_id', $user->id)->count();
+        $totalInsuranceTransactions   = InsuranceTransaction::where('user_id', $user->id)->count();
 
-            // Calculate the total number of transactions
-            $totalTransactions = $totalAirtimeTransactions + $totalDataTransactions +
-                $totalTvTransactions + $totalEducationTransactions +
-                $totalElectricityTransactions + $totalInsuranceTransactions;
+        // Calculate the total number of transactions
+        $totalTransactions = $totalAirtimeTransactions + $totalDataTransaction +
+            $totalTvTransaction + $totalEducationTransactions +
+            $totalElectricityTransactions + $totalInsuranceTransactions;
 
-            // Fetch recent transactions from each model
-            $airtimeTransactions = AirtimeTransaction::selectRaw('"Airtime" as type, network as logo, amount, status, created_at')
-                ->where('username', $username)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        // Fetch recent transactions from each model
+        $airtimeTransactions = AirtimeTransaction::where('user_id', $user->id)->with('transaction')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-            $dataTransactions = DataTransactions::selectRaw('"Data" as type, network as logo, amount, status, created_at')
-                ->where('username', $username)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        $DataTransaction = DataTransaction::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-            $educationTransactions = EducationTransaction::selectRaw('"Education" as type, product_name as logo, amount, status, transaction_date as created_at')
-                ->where('username', $username)
-                ->orderBy('transaction_date', 'desc')
-                ->get();
+        $educationTransactions = EducationTransaction::where('user_id', $user->id)
+            ->orderBy('transaction_date', 'desc')
+            ->get();
 
-            $electricityTransactions = EletricityTransaction::selectRaw('"Electricity" as type, product_name as logo, amount, status, transaction_date as created_at')
-                ->where('username', $username)
-                ->orderBy('transaction_date', 'desc')
-                ->get();
+        $electricityTransactions = ElectricityTransaction::where('user_id', $user->id)
+            ->orderBy('transaction_date', 'desc')
+            ->get();
 
-            $fundTransactions = FundTransaction::selectRaw('"Fund" as type, username as logo, amount, status, created_at')
-                ->where('username', $username)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        $fundTransactions = WalletTransaction::where('wallet_owner_id', $user->id)
+            ->where('wallet_owner_type', User::class)
+            ->where('type', 'credit')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-            $insuranceTransactions = InsuranceTransaction::selectRaw('"Insurance" as type, product_name as logo, amount, status, transaction_date as created_at')
-                ->where('username', $username)
-                ->orderBy('transaction_date', 'desc')
-                ->get();
+        $insuranceTransactions = InsuranceTransaction::where('user_id', $user->id)->with('transaction')
+            ->orderBy('transaction_date', 'desc')
+            ->get();
 
-            $tvTransactions = TvTransactions::selectRaw('"TV" as type, network as logo, amount, status, created_at')
-                ->where('username', $username)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        $tvTransactions = TvTransaction::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-            // Combine all transactions and sort by date
-            $transactions = $airtimeTransactions
-                ->merge($dataTransactions)
-                ->merge($educationTransactions)
-                ->merge($electricityTransactions)
-                ->merge($fundTransactions)
-                ->merge($insuranceTransactions)
-                ->merge($tvTransactions)
-                ->sortByDesc('created_at') // Sort all transactions by date
-                ->take(5);                 // Get the 5 most recent transactions
+        // Combine all transactions and sort by date
+        $transactions = $airtimeTransactions
+            ->merge($DataTransaction)
+            ->merge($educationTransactions)
+            ->merge($electricityTransactions)
+            ->merge($fundTransactions)
+            ->merge($insuranceTransactions)
+            ->merge($tvTransactions)
+            ->sortByDesc('created_at') // Sort all transactions by date
+            ->take(5);                 // Get the 5 most recent transactions
 
-            $configuration = Setting::first();
-            // Pass the data and the flag to the view
-            return view('users-layout.dashboard.dashboard', [
-                'userData'      => $userData,
-                'hideModal'     => $hideModal,
-                'notifications' => $notifications,
-                'showModal'     => $showModal,
-            ], compact('totalDebitedAmount', 'totalTransactions', 'totalCreditedAmount', 'totalCreditedTransactions', 'transactions', 'configuration'));
-        }
+        $configuration = Helper::merchant()->preferences;
 
-        // Handle the case where the user is not authenticated
-        return redirect()->route('login', [
-            'slug' => Helper::merchant()->slug,
-        ]);
+        $walletBalance = Wallet::where('owner_id', $user->id)
+            ->where('owner_type', User::class)
+            ->value('balance');
+        // Pass the data and the flag to the view
+        return view('users-layout.dashboard.dashboard', [
+            'userData'      => $userData,
+            'hideModal'     => $hideModal,
+            'notifications' => $notifications,
+            'showModal'     => $showModal,
+        ], compact('totalDebitedAmount', 'totalTransactions', 'totalCreditedAmount', 'totalCreditedTransactions', 'transactions', 'configuration', 'walletBalance'));
     }
 
     public function calculateTransactions(Request $request)
@@ -131,14 +124,14 @@ class usersController extends Controller
 
             // Rest of your logic
             $airtimeTransactions     = AirtimeTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
-            $dataTransactions        = DataTransactions::whereBetween('created_at', [$startDate, $endDate])->get();
+            $DataTransaction         = DataTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
             $educationTransactions   = EducationTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
-            $electricityTransactions = EletricityTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
+            $electricityTransactions = ElectricityTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
             $insuranceTransactions   = InsuranceTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
             $fundTransactions        = FundTransaction::whereBetween('created_at', [$startDate, $endDate])->get();
 
             $totalDebitedAmount = $airtimeTransactions->sum('amount') +
-            $dataTransactions->sum('amount') +
+            $DataTransaction->sum('amount') +
             $educationTransactions->sum('amount') +
             $electricityTransactions->sum('amount') +
             $insuranceTransactions->sum('amount');
@@ -147,13 +140,13 @@ class usersController extends Controller
 
             $summary = [
                 'airtime'             => [
-                    'mtn_data_sold'        => $dataTransactions->where('network', 'mtn')->sum('amount'),
+                    'mtn_data_sold'        => $DataTransaction->where('network', 'mtn')->sum('amount'),
                     'mtn_airtime_sold'     => $airtimeTransactions->where('network', 'mtn')->sum('amount'),
-                    'glo_data_sold'        => $dataTransactions->where('network', 'glo')->sum('amount'),
+                    'glo_data_sold'        => $DataTransaction->where('network', 'glo')->sum('amount'),
                     'glo_airtime_sold'     => $airtimeTransactions->where('network', 'glo')->sum('amount'),
-                    '9mobile_data_sold'    => $dataTransactions->where('network', '9mobile')->sum('amount'),
+                    '9mobile_data_sold'    => $DataTransaction->where('network', '9mobile')->sum('amount'),
                     '9mobile_airtime_sold' => $airtimeTransactions->where('network', '9mobile')->sum('amount'),
-                    'airtel_data_sold'     => $dataTransactions->where('network', 'airtel')->sum('amount'),
+                    'airtel_data_sold'     => $DataTransaction->where('network', 'airtel')->sum('amount'),
                     'airtel_airtime_sold'  => $airtimeTransactions->where('network', 'airtel')->sum('amount'),
                 ],
                 'totalDebitedAmount'  => $totalDebitedAmount,

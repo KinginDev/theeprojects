@@ -1,34 +1,33 @@
 <?php
 namespace App\Models;
 
+use App\Models\Base\BaseProduct;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class EletricityTransaction extends Model
+class TvTransaction extends BaseProduct
 {
     use HasFactory;
 
-    protected $table = 'electricity_transactions'; // Explicitly specify the table name
+    // Specify the table associated with the model
+    protected $table = 'tv_transactions';
 
+    // Specify which attributes are mass assignable
     protected $fillable = [
         'username',
-        'product_name',
-        'type',
+        'api_response',
+        'network',
         'tel',
+        'plan',
         'amount',
         'reference',
-        'purchased_code',
-        'response_description',
-        'transaction_date',
         'identity',
         'percent_profit',
         'current_bal',
         'prev_bal',
         'status',
-        'created_at',
-        'updated_at',
     ];
 
+    // If you want to cast some attributes to a specific type, you can use the $casts property
     protected $casts = [
         'transaction_date' => 'datetime',
         'amount'           => 'decimal:2',

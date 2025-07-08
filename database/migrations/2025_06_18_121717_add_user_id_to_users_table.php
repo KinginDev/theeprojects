@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('user_id')->nullable()->after('id'); // Adding user_id column after id
+            $table->string('referrer_id')->nullable()->after('id'); // Adding referrer_id column after id
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('user_id'); // Dropping user_id column
+            $table->dropColumn('referrer_id'); // Dropping referrer_id column
         });
     }
 };

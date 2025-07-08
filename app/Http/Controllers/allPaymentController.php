@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -84,8 +85,8 @@ class allPaymentController extends Controller
         ]);
 
         // Retrieve the authenticated user
-        $user = Auth::user();
-
+        $user          = Auth::user();
+        $configuration = null;
         if (Auth::guard('web')->check()) {
             $user          = Auth::guard('web')->user();
             $configuration = Helper::merchant()->preferences;
@@ -126,6 +127,32 @@ class allPaymentController extends Controller
                 $wt->save();
             }
 
+            if (Auth::guard('web')->check()) {
+                $transaction = Transaction::initialize([
+                    'transactable_type' => User::class,
+                    'transactable_id'   => $user->id,
+
+                    'amount'            => $validatedData['amount'],
+                    'type'              => $request->type,
+                    'payload'           => [
+                        'User Name'   => $user->name,
+                        'User Email'  => $user->email, // Initially pending until confirmed
+                        'redirectUrl' => route('users.dashboard', [
+                            'slug' => Helper::merchant()->slug,
+                        ]),
+                    ],
+                ]);
+
+                // Insert the new fund transaction
+                $wt                    = new WalletTransaction();
+                $wt->wallet_owner_id   = $user->id;
+                $wt->wallet_owner_type = User::class;
+                $wt->wallet_id         = $user->wallet->id;
+                $wt->transaction_id    = $transaction->id;
+                $wt->amount            = $validatedData['amount'];
+                $wt->save();
+            }
+
             DB::commit();
 
             return $transaction;
@@ -155,43 +182,74 @@ class allPaymentController extends Controller
 
         $transaction = Transaction::where('reference', $ref)->first();
 
+        $redirectUrl = $transaction->payload['redirectUrl'] ?? route('merchant.dashboard');
+
         if (! $transaction) {
-            return redirect()->route('dashboard')->with('error', 'Invalid.');
+            return redirect($redirectUrl)->with('error', 'Invalid.');
         } else {
-            // Handle successful transaction
-            $transaction->status = 'success';
-
-            if ($transaction->type) {
-                $this->{"handle" . ucfirst($transaction->type)}($transaction);
-            }
-        }
-
-        if ($transaction->transactable_type === Merchant::class) {
-            $merchant = Merchant::find($transaction->transactable_id);
-            if ($merchant) {
-                $merchant->wallet->increment('balance', floatval($transaction->amount));
-            }
-            return redirect()->route('merchant.dashboard')->with('success', 'Transaction successful.');
-        } elseif ($transaction->transactable_type === User::class) {
-            if (Auth::guard('web')->check()) {
-                $user = User::find($transaction->transactable_id);
-
-                if ($user) {
-                    $user->wallet->increment('balance', floatval($transaction->amount));
+            if ($transaction->status === 'pending') {
+                // Handle successful transaction
+                $transaction->status = 'success';
+                $transaction->save();
+                if ($transaction->type) {
+                    $this->{"handle" . ucfirst($transaction->type)}($transaction);
                 }
 
-                return redirect()->route('users.dashboard', [
-                    'slug' => Helper::merchant()->slug,
-                ])->with('success', 'Transaction successful.');
             }
-
         }
+        return redirect($redirectUrl)->with('success', 'Transaction successful.');
 
     }
 
     public function handleWallet($transaction)
     {
 
+        if ($transaction->transactable_type === Merchant::class) {
+            $merchant = Merchant::find($transaction->transactable_id);
+
+            if ($merchant) {
+                $wallet = Wallet::where('owner_id', $transaction->transactable_id)
+                    ->where('owner_type', Merchant::class)
+                    ->first();
+
+                if ($wallet) {
+                    $wallet->increment('balance', floatval($transaction->amount));
+                }
+
+                $walletTransaction = WalletTransaction::where('transaction_id', $transaction->id)
+                    ->where('wallet_owner_id', $transaction->transactable_id)
+                    ->where('wallet_owner_type', Merchant::class)
+                    ->first();
+
+                if ($walletTransaction && $walletTransaction->status !== 'success') {
+                    $walletTransaction->status = 'success';
+                    $walletTransaction->save();
+                }
+
+            }
+
+        } elseif ($transaction->transactable_type === User::class) {
+
+            $user = User::find($transaction->transactable_id);
+            if ($user) {
+                $wallet = Wallet::where('owner_id', $transaction->transactable_id)
+                    ->where('owner_type', User::class)
+                    ->first();
+                if ($wallet) {
+                    $wallet->increment('balance', floatval($transaction->amount));
+                }
+                $walletTransaction = WalletTransaction::where('transaction_id', $transaction->id)
+                    ->where('wallet_owner_id', $transaction->transactable_id)
+                    ->where('wallet_owner_type', User::class)
+                    ->first();
+
+                if ($walletTransaction && $walletTransaction->status !== 'success') {
+                    $walletTransaction->status = 'success';
+                    $walletTransaction->save();
+                }
+            }
+
+        }
     }
 
     public function manualFunding(Request $request)

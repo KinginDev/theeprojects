@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 

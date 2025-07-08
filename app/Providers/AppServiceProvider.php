@@ -34,10 +34,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('users-layout.*', function ($view) {
-
-            $merchant   = Helper::merchant();
-            $prefrences = $merchant->preferences ?? [];
-            $view->with('configuration', $prefrences);
+            try {
+                $merchant = Helper::merchant();
+                $preferences = $merchant->preferences ?? [];
+                $view->with('configuration', $preferences);
+            } catch (\Exception $e) {
+                // Fallback to default settings
+                $settings = Helper::settings();
+                $view->with('configuration', $settings);
+            }
         });
 
         View::composer('admin-layout.*', function ($view) {

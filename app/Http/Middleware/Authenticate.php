@@ -13,21 +13,47 @@ class Authenticate extends BaseAuthenticate
     protected function redirectTo(Request $request): ?string
     {
         if ($request->expectsJson()) {
-            return null; // Let Laravel return JSON 401
+            return null;
         }
 
-        $host     = $request->getHost();
-        $merchant = Merchant::where('domain', $host)
-            ->orWhere('slug', explode('.', $host)[0]) // assumes subdomain slug
-            ->first();
         $path = $request->path();
-        if (! $merchant && str_contains($path, 'admin')) {
+
+        // Get the current guard from the auth configuration
+        $guards = empty($guards) ? [null] : $guards;
+        $adminRouteName = 'admin/';
+
+        // If we're accessing an admin route, always redirect to admin login
+        if (str_starts_with($path,$adminRouteName)) {
+
             return route('admin.login');
-        } else if (! $merchant && str_contains($path, 'merchant')) {
-            return route('merchant.login');
-        } else {
-            return route('login', ['slug' => $merchant?->slug]);
         }
+
+        // Check if we're accessing a merchant subdomain
+        $host = $request->getHost();
+        $hostParts = explode('.', $host);
+        $isSubdomain = count($hostParts) > 2 || (count($hostParts) === 2 && !str_contains($host, 'www'));
+
+        if ($isSubdomain) {
+            $subdomain = $hostParts[0];
+            $merchant = Merchant::where('domain', $host)
+                ->orWhere('slug', $subdomain)
+                ->first();
+
+            if (!$merchant) {
+                return route('merchant.login');
+            }
+
+            // If on subdomain, return to user login
+            return route('users.login', ['slug' => $merchant->slug]);
+        }
+
+        // If it's a merchant route
+        if (str_starts_with($request->path(), 'merchant')) {
+            return route('merchant.login');
+        }
+
+        // Default to merchant login for any other route
+        return route('merchant.login');
     }
 
 }

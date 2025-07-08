@@ -46,7 +46,7 @@
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center mb-2">User Portal
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center mb-4">Access your personal account</p>
-                        <a href="{{ route('login') }}"
+                        <a href=""
                             class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-md transition-colors">
                             Login as User
                         </a>
@@ -82,8 +82,8 @@
                     <div class="p-6">
                         <div
                             class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
+                            <svg class="w-8 h-8 text-purple-600 dark:text-purple-300" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
                                 </path>

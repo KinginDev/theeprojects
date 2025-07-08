@@ -8,9 +8,27 @@ class Helper
 {
     public static function merchant()
     {
-        $merchant = app('currentMerchant');
+        $merchant = app('currentMerchant') ?? null;
         if (! $merchant) {
-            return null;
+            // Try to identify merchant from the host
+            $host = request()->getHost();
+            $merchant = \App\Models\Merchant::where('domain', $host)->first();
+
+            // If still not found, try subdomain
+            if (!$merchant) {
+                $hostParts = explode('.', $host);
+                if (count($hostParts) > 1) {
+                    $subdomain = $hostParts[0];
+                    $merchant = \App\Models\Merchant::where('slug', $subdomain)->first();
+                }
+            }
+
+            // If merchant found, set it for the app
+            if ($merchant) {
+                app()->instance('currentMerchant', $merchant);
+            } else {
+                return abort(403, 'Merchant not found');
+            }
         }
         return $merchant;
     }

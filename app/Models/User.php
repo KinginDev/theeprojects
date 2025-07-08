@@ -2,6 +2,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\UserVerify;
 use App\Models\Base\User as BaseUser;
 
 class User extends BaseUser
@@ -13,7 +14,7 @@ class User extends BaseUser
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+        'referrer_id',
         'name',
         'username',
         'email',
@@ -44,6 +45,14 @@ class User extends BaseUser
             'id',         // Local key on the User table
             'merchant_id' // Local key on the MerchantUser table
         );
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new UserVerify());
     }
 
     /**
@@ -83,5 +92,24 @@ class User extends BaseUser
     public function wallet()
     {
         return $this->hasOne(Wallet::class, 'owner_id', 'id');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Automatically set user_id on creation
+        static::created(function (User $user) {
+            Wallet::create([
+                'owner_type' => 'App\Models\User',
+                'owner_id'   => $user->id,
+                'balance'    => 0, // Initialize with zero balance
+            ]);
+        });
+    }
+
+    public function balance()
+    {
+        return $this->wallet->balance;
     }
 }

@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -33,7 +33,7 @@
                     <div class="col-lg-8 mx-auto">
                         <div class="card">
                             <div class="card-body">
-                                <form action="{{ route('adminupdates.profile', $user->id) }}" method="POST">
+                                <form action="{{ route('merchant.update.profile', $user->id) }}" method="POST">
                                     @csrf
                                     @method('PUT')
 
@@ -51,7 +51,8 @@
 
                                     <div class="mb-3">
                                         <label for="address" class="form-label">Address</label>
-                                        <textarea class="form-control" id="address" name="address" required>{{ old('address', $user->address) }}</textarea>
+                                        <textarea class="form-control" id="address" name="address"
+                                            required>{{ old('address', $user->address) }}</textarea>
                                     </div>
 
                                     <div class="mb-3">

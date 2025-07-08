@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -69,15 +69,16 @@
                                                             <div class="transaction-icon">
                                                                 <div class="icon-hold">
                                                                     @if (
-                                                                        $airtime->service == 'MTN_CORPORATE_GIFTING_Data' ||
+                                                                            $airtime->service == 'MTN_CORPORATE_GIFTING_Data' ||
                                                                             $airtime->service == 'MTN_GIFTING_Data' ||
                                                                             $airtime->service == 'MTN_SME2_Data' ||
-                                                                            $airtime->service == 'MTN_SME_Data')
-                                                                        <img src="/assets/images/brands/Mtn.png"
-                                                                            width="35" alt="MTN Logo">
+                                                                            $airtime->service == 'MTN_SME_Data'
+                                                                        )
+                                                                        <img src="/assets/images/brands/Mtn.png" width="35"
+                                                                            alt="MTN Logo">
                                                                     @elseif ($airtime->service == 'Airtel_CORPORATE_GIFTING_Data' || $airtime->service == 'Airtel_GIFTING_Data')
-                                                                        <img src="/assets/images/brands/Airtel.png"
-                                                                            width="35" alt="Airtel Logo">
+                                                                        <img src="/assets/images/brands/Airtel.png" width="35"
+                                                                            alt="Airtel Logo">
                                                                     @elseif ($airtime->service == 'GLO_CORPORATE_GIFTING_Data' || $airtime->service == 'GLO_GIFTING_Data')
                                                                         <img src="https://img.icons8.com/?size=100&id=d1bmMtlAQFUr&format=png&color=000000"
                                                                             width="35" alt="GLO Logo">
@@ -106,7 +107,7 @@
                                                             <span>{{ $airtime->updated_at }}</span>
                                                         </td>
                                                         <td class="status-pending">
-                                                            <a href="{{ route('add.charge', $airtime->id) }}">
+                                                            <a href="{{ route('merchant.add.charge', $airtime->id) }}">
                                                                 <button class="btn btn-primary">TOP UP +</button>
                                                             </a>
 
@@ -152,28 +153,28 @@
                                             <tbody>
                                                 <?php $i = 1; ?>
                                                 @foreach ($data_transaction as $transaction)
-                                                    <tr>
-                                                        <td>
+                                                                <tr>
+                                                                    <td>
 
-                                                            <h6 class="mb-0"><?php echo $i++; ?></h6>
-                                    </div>
+                                                                        <h6 class="mb-0"><?php    echo $i++; ?></h6>
+                                                    </div>
 
-                                    </td>
-                                    <td>{{ $transaction->username }}</td>
+                                                    </td>
+                                                    <td>{{ $transaction->username }}</td>
 
-                                    <td>{{ $transaction->network }}</td>
-                                    <td>{{ $transaction->tel }}</td>
-                                    <td>₦{{ $transaction->amount }}</td>
-                                    <td>{{ $transaction->reference }}</td>
-                                    <td>{{ $transaction->identity }}</td>
-                                    <td>{{ $transaction->status }}</td>
-
-
+                                                    <td>{{ $transaction->network }}</td>
+                                                    <td>{{ $transaction->tel }}</td>
+                                                    <td>₦{{ $transaction->amount }}</td>
+                                                    <td>{{ $transaction->reference }}</td>
+                                                    <td>{{ $transaction->identity }}</td>
+                                                    <td>{{ $transaction->status }}</td>
 
 
-                                    <td class="status-pending">{{ $transaction->created_at }}</td>
-                                    </tr>
-                                    @endforeach
+
+
+                                                    <td class="status-pending">{{ $transaction->created_at }}</td>
+                                                    </tr>
+                                                @endforeach
                                     </tbody><!-- end tbody -->
                                     </table> <!-- end table -->
                                 </div>

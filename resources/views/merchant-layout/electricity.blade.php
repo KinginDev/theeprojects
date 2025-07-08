@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -62,94 +62,35 @@
                                             </thead><!-- end thead -->
                                             <tbody>
                                                 @foreach ($airtimes as $airtime)
-                                                    <tr>
-                                                        <td>
+                                                                <tr>
+                                                                    <td>
 
-                                                                <h6 class="mb-0">{{ $airtime->service }}</h6>
-                                                            </div>
-                                                        </td>
-                                                        <td><span></span><span>{{ $airtime->smart_earners_percent }}</span>
-                                                        </td>
-                                                        <td class="status-pending">
-                                                            <span>{{ $airtime->topuser_earners_percent }}</span>
-                                                        </td>
-                                                        <td class="status-pending">
-                                                            <span>{{ $airtime->api_earners_percent }}</span>
-                                                        </td>
-                                                        <td class="status-pending">
-                                                            <span>{{ $airtime->created_at }}</span>
-                                                        </td>
-                                                        <td class="status-pending">
-                                                            <span>{{ $airtime->updated_at }}</span>
-                                                        </td>
-                                                        <td class="status-pending">
-                                                            <a href="{{ route('add.charge', $airtime->id) }}">
-                                                                <button class="btn btn-primary">TOP UP +</button>
-                                                            </a>
+                                                                        <h6 class="mb-0">{{ $airtime->service }}</h6>
+                                                    </div>
+                                                    </td>
+                                                    <td><span></span><span>{{ $airtime->smart_earners_percent }}</span>
+                                                    </td>
+                                                    <td class="status-pending">
+                                                        <span>{{ $airtime->topuser_earners_percent }}</span>
+                                                    </td>
+                                                    <td class="status-pending">
+                                                        <span>{{ $airtime->api_earners_percent }}</span>
+                                                    </td>
+                                                    <td class="status-pending">
+                                                        <span>{{ $airtime->created_at }}</span>
+                                                    </td>
+                                                    <td class="status-pending">
+                                                        <span>{{ $airtime->updated_at }}</span>
+                                                    </td>
+                                                    <td class="status-pending">
+                                                        <a href="{{ route('merchant.add.charge', $airtime->id) }}">
+                                                            <button class="btn btn-primary">TOP UP +</button>
+                                                        </a>
 
-                                                        </td>
+                                                    </td>
                                                     </tr>
                                                 @endforeach
 
-                                            </tbody><!-- end tbody -->
-                                        </table> <!-- end table -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Container to hold the main page elements ends here-->
-
-                <div class="container main-tags">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="col-lg-12 col-md-12 col-sm-12">
-                                <div class="card moni-card br-2">
-                                    <div class="h3">ELECTRICITY TRANSACTIONS</div>
-
-
-                                    <div class="table-responsive">
-                                        <table class="table table-centered mb-0 align-middle table-hover table-nowrap"
-                                            id="example2">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>USER</th>
-                                                    <th>PURCHASED CODE</th>
-                                                    <th>MOBILE NUMBER</th>
-                                                    <th>AMOUNT</th>
-                                                    <th>ID</th>
-                                                    <th>IDENT</th>
-                                                    <th>STATUS</th>
-                                                    <th>CREATED DATE</th>
-                                                </tr>
-                                            </thead><!-- end thead -->
-                                            <tbody>
-                                                <?php $i = 1; ?>
-                                                @foreach ($eletricity_transaction as $transaction)
-                                                    <tr>
-                                                        <td>
-
-                                                            <h6 class="mb-0"><?php echo $i++; ?></h6>
-                                    </div>
-
-                                    </td>
-                                    <td>{{ $transaction->username }}</td>
-
-                                    <td>{{ $transaction->purchased_code }}</td>
-                                    <td>{{ $transaction->tel }}</td>
-                                    <td>₦{{ $transaction->amount }}</td>
-                                    <td>{{ $transaction->reference }}</td>
-                                    <td>{{ $transaction->identity }}</td>
-                                    <td>{{ $transaction->status }}</td>
-
-
-
-
-                                    <td class="status-pending">{{ $transaction->created_at }}</td>
-                                    </tr>
-                                    @endforeach
                                     </tbody><!-- end tbody -->
                                     </table> <!-- end table -->
                                 </div>
@@ -158,7 +99,63 @@
                     </div>
                 </div>
             </div>
-        </div> <!-- container-fluid -->
+            <!-- Container to hold the main page elements ends here-->
+
+            <div class="container main-tags">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <div class="card moni-card br-2">
+                                <div class="h3">ELECTRICITY TRANSACTIONS</div>
+
+
+                                <div class="table-responsive">
+                                    <table class="table table-centered mb-0 align-middle table-hover table-nowrap"
+                                        id="example2">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>USER</th>
+                                                <th>PURCHASED CODE</th>
+                                                <th>MOBILE NUMBER</th>
+                                                <th>AMOUNT</th>
+                                                <th>ID</th>
+                                                <th>IDENT</th>
+                                                <th>STATUS</th>
+                                                <th>CREATED DATE</th>
+                                            </tr>
+                                        </thead><!-- end thead -->
+                                        <tbody>
+                                            <?php $i = 1; ?>
+                                            @foreach ($eletricity_transaction as $transaction)
+                                            <tr>
+                                            <td><h6 class="mb-0"><?php    echo $i++; ?></h6>
+
+                                                </td>
+                                                <td>{{ $transaction->username }}</td>
+
+                                                <td>{{ $transaction->purchased_code }}</td>
+                                                <td>{{ $transaction->tel }}</td>
+                                                <td>₦{{ $transaction->amount }}</td>
+                                                <td>{{ $transaction->reference }}</td>
+                                                <td>{{ $transaction->identity }}</td>
+                                                <td>{{ $transaction->status }}</td>
+
+
+
+
+                                                <td class="status-pending">{{ $transaction->created_at }}</td>
+                                                </tr>
+                                            @endforeach
+                                </tbody><!-- end tbody -->
+                                </table> <!-- end table -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- container-fluid -->
     </div>
     <!-- End Page-content -->
 

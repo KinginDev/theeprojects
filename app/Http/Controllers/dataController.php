@@ -1,583 +1,362 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\dataTransactions;
+use App\Classes\Helper;
+use App\Models\DataTransaction;
 use App\Models\Notification;
-use App\Models\percentage;
-use App\Models\Setting;
+use App\Models\Percentage;
+use App\Models\Transaction;
 use App\Models\User;
-use DateTime;
-use DateTimeZone;
-use GuzzleHttp\Client;
+use App\Models\WalletTransaction;
+use App\Services\DataService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class dataController extends Controller
 {
+    private $dataService;
+
+    public function __construct(DataService $dataService)
+    {
+        $this->dataService = $dataService;
+        $this->dataService->setSettings(Helper::merchant()->preferences);
+    }
+
     public function indexAction()
     {
+        try {
+            $data = $this->dataService->getLucyRoseNetworkData();
+            $user = Auth::user();
 
-        $configuration = Setting::first();
-        // API URL and key
-        $api_url = "https://lucysrosedata.com/api/network/";
-        $api_key = "Token " . $configuration->site_token;
+            if (!$user) {
+                return redirect()->route('login');
+            }
 
-        // Initialize cURL session
-        $ch = curl_init();
+            // Define the service types for data plans
+            $services = [
+                '9mobile_GIFTING_Data',
+                'GLO_GIFTING_Data',
+                'GLO_CORPORATE_GIFTING_Data',
+                'MTN_SME_Data',
+                'MTN_SME2_Data',
+                'Airtel_CORPORATE_GIFTING_Data',
+                'MTN_CORPORATE_GIFTING_Data',
+                '9mobile_CORPORATE_GIFTING_Data',
+            ];
 
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: $api_key",
+            // Determine the user's account type for percentage calculation
+            $userAccountType = $this->getUserAccountType($user);
+
+            // Get percentage data for the user's account type
+            $percentages = [];
+            if ($userAccountType) {
+                $percentages = Percentage::whereIn('service', $services)
+                    ->select('service', $userAccountType . ' as percent')
+                    ->get();
+            }
+
+            $transactions = DataTransaction::where('user_id', $user->id)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            return view('users-layout.dashboard.data', [
+                'networks' => $data,
+                'data_types' => ['SME', 'SME 2', 'GIFTING', 'CORPORATE GIFTING'],
+                'userData' => $user,
+                'transactions' => $transactions,
+                'notifications' => Notification::where('username', $user->username)->get(),
+                'percentages' => $percentages,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Process data purchase for MTN and Airtel gifting
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dataPurchaseMtnAirtelGifting(Request $request)
+    {
+        // Validate the request
+       $validated = $request->validate([
+            'network' => 'required|in:1,4', // Only MTN (1) and Airtel (4) supported
+            'type' => 'required|string',
+            'tel' => 'required|numeric',
+            'amount' => 'required|numeric',
         ]);
 
-        // Execute cURL request
-        $response = curl_exec($ch);
+        $user = Auth::guard('web')->user();
+        try {
+            DB::beginTransaction();
+            // Process using service
+        $result = $this->dataService->processDataGiftingPurchase(
+            $request->only(['network', 'type', 'tel', 'amount']),
+           $user
+        );
 
-        // Handle errors
-        if (curl_errno($ch)) {
-            $error_msg = 'Curl error: ' . curl_error($ch);
-            curl_close($ch);
-            return response()->json(['error' => $error_msg], 500);
+        if (!isset($result['content']['transactions']['status'])
+                || $result['content']['transactions']['status'] !== 'delivered') {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Data purchase failed',
+                    'result' => $result
+                ]);
         }
 
-        // Get HTTP response code
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+         // Create transaction record
+            $transaction = Transaction::initialize([
+                'transactable_type' => User::class,
+                'transactable_id' => $user->id,
+                'kind' => 'debit',
+                'amount' => $validated['amount'],
+                'type' => 'data',
+                'payload' => [
+                    'User Name' => $user->name,
+                    'User Email' => $user->email,
+                    'description' => "Data Purchase",
+                    'Network' => $this->dataService->getNetworkName($validated['network']),
+                    'Phone Number' => $validated['tel'],
+                    'Plan' => $validated['type'],
+                ],
+            ]);
 
-        // Close cURL session
-        curl_close($ch);
+            // Create data transaction record
+            $currentBalance = $user->wallet->balance - $validated['amount'];
 
-        // Handle the response
-        if ($http_code == 200) {
-            // Decode JSON response
-            $data = json_decode($response, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $data_type = ['SME', 'SME 2', 'GIFTING', 'CORPORATE GIFTING'];
-                $user      = Auth::user();
+            $user->wallet()
+                ->update(['balance' => $currentBalance]);
 
-                if ($user) {
-                    // Retrieve all data for the user from the database
-                    $userData      = User::where('id', $user->id)->first();
-                    $notifications = Notification::where('username', $user->username)->get();
+            $finalAmount = $this->dataService->calculateFinalAmount(
+                $user,
+                $validated['amount'],
+                $this->dataService->getServiceName($validated['network'], $validated['type'])
+            );
 
-                    // Define the service types
-                    $services = [
-                        '9mobile_GIFTING_Data',
-                        'GLO_GIFTING_Data',
-                        'GLO_CORPORATE_GIFTING_Data',
-                        'MTN_SME_Data',
-                        'MTN_SME2_Data',
-                        'Airtel_CORPORATE_GIFTING_Data',
-                        'MTN_CORPORATE_GIFTING_Data',
-                        '9mobile_CORPORATE_GIFTING_Data',
-                    ];
 
-                    // Determine the user's upgraded account type
-                    $userAccountType = null;
-                    if ($user->smart_earners == 1) {
-                        $userAccountType = 'smart_earners_percent';
-                    } elseif ($user->topuser_earners == 1) {
-                        $userAccountType = 'topuser_earners_percent';
-                    } elseif ($user->api_earners == 1) {
-                        $userAccountType = 'api_earners_percent';
-                    }
+            DataTransaction::create([
+                'user_id' => $user->id,
+                'transaction_id' => $transaction->id,
+                'api_response' => $result['content']['transactions']['product_name'] ?? 'No product name',
+                'network' => $this->dataService->getNetworkName($validated['network']),
+                'tel' => $validated['tel'],
+                'plan' => $validated['type'],
+                'amount' => $finalAmount,
+                'reference' => $result['content']['transactions']['transactionId'],
+                'identity' => 'Data Purchase',
+                'prev_bal' => $user->wallet->balance,
+                'current_bal' => $currentBalance,
+                'percent_profit' => $validated['amount'] - $finalAmount,
+                'status' => $result['content']['transactions']['status']
+            ]);
 
-                    // Fetch the percentages based on the user's account type
-                    $percentages = [];
-                    if ($userAccountType) {
-                        $percentages = Percentage::whereIn('service', $services)
-                            ->select('service', $userAccountType . ' as percent')
-                            ->get();
-                    }
 
-                    return view('users-layout.dashboard.data', [
-                        'networks'      => $data,
-                        'data_type'     => $data_type,
-                        'userData'      => $userData,
-                        'notifications' => $notifications,
-                        'percentages'   => $percentages, // Pass the percentages to the view
-                    ]);
-                }
-            } else {
-                $json_error = 'JSON decode error: ' . json_last_error_msg();
-                return response()->json(['error' => $json_error], 500);
-            }
-        } else {
-            $http_error = "HTTP request failed with code $http_code. Response: $response";
-            return response()->json(['error' => $http_error], $http_code);
+        return response()->json([
+            'status' => $result['content']['transactions']['status'],
+            'message' => $result['message'],
+            'result' => $result['result'] ?? null
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'failed',
+            'message' => $e->getMessage()
+        ]);
         }
+    }
+
+    /**
+     * Get data variations for MTN and Airtel networks
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dataMtnAirtelGifting(Request $request)
+    {
+
+        // Validate request
+        $validated = $request->validate([
+            'network' => 'required|in:1,4'
+        ], [
+            'network.required' => 'Network is required',
+            'network.in' => 'Invalid network selected. Only MTN and Airtel are supported for Gifting plans.'
+        ]);
+
+        $user = Auth::guard('web')->user();
+
+        // Get data variations from service
+        $result = $this->dataService->getDataVariations(
+            (int)$validated['network'],
+            $user
+        );
+
+        return response()->json($result);
     }
 
     public function purchaseData(Request $request)
     {
-        // Validate the request
-        $request->validate([
-            'network'     => 'required|in:1,2,4,6',
+        $validated = $request->validate([
+            'network' => 'required|in:1,2,4,6',
             'networkType' => 'required',
-            'amount'      => 'required|numeric',
-            'tel'         => 'required|numeric',
-            'type'        => 'required',
+            'amount' => 'required|numeric',
+            'tel' => 'required|numeric',
+            'type' => 'required',
+        ], [
+            'network.required' => 'Network is required',
+            'network.in' => 'Invalid network selected. Only MTN, GLO, Airtel, and 9mobile are supported.',
+            'networkType.required' => 'Network type is required',
+            'amount.required' => 'Amount is required',
+            'tel.required' => 'Phone number is required',
+            'type.required' => 'Data plan type is required',
+            'tel.numeric' => 'Phone number must be numeric',
+            'amount.numeric' => 'Amount must be a numeric value',
+            'amount.min' => 'Amount must be at least 1',
+            'amount.max' => 'Amount exceeds the maximum limit allowed',
+            'networkType.in' => 'Invalid network type selected. Only SME, SME 2, GIFTING, and CORPORATE GIFTING are supported.'
         ]);
 
-        // Get the input values
-        $network     = $request->input('network');
-        $amount      = $request->input('amount');
-        $tel         = $request->input('tel');
-        $networkType = $request->input('networkType');
-        $plan        = $request->input('type');
+        $user = Auth::guard('web')->user();
 
-        // Retrieve the authenticated user
-        $user        = Auth::user();
-        $userBalance = $user->account_balance;
-
-        // User types
-        $smart_earners   = $user->smart_earners;
-        $topuser_earners = $user->topuser_earners;
-        $api_earners     = $user->api_earners;
-
-        // Define the service map using network and networkType
-        $serviceMap = [
-            4 => [
-                'CORPORATE GIFTING' => 'Airtel_CORPORATE_GIFTING_Data',
-                'GIFTING'           => 'Airtel_GIFTING_Data',
-            ],
-            1 => [
-                'SME'               => 'MTN_SME_Data',
-                'SME 2'             => 'MTN_SME2_Data',
-                'CORPORATE GIFTING' => 'MTN_CORPORATE_GIFTING_Data',
-                'GIFTING'           => 'MTN_GIFTING_Data',
-            ],
-            2 => [
-                'GIFTING'           => 'GLO_GIFTING_Data',
-                'CORPORATE GIFTING' => 'GLO_CORPORATE_GIFTING_Data',
-            ],
-            6 => [
-                'GIFTING'           => '9mobile_GIFTING_Data',
-                'CORPORATE GIFTING' => '9mobile_CORPORATE_GIFTING_Data',
-            ],
-        ];
-
-        // Ensure both network and networkType are mapped
-        if (! isset($serviceMap[$network][$networkType])) {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid network or network type']);
+        // Get service name for the network and type
+        $serviceName = $this->dataService->getServiceName($validated['network'], $validated['networkType']);
+        if (!$serviceName) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Invalid network or network type selected'
+            ]);
         }
 
-        // Get the service type from the map
-        $service = $serviceMap[$network][$networkType];
-
-        // Fetch the percentage for the selected service from the database
-        $percentage = Percentage::where('service', $service)->first();
-
-        // Check if percentage data exists
-        if (! $percentage) {
-            return response()->json(['status' => 'failed', 'message' => 'No percentage data found for the selected network and type']);
+        // Calculate the final amount with profit deducted
+        $finalAmount = $this->dataService->calculateFinalAmount($user, $validated['amount'], $serviceName);
+        if (!$finalAmount) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Invalid user type or network'
+            ]);
         }
 
-        // Calculate the final amount based on the user's type
-        if ($smart_earners) {
-            $deduction = ($percentage->smart_earners_percent / 100) * $amount;
-        } elseif ($topuser_earners) {
-            $deduction = ($percentage->topuser_earners_percent / 100) * $amount;
-        } elseif ($api_earners) {
-            $deduction = ($percentage->api_earners_percent / 100) * $amount;
-        } else {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid user type']);
+        // Check if user has sufficient balance
+        if ($user->wallet->balance < $finalAmount) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Insufficient funds'
+            ]);
         }
-
-        $finalAmount    = ceil($amount); // Use ceil() to round up
-        $percent_profit = $deduction;
-
-        // Check if the user has sufficient funds
-        if ($userBalance < $finalAmount) {
-            return response()->json(['status' => 'failed', 'message' => 'Insufficient funds']);
-        }
-
-        // Calculate the current balance after the deduction
-        $currentBal = $userBalance - $finalAmount;
-
-        // Generate a unique request ID
-        $current_time     = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time   = $current_time->format("YmdHis");
-        $additional_chars = "89htyyo";
-        $request_id       = $formatted_time . $additional_chars;
-        while (strlen($request_id) < 12) {
-            $request_id .= "x";
-        }
-
-        $configuration = Setting::first();
-        // API URL and key
-        $api_url = "https://lucysrosedata.com/api/network/";
-        $api_key = "Token " . $configuration->site_token;
-
-        // Set up API request data
-        $data = [
-            "network"       => $network,
-            "mobile_number" => $tel,
-            "plan"          => $plan,
-            "Ported_number" => true, // Assuming this is a required parameter
-        ];
-
-        // Initialize GuzzleHttp client
-        $client = new \GuzzleHttp\Client();
 
         try {
-            // Make the API request
-            $response = $client->post($api_url, [
-                'headers' => [
-                    'Authorization' => $api_key,
-                    'Content-Type'  => 'application/json',
-                ],
-                'json'    => $data,
-            ]);
+            DB::beginTransaction();
 
-            // Decode the response
-            $result = json_decode($response->getBody(), true);
+            $requestId = $this->dataService->generateRequestId();
+            $result = $this->dataService->purchaseData(
+                $requestId,
+                $validated['network'],
+                $validated['networkType'],
+                $validated['tel'],
+                $validated['type'],
+                $validated['amount']
+            );
 
-            // Check if the transaction failed in the API response
-            if (isset($result['Status']) && strtolower($result['Status']) === 'failed') {
-                // Return an error response if the API status is failed
-                return response()->json(['status' => 'failed', 'message' => 'Data purchase failed', 'result' => $result]);
+            // Verify the result
+            if (!isset($result['content']['transactions']['status']) || $result['content']['transactions']['status'] !== 'delivered') {
+                throw new \Exception('Data purchase failed');
             }
 
-            // If successful, deduct the final amount from the user's balance
-            User::where('id', $user->id)->update(['account_balance' => $currentBal]);
+            $userBalance = $user->wallet->balance;
 
-            // Store the transaction in the database with new fields
-            DataTransactions::create([
-                'username'       => $user->username,
-                'api_response'   => $result['api_response'],
-                'network'        => $network,
-                'tel'            => $tel,
-                'plan'           => $result['plan_name'],
-                'amount'         => $finalAmount,
-                'prev_bal'       => $userBalance,
-                'current_bal'    => $currentBal,
-                'percent_profit' => $percent_profit,
-                'reference'      => $result['ident'],
-                'identity'       => 'Data Purchase',
-                'status'         => 'successful',
-                'created_at'     => now(),
-                'updated_at'     => now(),
+            // Update user's balance
+            $currentBalance = $userBalance - $finalAmount;
+            $user->wallet()->update(['balance' => $currentBalance]);
+
+            // Create transaction record
+            $transaction = Transaction::initialize([
+                'transactable_type' => User::class,
+                'transactable_id' => $user->id,
+                'kind' => 'debit',
+                'amount' => $validated['amount'],
+                'type' => 'data',
+                'payload' => [
+                    'User Name' => $user->name,
+                    'User Email' => $user->email,
+                    'description' => "Data Purchase",
+                    'Network' => $this->dataService->getNetworkName($validated['network']),
+                    'Phone Number' => $validated['tel'],
+                    'Plan' => $validated['type'],
+                ],
             ]);
 
-            // Return a success response
-            return response()->json(['status' => 'delivered', 'message' => 'Data purchase successful', 'result' => $result]);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            // Handle Guzzle request exception
-            return response()->json(['status' => 'failed', 'message' => 'HTTP request error: ' . $e->getMessage()], 500);
+            $currentBal = $userBalance - $validated['amount'];
+
+            //Create wallet transaction
+                WalletTransaction::create([
+                    'wallet_owner_id' => $user->id,
+                    'wallet_owner_type' => User::class,
+                    'wallet_id' => $user->wallet->id,
+                    'transaction_id' => $transaction->id,
+                    'amount' => $validated['amount'],
+                    'type' => 'debit',
+                    'description' => 'Electricity purchase for meter ' . $validated['meter_number'],
+                    'prev_balance' => $userBalance,
+                    'current_balance' => $currentBal
+                ]);
+
+
+            // Create data transaction record
+            DataTransaction::create([
+                'user_id' => $user->id,
+                'transaction_id' => $transaction->id,
+                'api_response' => $result['content']['transactions']['product_name'] ?? 'No product name',
+                'network' => $this->dataService->getNetworkName($validated['network']),
+                'tel' => $validated['tel'],
+                'plan' => $validated['type'],
+                'amount' => $finalAmount,
+                'reference' => $result['content']['transactions']['transactionId'],
+                'identity' => 'Data Purchase',
+                'prev_bal' => $user->wallet->balance,
+                'current_bal' => $currentBalance,
+                'percent_profit' => $validated['amount'] - $finalAmount,
+                'status' => 'successful'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'delivered',
+                'message' => 'Data purchase successful',
+                'result' => $result
+            ]);
+
         } catch (\Exception $e) {
-            // Handle general exceptions
-            return response()->json(['status' => 'failed', 'message' => 'General error: ' . $e->getMessage()], 500);
+            DB::rollBack();
+            return response()->json([
+                'status' => 'failed',
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
     public function getNetworkPlans(Request $request)
     {
-        $configuration = Setting::first();
-        // API URL and key
-        $api_url = "https://lucysrosedata.com/api/network/";
-        $api_key = "Token " . $configuration->site_token;
-
-        // Initialize cURL session
-        $ch = curl_init();
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: $api_key",
-        ]);
-
-        // Execute cURL request
-        $response = curl_exec($ch);
-
-        // Handle errors
-        if (curl_errno($ch)) {
-            $error_msg = 'Curl error: ' . curl_error($ch);
-            curl_close($ch);
-            return response()->json(['error' => $error_msg], 500);
-        }
-
-        // Get HTTP response code
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        // Close cURL session
-        curl_close($ch);
-
-        // Check for successful response
-        if ($http_code != 200) {
-            return response()->json(['error' => 'Failed to fetch network plans.'], $http_code);
-        }
-
-        // Decode the JSON response
-        $decoded_response = json_decode($response, true);
-
-        // Handle JSON decode errors
-        if (json_last_error() != JSON_ERROR_NONE) {
-            return response()->json(['error' => 'Failed to decode JSON response.'], 500);
-        }
-
-        // Return the decoded response
-        return response()->json($decoded_response);
-    }
-
-    public function dataPurchaseMtnAirtelGifting(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'network' => 'required|in:1,2,4,6',
-            'type'    => 'required',
-            'tel'     => 'required|numeric',
-            'amount'  => 'required|numeric',
-        ]);
-
-        // Get the input values
-        $isnetwork = $request->input('network');
-        $network   = null;
-
-        // Fix the network logic
-        if ($isnetwork == 4) {
-            $network = "airtel";
-        } elseif ($isnetwork == 1) {
-            $network = "mtn";
-        }
-
-        if ($network === null) {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid network selected']);
-        }
-
-        $type = $request->input('type');
-        $tel  = $request->input('tel');
-
-        // Extract the last part of the string after the hyphen
-        $parts  = explode('-', $type);
-        $amount = end($parts); // Get the last part of the array
-
-        // Optionally, ensure $amount is numeric
-        if (! is_numeric($amount)) {
-            return response()->json(['error' => 'Invalid amount format'], 400);
-        }
-        // dd($amount);
-        // Retrieve the authenticated user and balance
-        $user        = Auth::user();
-        $userBalance = $user->account_balance;
-
-        // User types
-        $smart_earners   = $user->smart_earners;
-        $topuser_earners = $user->topuser_earners;
-        $api_earners     = $user->api_earners;
-
-        // Define the service map for Airtel and MTN
-        $serviceMap = [
-            'airtel' => 'Airtel_GIFTING_Data',
-            'mtn'    => 'MTN_GIFTING_Data',
-        ];
-        $serviceID = $network . "-data";
-        $service   = $serviceMap[$network] ?? null;
-
-        // Fetch percentage based on user type and service
-        $percentage = Percentage::where('service', $service)->first();
-
-        if (! $percentage) {
-            return response()->json(['status' => 'failed', 'message' => 'Percentage data not found for this service']);
-        }
-
-        // Calculate the deduction based on user type
-        if ($smart_earners) {
-            $deduction = ($percentage->smart_earners_percent / 100) * $amount;
-        } elseif ($topuser_earners) {
-            $deduction = ($percentage->topuser_earners_percent / 100) * $amount;
-        } elseif ($api_earners) {
-            $deduction = ($percentage->api_earners_percent / 100) * $amount;
-        } else {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid user type']);
-        }
-
-        $finalAmount    = ceil($amount); // Use ceil() to round up
-        $percent_profit = $deduction;
-
-        // Check if the user has sufficient funds
-        if ($userBalance < $finalAmount) {
-            return response()->json(['status' => 'failed', 'message' => 'Insufficient funds']);
-        }
-
-        // Calculate the current balance after deduction
-        $currentBal = $userBalance - $finalAmount;
-
-        // Generate a unique request ID
-        $current_time     = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time   = $current_time->format("YmdHis");
-        $additional_chars = "89htyyo";
-        $request_id       = $formatted_time . $additional_chars;
-        while (strlen($request_id) < 12) {
-            $request_id .= "x";
-        }
-
-        // Fetch the API configuration
-        $configuration = Setting::first();
-        $apiUrl        = $configuration->airtime_api_url;
-
-        // Set up API request data
-        $data = [
-            "request_id"     => $request_id,
-            "serviceID"      => $serviceID,
-            "billersCode"    => $tel,
-            "variation_code" => $type,
-            "amount"         => $amount,
-            "phone"          => $tel,
-        ];
 
         try {
-            // Make the API request using Guzzle
-            $client   = new Client();
-            $response = $client->post($apiUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
-                ],
-                'json'    => $data,
-            ]);
-
-            // Decode the response
-            $result = json_decode($response->getBody());
-
-            // Check if the transaction was successful
-            if (isset($result->content->transactions->status) && $result->content->transactions->status === "delivered") {
-                // Deduct the final amount from the user's balance
-                User::where('id', $user->id)->update(['account_balance' => $currentBal]);
-
-                // Store the transaction in the database
-                DataTransactions::create([
-                    'username'       => $user->username,
-                    'api_response'   => $result->content->transactions->product_name,
-                    'network'        => $network,
-                    'tel'            => $tel,
-                    'plan'           => $result->content->transactions->product_name, // Assuming this field represents the plan
-                    'amount'         => $finalAmount,
-                    'reference'      => $result->content->transactions->transactionId,
-                    'identity'       => 'Data Purchase',
-                    'prev_bal'       => $userBalance,
-                    'current_bal'    => $currentBal,
-                    'percent_profit' => $percent_profit,
-                    'status'         => 'successful',
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
-                ]);
-
-                // Return a success response
-                return response()->json(['status' => 'delivered', 'message' => 'Data purchase successful', 'result' => $result]);
-            } else {
-                // Return an error response if the transaction failed
-                return response()->json(['status' => 'failed', 'message' => 'Data purchase failed', 'result' => $result]);
-            }
+            $data = $this->dataService->getLucyRoseNetworkData();
+            return response()->json($data);
         } catch (\Exception $e) {
-            // Return an error response with exception details
-            return response()->json(['status' => 'failed', 'message' => 'Error during API request', 'exception' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    public function dataMtnAirtelGifting(Request $request)
+    private function getUserAccountType(User $user): ?string
     {
-        $configuration = Setting::first();
-        if (! $configuration) {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Configuration not found',
-            ]);
+        if ($user->smart_earners) {
+            return 'smart_earners_percent';
+        } elseif ($user->topuser_earners) {
+            return 'topuser_earners_percent';
+        } elseif ($user->api_earners) {
+            return 'api_earners_percent';
         }
-
-        $network = $request->input('network');
-
-        // Validate the network input
-        if (! in_array($network, [1, 4])) {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Invalid network selected',
-            ]);
-        }
-
-        // Determine API URL
-        $apiUrl = ($network == 1) ? $configuration->data_mtn : $configuration->data_airtime;
-
-        // Retrieve the authenticated user
-        $user            = Auth::user();
-        $smart_earners   = $user->smart_earners;
-        $topuser_earners = $user->topuser_earners;
-        $api_earners     = $user->api_earners;
-
-        // Map service IDs to service names
-        $serviceMap = [
-            4 => 'Airtel_GIFTING_Data',
-            1 => 'MTN_GIFTING_Data',
-        ];
-
-        // Check if the selected network exists in the service map
-        $serviceName = $serviceMap[$network] ?? null;
-        if (! $serviceName) {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Invalid service mapping',
-            ]);
-        }
-
-        // Fetch percentage settings for the service
-        $percentage = Percentage::where('service', $serviceName)->first();
-        if (! $percentage) {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Service percentage not found',
-            ]);
-        }
-
-        // Determine the profit percentage based on the user role
-        if ($smart_earners) {
-            $profitPercentage = $percentage->smart_earners_percent;
-        } elseif ($topuser_earners) {
-            $profitPercentage = $percentage->topuser_earners_percent;
-        } elseif ($api_earners) {
-            $profitPercentage = $percentage->api_earners_percent;
-        } else {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'No valid earner type found',
-            ]);
-        }
-
-        try {
-            // Make the API request
-            $client   = new Client();
-            $response = $client->get($apiUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
-                ],
-            ]);
-
-            // Decode the API response
-            $result = json_decode($response->getBody(), true);
-
-            if (! empty($result)) {
-                return response()->json([
-                    'status'           => 'success',
-                    'data'             => $result,
-                    'profitPercentage' => $profitPercentage,
-                ]);
-            } else {
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'No data variations available',
-                ]);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'    => 'failed',
-                'message'   => 'Error fetching data variations',
-                'exception' => $e->getMessage(),
-            ]);
-        }
+        return null;
     }
 }

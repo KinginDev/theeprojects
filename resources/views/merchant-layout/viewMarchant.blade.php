@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -68,7 +68,7 @@
                                                         <td>{{ $user->username }}</td>
                                                         <td>{{ $user->tel }}</td>
                                                         <td>{{ $user->email }}</td>
-                                                        <td>{{ '₦'.number_format($user->account_balance, 2) }}</td>
+                                                        <td>{{ '₦' . number_format($user->account_balance, 2) }}</td>
                                                         <td>{{ $user->address }}</td>
                                                         <td>{{ $user->refferal_user }}</td>
                                                         <td>{{ $user->refferal }}</td>
@@ -77,9 +77,9 @@
                                                             @if ($user->role == 0)
                                                                 <p class="btn-primary text-center">Admin</p>
                                                             @elseif ($user->role == 1)
-                                                            <p class="btn-secondary text-center">Sub Admin</p>
+                                                                <p class="btn-secondary text-center">Sub Admin</p>
                                                             @else
-                                                            <p class="btn-secondary text-center">User</p>
+                                                                <p class="btn-secondary text-center">User</p>
                                                             @endif
                                                         </td>
 
@@ -93,14 +93,19 @@
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            <a href="{{ route('manageSubAdmin', $user->id) }}"><button class="btn btn-primary">Manage-))</button></a>
+                                                            <a href="{{ route('manageSubAdmin', $user->id) }}"><button
+                                                                    class="btn btn-primary">Manage-))</button></a>
 
                                                             @if ($user->cal == 0 && $user->role != 0)
-                                                            <a href="{{ route('activate', $user->id) }}"><button class="btn btn-secondary">Activate</button></a>
-                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                                <a href="{{ route('activate', $user->id) }}"><button
+                                                                        class="btn btn-secondary">Activate</button></a>
+                                                                <a href="{{ route('delete', $user->id) }}"><button
+                                                                        class="btn btn-danger">Delete</button></a>
                                                             @elseif ($user->cal == 1 && $user->role != 0)
-                                                            <a href="{{ route('deactivate', $user->id) }}"><button class="btn btn-warning">Deactivate</button></a>
-                                                            <a href="{{ route('delete', $user->id) }}"><button class="btn btn-danger">Delete</button></a>
+                                                                <a href="{{ route('deactivate', $user->id) }}"><button
+                                                                        class="btn btn-warning">Deactivate</button></a>
+                                                                <a href="{{ route('delete', $user->id) }}"><button
+                                                                        class="btn btn-danger">Delete</button></a>
                                                             @endif
 
                                                         </td>

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->json('meta_data')->nullable();
             $table->decimal('prev_balance', 10, 2)->default(0);
             $table->decimal('current_balance', 10, 2)->default(0);
+            $table->string('provider');
             $table->timestamps();
 
         });

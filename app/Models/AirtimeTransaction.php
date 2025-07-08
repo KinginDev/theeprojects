@@ -1,17 +1,18 @@
 <?php
 namespace App\Models;
 
+use App\Models\Base\BaseProduct;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class AirtimeTransaction extends Model
+class AirtimeTransaction extends BaseProduct
 {
     use HasFactory;
 
     protected $table = 'airtimes_transactions'; // Explicitly specify the table name
 
     protected $fillable = [
-        'username',
+        'user_id',
+        'transaction_id',
         'network',
         'tel',
         'amount',
@@ -24,4 +25,7 @@ class AirtimeTransaction extends Model
         'created_at',
         'updated_at',
     ];
+
+
+
 }

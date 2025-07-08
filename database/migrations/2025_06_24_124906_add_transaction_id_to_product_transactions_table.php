@@ -13,30 +13,42 @@ return new class extends Migration
     {
         Schema::table('tv_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
         Schema::table('airtimes_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
 
         Schema::table('data_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
 
         Schema::table('electricity_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
 
         Schema::table('insurance_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
 
         Schema::table('education_transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_id')->nullable()->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
         });
     }

@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -19,10 +19,8 @@
                             <h4 class="mb-sm-0">wallet summary</h4>
 
                             <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="javascript: void(0);">Utility</a></li>
-                                    <li class="breadcrumb-item active">Starter page</li>
-                                </ol>
+                               {!! Helper::generateBreadCrumbs( 'Wallet Summary') !!}
+
                             </div>
 
 
@@ -47,7 +45,7 @@
                                             id="transactionsTable">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Username</th>
+                                                    <th>Name</th>
                                                     <th>Reference</th>
 
                                                     <th>Network</th>
@@ -64,12 +62,12 @@
                                             <tbody>
                                                 @foreach ($allTransactions as $transaction)
                                                     <tr>
-                                                        <td><b>{{ strtoupper($transaction->username)  ?? 'N/A'}}</b></td>
+                                                        <td><b>{{ strtoupper($transaction->owner->name) ?? 'N/A'}}</b></td>
                                                         <td>{{ $transaction->reference ?? 'N/A' }}</td>
                                                         <td>{{ $transaction->network ?? 'N/A' }}</td>
                                                         <!-- Handle 'network' dynamically -->
                                                         <td>₦{{ number_format($transaction->amount, 2) ?? 'N/A' }}</td>
-                                                        <td>{{ $transaction->identity  ?? 'N/A'}}</td>
+                                                        <td>{{ $transaction->identity ?? 'N/A'}}</td>
                                                         <td>₦{{ $transaction->prev_bal ?? 'N/A' }}</td>
                                                         <td>₦{{ $transaction->current_bal ?? 'N/A' }}</td>
                                                         <td>{{ $transaction->created_at ?? 'N/A'}}</td>

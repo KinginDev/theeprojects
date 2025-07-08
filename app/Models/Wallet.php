@@ -28,4 +28,9 @@ class Wallet extends Model
         return $this->morphTo("App\Models\Merchant", 'owner');
     }
 
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class, 'wallet_id');
+    }
+
 }

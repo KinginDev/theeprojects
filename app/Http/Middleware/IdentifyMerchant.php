@@ -7,33 +7,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
-class IdentifyMerchant
-{
+class IdentifyMerchant {
     /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
+    * Handle an incoming request.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @param  \Closure  $next
+    * @return \Symfony\Component\HttpFoundation\Response
+    */
+    public function handle(Request $request, Closure $next): Response {
         $host = $request->getHost();
 
-        //Get merchant by the host
-        $merchant = Merchant::where('domain', $host)
-            ->orWhere('slug', explode('.', $host)[0]) // assumes subdomain slug
-            ->first();
-
-        if (! $merchant) {
-
-            abort(404, 'Merchant not found');
+        $appDomain = config('app.domain');
+        if($host === $appDomain) {
+            // If the host is the main domain, we can skip identifying a merchant
+            return $next($request);
         }
 
-        // Share tenant globally (can also use a singleton or container binding)
-        app()->instance('currentMerchant', $merchant);
+        // Check for custom domain or subdomain
+        $merchant = Merchant::where('domain', $host)->first();
 
-        // Optionally share with views
-        View::share('currentMerchant', $merchant);
+        // If not found by domain, check if it's a subdomain
+        if (!$merchant) {
+            $hostParts = explode('.', $host);
+            $subdomain = $hostParts[0];
 
-        return $next($request);
+            $merchant = Merchant::where('slug', $subdomain)->first();
+        }
+
+
+        if ( $merchant ) {
+            app()->instance( 'currentMerchant', $merchant );
+            View::share( 'currentMerchant', $merchant );
+        }
+
+        return $next( $request );
     }
 }

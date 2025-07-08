@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -46,9 +46,10 @@
                                         @csrf
                                         <div class="m-3">
                                             <label for="">Amount</label>
-                                            <input type="number" class="form-control" value="{{ $funding->amount-50 }}"
+                                            <input type="number" class="form-control" value="{{ $funding->amount - 50 }}"
                                                 name="amount" id="amount" readonly>
-                                                <p class="text-danger">Note: Initial amount is ₦{{ $funding->amount }} The charge is ₦50 which funding price is ₦{{ $funding->amount-50 }}</p>
+                                            <p class="text-danger">Note: Initial amount is ₦{{ $funding->amount }} The
+                                                charge is ₦50 which funding price is ₦{{ $funding->amount - 50 }}</p>
                                         </div>
                                         {{-- <div class="m-3">
                                             <label for="">User Username</label>
@@ -63,7 +64,8 @@
                                             <input type="text" class="form-control">
                                         </div> --}}
                                         <div class="m-3">
-                                            <button class="btn btn-primary w-100" type="submit" name="submit">APPROVE FUND</button>
+                                            <button class="btn btn-primary w-100" type="submit" name="submit">APPROVE
+                                                FUND</button>
                                         </div>
                                     </form>
                                 </div>
@@ -94,8 +96,8 @@
     <!-- end main content-->
 
     <script>
-        $(document).ready(function() {
-            $('#fundForm').on('submit', function(event) {
+        $(document).ready(function () {
+            $('#fundForm').on('submit', function (event) {
                 event.preventDefault();
                 var formData = {
                     _token: $('input[name="_token"]').val(),
@@ -105,14 +107,14 @@
                     url: '{{ route('approveFund.user', $funding->id) }}',
                     method: 'POST',
                     data: formData,
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire({
                             title: "Success!",
                             text: response.message,
                             icon: "success"
                         });
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.log(xhr.responseText);
                     }
                 });

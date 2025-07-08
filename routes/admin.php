@@ -5,18 +5,21 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\usersController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Guest routes
-    Route::middleware('guest:admin')->group(function () {
-        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::domain(config('app.domain'))
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+    // Public routes (no auth required)
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/forget_password', [authController::class, 'forget_password'])->name('forget_password');
+    Route::post('/forgetPassword', [authController::class, 'forgetPasswordMail'])->name('users.forget_password');
+    Route::get('/password/reset/{token}', [authController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/update-password', [authController::class, 'updatePassword'])->name('updatePassword');
 
-        Route::post('login', [AuthController::class, 'login'])->name('login.submit');
-
-        Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-    });
-
-    // Authenticated routes
+    // Protected routes - require admin authentication
     Route::middleware('auth:admin')->group(function () {
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/admin/generate-user-emails-csv', [usersController::class, 'generateUserEmailsCSV'])->name('generateUserEmailsCSV');
         Route::get('/dashboard', [adminController::class, 'dashboard'])->name('dashboard');
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -54,6 +57,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/update-page-status/{id}/{action}', [adminController::class, 'updatePageStatus'])->name('updatePageStatus');
 
         Route::get('/admin/monnify-fee', [adminController::class, 'getMonnifyFee'])->name('admin.getMonnifyFee');
+
+        Route::put('/adminedit/{id}', [adminController::class, 'adminupdates'])->name('adminupdates.profile');
+
 
         // // Merchant management
         // Route::resource('merchants', MerchantController::class);

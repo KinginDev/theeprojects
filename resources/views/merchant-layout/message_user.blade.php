@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Send Message to User')
 
@@ -59,18 +59,24 @@
                                         @csrf
                                         <div class="mb-3">
                                             <label for="username" class="form-label">Username</label>
-                                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required value="{{ $user->username }}" readonly>
+                                            <input type="text" class="form-control" id="username" name="username"
+                                                placeholder="Enter username" required value="{{ $user->username }}"
+                                                readonly>
                                         </div>
                                         <div class="mb-3">
                                             <label for="subject" class="form-label">Subject</label>
-                                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
+                                            <input type="text" class="form-control" id="subject" name="subject"
+                                                placeholder="Enter subject" required>
                                         </div>
                                         <div class="mb-3">
                                             <label for="message" class="form-label">Message</label>
-                                            <textarea class="form-control" id="message" name="message" rows="4" placeholder="Type your message here" required></textarea>
+                                            <textarea class="form-control" id="message" name="message" rows="4"
+                                                placeholder="Type your message here" required></textarea>
                                         </div>
                                         <div class="text-end">
-                                            <button type="submit" class="btn" style="background-color: #FF6600 !important; color: white;">Send Message</button>
+                                            <button type="submit" class="btn"
+                                                style="background-color: #FF6600 !important; color: white;">Send
+                                                Message</button>
                                         </div>
                                     </form>
                                 </div>

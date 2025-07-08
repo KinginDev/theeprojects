@@ -1,24 +1,36 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\EducationTransaction;
-use App\Models\EletricityTransaction;
-use App\Models\InsuranceTransaction;
-use App\Models\Notification;
-use App\Models\percentage;
-use App\Models\Setting;
-use App\Models\TvTransactions;
-use App\Models\User;
 use DateTime;
 use DateTimeZone;
+use App\Models\User;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use App\Models\Setting;
+use App\Models\Referral;
+use App\Models\Percentage;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Models\Notification;
+use Illuminate\Http\Request;
+use App\Models\TvTransaction;
+use Illuminate\Http\Response;
+use App\Models\WalletTransaction;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\EducationTransaction;
+use App\Models\InsuranceTransaction;
+use App\Services\ElectricityService;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ElectricityTransaction;
 
 class utilitiesPaymentController extends Controller
 {
+
+    public function __construct(ElectricityService $eleService)
+    {
+        $this->eleService = $eleService;
+    }
     public function indexElectricity()
     {
         $user = Auth::user();
@@ -28,175 +40,188 @@ class utilitiesPaymentController extends Controller
             $userData      = User::where('id', $user->id)->first();
             $notifications = Notification::where('username', $user->username)->get();
 
+            $products = Product::where('type', 'electricity')
+                ->where('is_active', true)
+                ->get();
+
             return view('users-layout.dashboard.electricity', [
                 'userData'      => $userData,
                 'notifications' => $notifications,
+                'products'     => $products
             ]);
         }
     }
 
     public function purchaseElectricity(Request $request)
     {
-        // Validate the request
-        $request->validate([
-            'distribution_company' => 'required|in:ikeja-electric,eko-electric,abuja-electric,kano-electric,portharcourt-electric,jos-electric,kaduna-electric,enugu-electric,ibadan-electric,benin-electric,aba-electric,yola-electric',
-            'type'                 => 'required|in:prepaid,postpaid',
-            'meter_number'         => 'required',
-            'tel'                  => 'required|numeric',
-            'email'                => 'required|email',
-            'amount'               => 'required|numeric',
-        ]);
-
-        // Get the input values
-        $distributionCompany = $request->input('distribution_company');
-        $meterNumber         = $request->input('meter_number');
-        $type                = $request->input('type');
-        $tel                 = $request->input('tel');
-        $email               = $request->input('email');
-        $amount              = $request->input('amount');
-
-        // Retrieve the authenticated user and balance
-        $user        = Auth::user();
-        $userBalance = $user->account_balance;
-
-        // User types
-        $smart_earners   = $user->smart_earners;
-        $topuser_earners = $user->topuser_earners;
-        $api_earners     = $user->api_earners;
-
-        // Check if the user has sufficient funds
-        if ($userBalance < $amount) {
-            return response()->json(['status' => 'failed', 'message' => 'Insufficient funds']);
-        }
-
-        // Map service IDs to the corresponding service names
-        $serviceMap = [
-            'ikeja-electric'        => 'Ikeja_Electric_Payment_-_IKEDC',
-            'eko-electric'          => 'Eko_Electric_Payment_-_EKEDC',
-            'abuja-electric'        => 'Abuja_Electricity_Distribution_Company_-_AEDC',
-            'kano-electric'         => 'KEDCO_-_Kano_Electric',
-            'portharcourt-electric' => 'PHED_-_Port_Harcourt_Electric',
-            'jos-electric'          => 'Jos_Electric_-_JED',
-            'kaduna-electric'       => 'Kaduna_Electric_-_KAEDCO',
-            'enugu-electric'        => 'Enugu_Electric_-_EEDC',
-            'ibadan-electric'       => 'IBEDC_-_Ibadan_Electricity_Distribution_Company',
-            'benin-electric'        => 'Benin_Electricity_-_BEDC',
-            'aba-electric'          => 'Aba_Electric_Payment_-_ABEDC',
-            'yola-electric'         => 'Yola_Electric_Disco_Payment_-_YEDC',
-        ];
-
-        $serviceID = strtolower($distributionCompany);
-
-        // Check if the service ID exists in the map
-        if (isset($serviceMap[$serviceID])) {
-            $serviceName = $serviceMap[$serviceID];
-            $percentage  = Percentage::where('service', $serviceName)->first();
-
-            // Calculate final amount after applying percentage deductions based on user type
-            if ($percentage) {
-                if ($smart_earners == 1) {
-                    $smartEarnerPercent = $percentage->smart_earners_percent;
-                    $deduction          = ($smartEarnerPercent / 100) * $amount;
-                    $finalAmount        = $amount - $deduction;
-                } elseif ($topuser_earners == 1) {
-                    $topuserEarnerPercent = $percentage->topuser_earners_percent;
-                    $deduction            = ($topuserEarnerPercent / 100) * $amount;
-                    $finalAmount          = $amount - $deduction;
-                } elseif ($api_earners == 1) {
-                    $apiEarnerPercent = $percentage->api_earners_percent;
-                    $deduction        = ($apiEarnerPercent / 100) * $amount;
-                    $finalAmount      = $amount - $deduction;
-                } else {
-                    return response()->json(['status' => 'failed', 'message' => 'No valid earner type found']);
-                }
-
-                // Round up the final amount to the nearest whole number
-                $finalAmount = ceil($finalAmount);
-            } else {
-                return response()->json(['status' => 'failed', 'message' => 'No percentage data found for the selected distribution company']);
-            }
-        } else {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid distribution company']);
-        }
-
-        // Verify the meter number
-        $verificationResult = $this->verifyMeterNumber($meterNumber, $type, $distributionCompany);
-        if ($verificationResult['status'] !== 'verified') {
-            return response()->json($verificationResult);
-        }
-
-        // Get the current time and generate a request ID
-        $current_time   = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time = $current_time->format("YmdHis");
-        $request_id     = $formatted_time . "89htyyo";
-
-        $configuration = Setting::first();
-
-        // Set up Guzzle client
-        $client = new Client();
-        $apiUrl = $configuration->airtime_api_url;
-
-        // API request data
-        $data = [
-            "request_id"     => $request_id,
-            "serviceID"      => $serviceID,
-            "billersCode"    => $meterNumber,
-            "variation_code" => $type,
-            "amount"         => $amount, // Use finalAmount after deductions and rounding
-            "phone"          => $tel,
-            "email"          => $email,
-        ];
-
         try {
-            // Call the API
-            $response = $client->post($apiUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
-                ],
-                'json'    => $data,
+            // Get active electricity products
+            $products = Product::where('type', 'electricity')
+                ->where('is_active', true)
+                ->get();
+
+            $serviceNames = $products->pluck('name')->map(function ($name) {
+                return Str::lower($name);
+            })->implode(',');
+
+            // Validate request
+            $validatedData = $request->validate([
+                'distribution_company' => 'required|in:' . $serviceNames,
+                'type' => 'required|in:prepaid,postpaid',
+                'meter_number' => 'required',
+                'tel' => 'required|numeric',
+                'email' => 'required|email',
+                'amount' => 'required|numeric|min:1',
             ]);
 
-            // Decode the API response
-            $result = json_decode($response->getBody());
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not authenticated'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
 
-            // Check if the transaction was successful
-            if (isset($result->content->transactions->status) && $result->content->transactions->status === "delivered") {
-                // Update user's balance
-                $currentBal = $userBalance - $finalAmount;
-                User::where('id', $user->id)->update(['account_balance' => $currentBal]);
+            // Get user's wallet balance
+            $userBalance = $user->wallet->balance ?? 0;
+            if ($userBalance < $validatedData['amount']) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Insufficient wallet balance'
+                ], Response::HTTP_BAD_REQUEST);
+            }
 
-                // Calculate percentage profit
-                $percentProfit = $amount - $finalAmount;
+            // Get profit percentage from settings
+            $profitPercentage = percentage::where('action', 'electricity')->first();
+            $percentageValue = $profitPercentage ? $profitPercentage->percentage : 0;
+            $finalAmount = $validatedData['amount'] * (1 - ($percentageValue / 100));
+            $percentProfit = $validatedData['amount'] - $finalAmount;
 
-                // Create the transaction record
-                EletricityTransaction::create([
-                    'username'             => $user->username,
-                    'product_name'         => $serviceMap[$serviceID],
-                    'type'                 => $type,
-                    'tel'                  => $tel,
-                    'amount'               => $amount,
-                    'reference'            => $result->requestId ?? null,
-                    'purchased_code'       => $result->purchased_code ?? null,
-                    'response_description' => $result->response_description ?? 'No description provided',
-                    'transaction_date'     => now(),
-                    'identity'             => $meterNumber,
-                    'prev_bal'             => $userBalance,
-                    'current_bal'          => $currentBal,
-                    'percent_profit'       => $percentProfit,
-                    'status'               => 'successful',
+            // Begin transaction
+            \DB::beginTransaction();
+            try {
+                // Verify meter number first
+                $verificationData = [
+                    'meter_number' => $validatedData['meter_number'],
+                    'service_name' => $validatedData['distribution_company'],
+                    'type' => $validatedData['type']
+                ];
+
+                $verificationResult = $this->eleService->verifyMeterNumber($verificationData);
+                if (!$verificationResult || ($verificationResult['status'] ?? '') !== 'success') {
+                    throw new \Exception('Meter number verification failed: ' . ($verificationResult['message'] ?? 'Unknown error'));
+                }
+
+
+                $data = [
+                    'meter_number' => $validatedData['meter_number'],
+                    'service_name' => $validatedData['distribution_company'],
+                    'type' => $validatedData['type'],
+                    'email' => $validatedData['email'],
+                    'tel' => $validatedData['tel'],
+                    'amount' => $finalAmount
+                ];
+
+                $result = $this->eleService->requestToken($data);
+
+                // Create main transaction record
+                $transaction = Transaction::initialize([
+                    'transactable_type' => User::class,
+                    'transactable_id' => $user->id,
+                    'amount' => $validatedData['amount'],
+                    'type' => 'electricity',
+                    'kind' => 'debit',
+                    'status' => 'success',
+                    'payload' => [
+                        'meter_number' => $validatedData['meter_number'],
+                        'distribution_company' => $validatedData['distribution_company'],
+                        'type' => $validatedData['type'],
+                        'email' => $validatedData['email'],
+                        'tel' => $validatedData['tel']
+                    ],
+                    'reference' => $result->request_id
                 ]);
 
-                // Return success response
-                return response()->json(['status' => 'delivered', 'message' => 'Electricity purchase successful', 'result' => $result]);
-            } else {
-                // Return failure response
-                return response()->json(['status' => 'failed', 'message' => 'Electricity purchase failed', 'result' => $result]);
+                // Deduct amount from user's wallet
+                $currentBal = $userBalance - $validatedData['amount'];
+                $user->wallet->update(['balance' => $currentBal]);
+
+                // Create wallet transaction
+                WalletTransaction::create([
+                    'wallet_owner_id' => $user->id,
+                    'wallet_owner_type' => User::class,
+                    'wallet_id' => $user->wallet->id,
+                    'transaction_id' => $transaction->id,
+                    'amount' => $validatedData['amount'],
+                    'type' => 'debit',
+                    'description' => 'Electricity purchase for meter ' . $validatedData['meter_number'],
+                    'prev_balance' => $userBalance,
+                    'current_balance' => $currentBal
+                ]);
+
+
+
+
+                if (!$result || ($result->status ?? '') !== 'success') {
+                    throw new \Exception('Electricity purchase failed: ' . ($result->message ?? 'Unknown error'));
+                }
+
+                // Create electricity transaction record
+                ElectricityTransaction::create([
+                    'user_id' => $user->id,
+                    'transaction_id' => $transaction->id,
+                    'username' => $user->username,
+                    'product_name' => $validatedData['distribution_company'],
+                    'type' => $validatedData['type'],
+                    'tel' => $validatedData['tel'],
+                    'amount' => $validatedData['amount'],
+                    'reference' => $transaction->reference,
+                    'purchased_code' => $result->purchased_code ?? null,
+                    'response_description' => $result->response_description ?? 'Transaction successful',
+                    'transaction_date' => now(),
+                    'identity' => $validatedData['meter_number'],
+                    'prev_bal' => $userBalance,
+                    'current_bal' => $currentBal,
+                    'percent_profit' => $percentProfit,
+                    'status' => 'successful'
+                ]);
+
+                // Update main transaction status
+                $transaction->update([
+                    'status' => 'success',
+                    'provider_reference' => $result->purchased_code ?? null
+                ]);
+
+                // Commit transaction
+                \DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Electricity purchase successful',
+                    'data' => [
+                        'token' => $result->purchased_code ?? null,
+                        'amount' => $validatedData['amount'],
+                        'reference' => $transaction->reference,
+                        'meter_number' => $validatedData['meter_number']
+                    ]
+                ]);
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+
+                // Attempt to reverse wallet transaction if it was deducted
+                if (isset($user) && isset($userBalance)) {
+                    $user->wallet->update(['balance' => $userBalance]);
+                }
+
+                throw $e;
             }
+
         } catch (\Exception $e) {
-            // Handle any errors
-            return response()->json(['status' => 'failed', 'message' => 'Error during API request', 'exception' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -606,7 +631,7 @@ class utilitiesPaymentController extends Controller
                 User::where('id', $user->id)->update(['account_balance' => $currentBal]);
 
                 // Insert transaction data into the tv_transactions table
-                TvTransactions::create([
+                TvTransaction::create([
                     'username'       => $user->username,
                     'api_response'   => $result['response_description'] ?? 'No description provided',
                     'network'        => $subscription_type,
@@ -750,7 +775,7 @@ class utilitiesPaymentController extends Controller
                 $percentProfit = $amount - $finalAmount;
 
                 // Log the transaction
-                TvTransactions::create([
+                TvTransaction::create([
                     'username'       => $user->username,
                     'api_response'   => $result['response_description'] ?? 'No description provided',
                     'network'        => $subscription_type,
@@ -761,7 +786,7 @@ class utilitiesPaymentController extends Controller
                     'identity'       => $result['content']['transactions']['product_name'] ?? 'Unknown Product',
                     'prev_bal'       => $userBalance,
                     'current_bal'    => $currentBal,
-                    'percent_profit' => $percentProfit, // Store the actual profit amount
+                    'percent_profit' => $percentProfit,
                     'status'         => 'successful',
                 ]);
 
@@ -772,7 +797,7 @@ class utilitiesPaymentController extends Controller
                 return response()->json(['status' => 'failed', 'message' => Str::upper($serviceID) . ' Subscription failed', 'result' => $result]);
             }
         } catch (\Exception $e) {
-            // Return error response
+            // Return error response with exception details
             return response()->json(['status' => 'failed', 'message' => 'Error during API request', 'exception' => $e->getMessage()]);
         }
     }
@@ -789,7 +814,6 @@ class utilitiesPaymentController extends Controller
 
         // Process form data
         $serviceID     = 'startimes';
-        $amount        = $request->input('amount');
         $billerCode    = $request->input('billerCode');
         $selectBouquet = $request->input('selectBouquet');
         $phone         = $request->input('tel');
@@ -807,6 +831,7 @@ class utilitiesPaymentController extends Controller
         $serviceMap = [
             'startimes' => 'Startime_Payment',
         ];
+        $amount        = null;
 
         // Initialize finalAmount with the original amount
         $finalAmount   = $amount;
@@ -888,7 +913,7 @@ class utilitiesPaymentController extends Controller
 
                 $percentProfit = $amount - $finalAmount;
                 // Log transaction
-                TvTransactions::create([
+                TvTransaction::create([
                     'username'       => $user->username,
                     'api_response'   => $result['response_description'] ?? 'No description provided',
                     'network'        => $selectBouquet,
@@ -906,7 +931,7 @@ class utilitiesPaymentController extends Controller
                 // Return success response
                 return response()->json(['status' => 'initiated', 'message' => 'Startimes Subscription successful', 'result' => $result]);
             } else {
-                // Return error response
+                // Return error if API request failed
                 return response()->json(['status' => 'failed', 'message' => 'Startimes Subscription failed', 'result' => $result]);
             }
         } catch (\Exception $e) {
@@ -1031,7 +1056,7 @@ class utilitiesPaymentController extends Controller
                 User::where('id', $user->id)->update(['account_balance' => $currentBal]);
 
                 // Save transaction in the database
-                TvTransactions::create([
+                TvTransaction::create([
                     'username'       => $user->username,
                     'api_response'   => $result['response_description'] ?? 'No description provided',
                     'network'        => $result['content']['transactions']['product_name'] ?? 'Unknown Product',
@@ -1422,9 +1447,9 @@ class utilitiesPaymentController extends Controller
             $transaction = InsuranceTransaction::where('reference', $requestId)->first();
         }
 
-        // If still not found, try to find it in the EletricityTransaction table
+        // If still not found, try to find it in the ElectricityTransaction table
         if (! $transaction) {
-            $transaction = EletricityTransaction::where('reference', $requestId)->first();
+            $transaction = ElectricityTransaction::where('reference', $requestId)->first();
         }
 
         // Check if the transaction was found

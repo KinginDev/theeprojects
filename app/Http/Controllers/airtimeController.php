@@ -1,205 +1,136 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Classes\Helper;
+use App\Enums\ProductTypes;
 use App\Models\AirtimeTransaction;
 use App\Models\Notification;
-use App\Models\percentage;
-use App\Models\Setting;
+use App\Models\Product;
+use App\Models\Transaction;
 use App\Models\User;
-use DateTime;
-use DateTimeZone;
-use GuzzleHttp\Client;
+use App\Services\AirtimeService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
-class airtimeController extends Controller
+class AirtimeController extends Controller
 {
+    private $airtimeService;
+
+    public function __construct(AirtimeService $airtimeService)
+    {
+        $this->airtimeService = $airtimeService;
+
+    }
+
     public function indexAction()
     {
+        $user = Auth::guard('web')->user();
 
-        $user = Auth::user();
-
-        if ($user) {
-            // Retrieve all data for the user from the database
-            $userData      = User::where('id', $user->id)->first();
-            $notifications = Notification::where('username', $user->username)->get();
-
-            return view('users-layout.dashboard.airtime', [
-                'userData'      => $userData,
-                'notifications' => $notifications,
-            ], );
-        }
+        return view('users-layout.dashboard.airtime', [
+            'userData'        => $user,
+            'notifications'   => Notification::where('username', $user->username)->get(),
+            'airtimeProducts' => Product::where('type', ProductTypes::AIRTIME->value)
+                ->where('is_active', true)
+                ->get(),
+        ]);
     }
 
     public function purchaseAirtime(Request $request)
     {
-        // Validate the request
-        $request->validate([
-            'network' => 'required|in:mtn,airtel,glo,etisalat', // Validate that network is one of the specified values
-            'amount'  => 'required|numeric',
+        $airtimeProducts = Product::where('type', ProductTypes::AIRTIME->value)
+            ->where('is_active', true)
+            ->get();
+
+        $validated = $request->validate([
+            'network' => "required|in:{$airtimeProducts->pluck('slug')->implode(',')}",
+            'amount'  => 'required|numeric|min:1',
             'tel'     => 'required|numeric',
         ]);
 
-        // Get the input values
-        $network = $request->input('network');
-        $amount  = $request->input('amount');
-        $tel     = $request->input('tel');
+        $user = Auth::guard('web')->user();
 
-        // Retrieve the authenticated user
-        $user        = Auth::user();
-        $userBalance = $user->account_balance;
-        $email       = $user->email;
-        $username    = $user->username;
+        $slug = $validated['network'];
 
-        // User types
-        $smart_earners   = $user->smart_earners;
-        $topuser_earners = $user->topuser_earners;
-        $api_earners     = $user->api_earners;
+        $this->airtimeService->setSettings(Helper::merchant()->preferences);
 
-        // Get percentage rates for services
-        $getPercentage = Percentage::select('smart_earners_percent', 'topuser_earners_percent', 'api_earners_percent')
-            ->whereIn('service', [
-                'Airtel_Airtime_VTU',
-                'GLO_Airtime_VTU',
-                'MTN_Airtime_VTU',
-                '9mobile_Airtime_VTU',
-            ])->get();
-
-        // Check if the user has sufficient funds
-        if ($userBalance < $amount) {
+        if ($user->wallet->balance < $validated['amount']) {
             return response()->json(['status' => 'failed', 'message' => 'Insufficient funds']);
         }
 
-        // Convert the network to lowercase to match the service ID
-        $serviceID = strtolower($network);
+        $finalAmount = $this->airtimeService->calculateFinalAmount(
+            $user,
+            $validated['amount'],
+            $slug
+        );
 
-        // Map service IDs to the corresponding service names in the database
-        $serviceMap = [
-            'airtel'   => 'Airtel_Airtime_VTU',
-            'mtn'      => 'MTN_Airtime_VTU',
-            'glo'      => 'GLO_Airtime_VTU',
-            'etisalat' => '9mobile_Airtime_VTU', // Etisalat now called 9mobile
-        ];
+        if (! $finalAmount) {
+            return response()->json(['status' => 'failed', 'message' => 'Invalid user type or network']);
+        }
 
-        // Initialize finalAmount with the original amount
-        $finalAmount = $amount;
+        $requestId = $this->airtimeService->generateRequestId();
 
-        // Apply the correct deduction based on the user's role
-        if (isset($serviceMap[$serviceID])) {
-            $serviceName = $serviceMap[$serviceID];
-            $percentage  = Percentage::where('service', $serviceMap[$serviceID])->first();
+        try {
+            DB::beginTransaction();
 
-            if ($percentage) {
-                if ($smart_earners == 1) {
-                    $smartEarnerPercent = $percentage->smart_earners_percent;
-                    $deduction          = ($smartEarnerPercent / 100) * $amount;
-                    $finalAmount        = $amount - $deduction;
-                } elseif ($topuser_earners == 1) {
-                    $topuserEarnerPercent = $percentage->topuser_earners_percent;
-                    $deduction            = ($topuserEarnerPercent / 100) * $amount;
-                    $finalAmount          = $amount - $deduction;
-                } elseif ($api_earners == 1) {
-                    $apiEarnerPercent = $percentage->api_earners_percent;
-                    $deduction        = ($apiEarnerPercent / 100) * $amount;
-                    $finalAmount      = $amount - $deduction;
-                } else {
-                    return response()->json(['status' => 'failed', 'message' => 'No valid earner type found']);
-                }
+            $product = Product::where('slug', $validated['network'])
+                ->where('type', ProductTypes::AIRTIME->value)
+                ->first();
+            $result = $this->airtimeService->purchaseAirtime(
+                $requestId,
+                $product->service_name,
+                $validated['amount'],
+                $validated['tel'],
+                $user->email
+            );
 
-                // Round up the final amount to the nearest whole number
-                $finalAmount = ceil($finalAmount);
-            } else {
-                return response()->json(['status' => 'failed', 'message' => 'No percentage data found for the selected network']);
+            if (! isset($result['content']['transactions']['status']) || $result['content']['transactions']['status'] !== 'delivered') {
+                throw new \Exception('Airtime purchase failed');
             }
-        } else {
-            return response()->json(['status' => 'failed', 'message' => 'Invalid service ID']);
-        }
 
-        // Generate request ID
-        $current_time     = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time   = $current_time->format("YmdHis");
-        $additional_chars = "89htyyo";
-        $request_id       = $formatted_time . $additional_chars;
-        while (strlen($request_id) < 12) {
-            $request_id .= "x";
-        }
+            $verificationResult = $this->airtimeService->verifyTransaction($requestId);
 
-        // Get settings
-        $configuration = Setting::first();
-        $apiUrl        = $configuration->airtime_api_url;
+            if ($verificationResult['code'] !== '000') {
+                throw new \Exception('Transaction verification failed');
+            }
 
-        // Set up Guzzle client and API request
-        $client = new Client();
-        $data   = [
-            "request_id" => $request_id,
-            "serviceID"  => $serviceID,
-            "amount"     => $amount, // Use finalAmount after deduction and rounding
-            "phone"      => $tel,
-            "email"      => $email,
-        ];
+            $currentBalance = $user->wallet->balance - $finalAmount;
+            $user->wallet()->update(['balance' => $currentBalance]);
 
-        \Log::info("Data:", $data);
-
-        // Make API call
-        $response = $client->post($apiUrl, [
-            'headers' => [
-                'api-key'      => $configuration->api_key,
-                'secret-key'   => $configuration->secret_key,
-                'Content-Type' => 'application/json',
-            ],
-            'json'    => $data,
-        ]);
-
-        // Decode the API response
-        $result = json_decode($response->getBody());
-
-        // Check if the transaction was successful
-        if (isset($result->content->transactions->status) && $result->content->transactions->status === "delivered") {
-            // Deduct finalAmount from user balance
-            User::where('id', $user->id)->update(['account_balance' => $userBalance - $finalAmount]);
-            $currentBal = $userBalance - $finalAmount;
-
-            // Requery the transaction status using the request_id
-            $requeryUrl      = $configuration->transaction_api_url;
-            $requeryResponse = $client->post($requeryUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
+            $transaction = Transaction::initialize([
+                'transactable_type' => User::class,
+                'transactable_id'   => $user->id,
+                'kind'              => 'debit',
+                'amount'            => $validated['amount'],
+                'type'              => ProductTypes::AIRTIME->value,
+                'payload'           => [
+                    'User Name'        => $user->name,
+                    'User Email'       => $user->email,
+                    'description'      => "{$product->service_name} Airtime Purchase",
+                    "Transaction Type" => 'Airtime Purchase',
                 ],
-                'json'    => ['request_id' => $request_id],
             ]);
 
-            $requeryResult = json_decode($requeryResponse->getBody());
+            AirtimeTransaction::create([
+                'user_id'        => $user->id,
+                'transaction_id' => $transaction->id,
+                'network'        => $product->service_name,
+                'tel'            => $validated['tel'],
+                'amount'         => $validated['amount'],
+                'prev_bal'       => $user->wallet->balance,
+                'current_bal'    => $currentBalance,
+                'percent_profit' => $validated['amount'] - $finalAmount,
+                'reference'      => $verificationResult['content']['transactions']['transactionId'],
+                'identity'       => $verificationResult['content']['transactions']['unique_element'],
+                'status'         => $verificationResult['content']['transactions']['status'],
+            ]);
 
-            // Check if the requery was successful
-            if ($requeryResult->code === "000") {
-                // Save transaction in the database
-                $transaction                 = new AirtimeTransaction();
-                $transaction->username       = $username;
-                $transaction->network        = $network;
-                $transaction->tel            = $tel;
-                $transaction->amount         = $amount;
-                $transaction->prev_bal       = $userBalance;
-                $transaction->current_bal    = $currentBal;
-                $transaction->percent_profit = $amount - $finalAmount;
-                $transaction->reference      = $requeryResult->content->transactions->transactionId;
-                $transaction->identity       = $requeryResult->content->transactions->unique_element;
-                $transaction->status         = $requeryResult->content->transactions->status;
-                $transaction->created_at     = now();
-                $transaction->updated_at     = now();
-                $transaction->save();
+            DB::commit();
+            return response()->json(['status' => 'delivered', 'message' => 'Airtime purchase successful', 'result' => $result]);
 
-                // Return success response
-                return response()->json(['status' => 'delivered', 'message' => 'Airtime purchase successful', 'result' => $result]);
-            } else {
-                // Return requery error
-                return response()->json(['status' => 'failed', 'message' => 'Failed to verify transaction status', 'result' => $requeryResult]);
-            }
-        } else {
-            // Return purchase failure
-            return response()->json(['status' => 'failed', 'message' => 'Airtime purchase failed', 'result' => $result]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => 'failed', 'message' => $e->getMessage()]);
         }
     }
 }

@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Manage Merchant Pages')
 
@@ -137,11 +137,11 @@
     </div>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             let selectedPageId, selectedAction;
 
             // Handle status toggle button click
-            $('.status-toggle').on('click', function() {
+            $('.status-toggle').on('click', function () {
                 selectedPageId = $(this).data('id');
                 selectedAction = $(this).data('status');
 
@@ -159,20 +159,20 @@
                 $('#alert-container').fadeIn();
 
                 // Auto-hide after 5 seconds
-                setTimeout(function() {
+                setTimeout(function () {
                     $('#alert-container').fadeOut();
                 }, 10000);
             }
 
             // Confirm action
-            $('#confirmAction').on('click', function() {
+            $('#confirmAction').on('click', function () {
                 $.ajax({
                     url: `/admin/update-page-status/${selectedPageId}/${selectedAction}`,
                     type: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.success) {
                             showAlert('Page status updated successfully.', 'success');
                             window.location.reload();
@@ -180,7 +180,7 @@
                             showAlert('An error occurred while updating the status.', 'danger');
                         }
                     },
-                    error: function() {
+                    error: function () {
                         showAlert('An error occurred while updating the status.', 'danger');
                     }
                 });

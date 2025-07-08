@@ -6,6 +6,7 @@ use App\Models\Merchant;
 use App\Models\MerchantUser;
 use App\Models\Referral;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +20,7 @@ class authController extends Controller
 {
     public function login()
     {
-        return view('users-layout.auth-login');
+        return view('users-layout.auth.login');
     }
 
     public function loginAction(Request $request)
@@ -46,12 +47,22 @@ class authController extends Controller
             $credentials = ['username' => $login, 'password' => $password];
         }
 
+         $remember = $request->boolean('remember', false);
+
         // Attempt login with the provided credentials
-        if (! Auth::guard('web')->attempt($credentials, $request->remember)) {
+        if (! Auth::guard('web')->attempt($credentials, $remember)) {
             // Authentication successful
 
-            return redirect(route('login'))->withErrors(['error' => 'Login details are not valid']);
+            return redirect(route('users.login',[
+            'slug' => Helper::merchant()->slug,
+        ]))->withErrors(['error' => 'Login details are not valid']);
         }
+
+        $user = User::find(Auth::guard('web')->id());
+
+        $user->update([
+            'remember_token' => $request->input('remember') ? Hash::make($user->email . $user->password) : null,
+        ]);
 
         $user = Auth::guard('web')->user();
         session(['username' => $user->username]);
@@ -63,7 +74,7 @@ class authController extends Controller
 
     public function registration()
     {
-        return view('users-layout.auth-register');
+        return view('users-layout.auth.register');
     }
 
     public function registrationAction(Request $request)
@@ -74,9 +85,6 @@ class authController extends Controller
             'username'    => 'required|unique:users',
             'email'       => 'required|email|unique:users',
             'tel'         => [
-                'required',
-                'max:20',
-                'min:6',
                 'unique:users',
             ],
             'address'     => 'required',
@@ -99,46 +107,50 @@ class authController extends Controller
 
         $randomString = strtoupper(substr(md5(mt_rand()), 0, 8));
         $latestUserId = User::max('id') + 1;
-        $userId       = "UID{$randomString}{$latestUserId}";
+        $referrerId   = "UID{$randomString}{$latestUserId}";
 
         // Data array for creating a new user
         $data = [
-            'name'           => $request->fname,
-            'user_id'        => $userId,
-            'username'       => $request->username,
-            'address'        => $request->address,
-            'email'          => $request->email,
-            'tel'            => $request->tel,
-            'password'       => Hash::make($request->password),
-            'role'           => $role,
-            'cal'            => $cal,
-            'refferal_user'  => $refferal_user ?? null,
-            'refferal'       => $refferal,
-            'refferal_bonus' => $refferal_bonus,
+            'name'            => $request->fname,
+            'referrer_id'     => $referrerId,
+            'username'        => $request->username,
+            'address'         => $request->address,
+            'email'           => $request->email,
+            'tel'             => $request->tel,
+            'password'        => Hash::make($request->password),
+            'role'            => $role,
+            'cal'             => $cal,
+            'refferal_user'   => $refferal_user ?? null,
+            'refferal'        => $refferal,
+            'refferal_bonus'  => $refferal_bonus,
+            'smart_earners'  => 0.0,
+            'api_earners'    => 0.0,
+            'topuser_earners' => 0.0,
         ];
 
         // Create the user
         $user = User::create($data);
 
-        if (! $user) {
-            return redirect()->back()->withErrors(['error' => 'User registration failed']);
+        event (new Registered($user));
+
+        if (!$user) {
+            return redirect()->back()->withErrors(['error' => 'Failed to create account. Please try again.'])->withInput();
         }
 
         // Handle referral logic if there's a referral user
         if ($refferal_user) {
-            $referrer = User::where('user_id', $refferal_user)->first();
+            $referrer = User::where('username', $refferal_user)->first();
             if ($referrer) {
-                $referrer->increment('refferal');
                 Referral::create([
-                    'user_id'           => $referrer->user_id,
-                    'referral_user_id'  => $user->user_id,
+                    'referrer_id'       => $referrer->id,
+                    'referred_id'       => $user->id,
                     'referral_username' => $user->username,
                 ]);
             }
         }
 
         $merchant = Helper::merchant();
-        if (! $merchant) {
+        if (!$merchant) {
             $merchant = Merchant::where('slug', $request->merchant_slug)->first();
         }
 
@@ -147,18 +159,21 @@ class authController extends Controller
             ->where('merchant_id', $merchant->id)
             ->first();
 
-        if (! $merchantUser) {
+        if (!$merchantUser) {
             MerchantUser::create([
                 'merchant_id' => $merchant->id,
                 'user_id'     => $user->id,
             ]);
         }
 
+        // Send email verification notification
+        event(new Registered($user));
+
         Auth::guard('web')->login($user);
 
-        return redirect(route('users.login', [
+        return redirect(route('users.verification.notice', [
             'slug' => $merchant->slug,
-        ]))->with('success', 'Registration successful, login to access the dashboard.');
+        ]))->with('resend', 'Please check your email to verify your account.');
     }
 
     public function forget_password()
@@ -244,6 +259,32 @@ class authController extends Controller
         return redirect()->route('login')->with('success', 'Your password has been reset successfully!');
     }
 
+    /**
+     * Send a verification email to the user.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function sendVerificationEmail(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+
+        if (! $user) {
+            return redirect()->back()->withErrors(['message' => 'You must be logged in to request a verification email.']);
+        }
+
+        if($user->hasVerifiedEmail()) {
+            return redirect()->route('users.dashboard', [
+                'slug' => Helper::merchant()->slug,
+            ])->with('message', 'Your email is already verified.');
+        }
+
+        // Send the email verification notification
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('resent', 'Verification link sent to your email.');
+    }
+
     public function showResetForm(Request $request)
     {
         $email = $request->query('email');
@@ -262,6 +303,6 @@ class authController extends Controller
         session()->regenerateToken();
 
         // Redirect the user to the login page
-        return redirect(route('login'));
+        return redirect(route('home'))->with('success', 'You have been logged out successfully.');
     }
 }

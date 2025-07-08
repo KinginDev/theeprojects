@@ -2,30 +2,6 @@
 </div>
 <!-- MOdal for Send-->
 
-<script>
-    // Get session lifetime from Laravel (using @php to inject it if you want to make it dynamic)
-    let inactivityTime = 5 * 60 * 1000; // Convert minutes to milliseconds
-    let timeout;
-
-    // Function to reset the inactivity timer
-    function resetTimer() {
-        clearTimeout(timeout);
-        timeout = setTimeout(logoutUser, inactivityTime); // Log out the user after timeout
-    }
-
-    // Function to log out the user
-    function logoutUser() {
-        window.location.href = '{{ route("logout") }}'; // Laravel logout route
-    }
-
-    // Reset timer on user activity (mouse movement, key press, etc.)
-    document.addEventListener('mousemove', resetTimer);
-    document.addEventListener('keypress', resetTimer);
-    document.addEventListener('click', resetTimer);
-
-    // Initialize the inactivity timer
-    resetTimer();
-</script>
 
 <!-- JAVASCRIPT -->
 {{-- <script src="https://code.jquery.com/jquery-3.7.1.js"></script> --}}

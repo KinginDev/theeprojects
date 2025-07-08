@@ -2,14 +2,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\AirtimeTransaction;
-use App\Models\dataTransactions;      // Import the TvTransactions model
-use App\Models\EducationTransaction;  // Import the TvTransactions model
-use App\Models\EletricityTransaction; // Import the TvTransactions model
-use App\Models\FundTransaction;       // Import the TvTransactions model
-use App\Models\InsuranceTransaction;  // Import the TvTransactions model
-use App\Models\Notification;          // Import the TvTransactions model
-use App\Models\Setting;               // Import the TvTransactions model
-use App\Models\TvTransactions;        // Import the TvTransactions model
+use App\Models\DataTransaction;        // Import the TvTransaction model
+use App\Models\EducationTransaction;   // Import the TvTransaction model
+use App\Models\ElectricityTransaction; // Import the TvTransaction model
+use App\Models\FundTransaction;        // Import the TvTransaction model
+use App\Models\InsuranceTransaction;   // Import the TvTransaction model
+use App\Models\Notification;           // Import the TvTransaction model
+use App\Models\Setting;                // Import the TvTransaction model
+use App\Models\TvTransaction;          // Import the TvTransaction model
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,12 +21,12 @@ class transactionController extends Controller
         // Retrieve the requestId from the query parameters
         $requestId = $request->query('hash');
 
-        // Attempt to find the transaction in the TvTransactions table
-        $transaction = TvTransactions::where('reference', $requestId)->first();
+        // Attempt to find the transaction in the TvTransaction table
+        $transaction = TvTransaction::where('reference', $requestId)->first();
 
         // Check if the transaction was found
         if (! $transaction) {
-            $transaction = dataTransactions::where('reference', $requestId)->first();
+            $transaction = DataTransaction::where('reference', $requestId)->first();
         }
 
         if (! $transaction) {
@@ -34,7 +34,7 @@ class transactionController extends Controller
         }
 
         if (! $transaction) {
-            $transaction = EletricityTransaction::where('reference', $requestId)->first();
+            $transaction = ElectricityTransaction::where('reference', $requestId)->first();
         }
 
         if (! $transaction) {
@@ -93,26 +93,26 @@ class transactionController extends Controller
         return response()->json($transactions);
     }
 
-    public function fetchDataTransactions()
+    public function fetchDataTransaction()
     {
-        $user             = Auth::user();
-        $dataTransactions = dataTransactions::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
+        $user            = Auth::user();
+        $DataTransaction = DataTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
             ->get();
-        return response()->json($dataTransactions);
+        return response()->json($DataTransaction);
     }
 
     public function fetchElectricityTransactions()
     {
         $user                    = Auth::user();
-        $electricityTransactions = EletricityTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
+        $electricityTransactions = ElectricityTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
             ->get();
         return response()->json($electricityTransactions);
     }
 
-    public function fetchTvTransactions()
+    public function fetchTvTransaction()
     {
         $user           = Auth::user();
-        $tvTransactions = TvTransactions::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
+        $tvTransactions = TvTransaction::where('username', $user->username)->orderBy('created_at', 'desc') // or 'transaction_date'
             ->get();
         return response()->json($tvTransactions);
     }
@@ -169,16 +169,16 @@ class transactionController extends Controller
 
         // Fetch data from each table where username matches the authenticated user
         $airtimeTransactions     = AirtimeTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $dataTransactions        = dataTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $DataTransaction         = DataTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
         $educationTransactions   = EducationTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $electricityTransactions = EletricityTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $electricityTransactions = ElectricityTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
         $fundTransactions        = FundTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
         $insuranceTransactions   = InsuranceTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
-        $tvTransactions          = TvTransactions::where('username', $username)->orderBy('created_at', 'desc')->get();
+        $tvTransactions          = TvTransaction::where('username', $username)->orderBy('created_at', 'desc')->get();
 
         // Combine the transactions into a single collection and sort them by creation date
         $allTransactions = $airtimeTransactions
-            ->merge($dataTransactions)
+            ->merge($DataTransaction)
             ->merge($educationTransactions)
             ->merge($electricityTransactions)
             ->merge($fundTransactions)

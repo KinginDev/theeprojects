@@ -3,6 +3,8 @@ namespace App\Models;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use App\Notifications\MerchantVerify;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class Merchant extends User
 {
@@ -27,6 +29,16 @@ class Merchant extends User
             'id',
             'user_id'
         );
+    }
+
+    public function sendEmailVerificationNotification(){
+        $this->notify(new MerchantVerify());
+    }
+
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+        return redirect('/merchant/dashboard');
     }
 
     /**
@@ -76,10 +88,15 @@ class Merchant extends User
         $merchant->slug     = Str::slug($data['name']);
         $merchant->phone    = $data['phone'] ?? null;
         $merchant->password = bcrypt($data['password']);
-        $merchant->domain   = str_replace(' ', '_', strtolower($merchant->name)) . '.' . env('APP_DOMAIN', self::APP_DOMAIN);
+        $merchant->domain   = strtolower($merchant->slug) . '.' . env('APP_DOMAIN', self::APP_DOMAIN);
         $merchant->save();
 
         return $merchant;
+    }
+
+    public function balance()
+    {
+        return $this->wallet->balance;
     }
 
     public static function boot()

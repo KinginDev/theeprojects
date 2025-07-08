@@ -11,6 +11,7 @@ class Transaction extends Model
         'transactable_type', // 'App\Models\Merchant' or 'App\Models\User'
         'transactable_id',   // merchant_id or user_id
         'amount',
+        'kind',               // 'credit' or 'debit'
         'type',               // transaction type (airtime, data, tv, etc.)
         'status',             // 'pending', 'success', 'failed'
         'payload',            // transaction details as JSON
@@ -18,16 +19,19 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'amount'  => 'decimal:2',
-        'payload' => 'array',
+        'amount'     => 'decimal:2',
+        'payload'    => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
      * Get the owner of the transaction (merchant or user)
      */
-    public function transactable(): MorphTo
+
+    public function owner()
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'transactable_type', 'transactable_id');
     }
 
     public static function initialize($data)
@@ -47,8 +51,10 @@ class Transaction extends Model
             'amount'             => $data['amount'],
             'type'               => $data['type'] ?? 'general',
             'status'             => 'pending',
+            'kind'               => $data['kind'] ?? 'credit', // default to credit
             'payload'            => $data['payload'],
             'provider_reference' => $data['provider_reference'] ?? null,
+            'provider'           => $data['provider'] ?? null,
         ]);
         $transaction->reference = 'TRX' . strtoupper(uniqid());
         $transaction->save();
@@ -66,4 +72,9 @@ class Transaction extends Model
             }
         });
     }
+
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return $value ? $value->format('Y-m-d H:i:s') : null;
+    // }
 }

@@ -33,7 +33,7 @@
                     <div class="col-lg-8 mx-auto">
                         <div class="card">
                             <div class="card-body">
-                                <form action="{{ route('adminupdates.profile', $user->id) }}" method="POST">
+                                <form action="{{ route('merchant.update.user', $user->id) }}" method="POST">
                                     @csrf
                                     @method('PUT')
 

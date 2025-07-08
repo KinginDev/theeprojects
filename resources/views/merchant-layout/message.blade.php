@@ -1,4 +1,4 @@
-@extends('admin-layout.layouts.app')
+@extends('merchant-layout.layouts.app')
 
 @section('title', 'Dashboard Page')
 
@@ -41,13 +41,13 @@
                                 <div class="card moni-card br-2">
                                     <div class="d-flex justify-content-between">
                                         <div class="h3">AIRTIME TOPUP PERCENTAGE</div>
-                                        <a href="{{ route('add.charge') }}"><button class="btn btn-primary">ADD TOPUP PERCENTAGE +</button></a>
-                                      </div>
+                                        <a href="{{ route('add.charge') }}"><button class="btn btn-primary">ADD TOPUP
+                                                PERCENTAGE +</button></a>
+                                    </div>
 
 
                                     <div class="table-responsive">
-                                        <table
-                                            class="table table-centered mb-0 align-middle table-hover table-nowrap"
+                                        <table class="table table-centered mb-0 align-middle table-hover table-nowrap"
                                             id="example">
                                             <thead class="table-light">
                                                 <tr>
@@ -105,21 +105,22 @@
                                             <tbody>
                                                 <?php $i = 1; ?>
                                                 @foreach ($message_user as $transaction)
-                                                    <tr>
-                                                        <td>
+                                                                <tr>
+                                                                    <td>
 
-                                                            <h6 class="mb-0"><?php echo $i++; ?></h6>
-                                    </div>
+                                                                        <h6 class="mb-0"><?php    echo $i++; ?></h6>
+                                                    </div>
 
-                                    </td>
-                                    <td>{{ $transaction->name }}</td>
-                                    <td>{{ $transaction->username }}</td>
+                                                    </td>
+                                                    <td>{{ $transaction->name }}</td>
+                                                    <td>{{ $transaction->username }}</td>
 
 
 
-                                    <td class="status-pending"><a href="message/user/{{ $transaction->id }}"><button class="btn btn-primary">Message User</button></a></td>
-                                    </tr>
-                                    @endforeach
+                                                    <td class="status-pending"><a href="message/user/{{ $transaction->id }}"><button
+                                                                class="btn btn-primary">Message User</button></a></td>
+                                                    </tr>
+                                                @endforeach
                                     </tbody><!-- end tbody -->
                                     </table> <!-- end table -->
                                 </div>
