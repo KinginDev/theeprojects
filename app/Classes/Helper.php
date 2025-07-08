@@ -2,35 +2,52 @@
 namespace App\Classes;
 
 use App\Models\Setting;
+use App\Models\Merchant;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Helper
 {
     public static function merchant()
     {
-        $merchant = app('currentMerchant') ?? null;
-        if (! $merchant) {
-            // Try to identify merchant from the host
-            $host = request()->getHost();
-            $merchant = \App\Models\Merchant::where('domain', $host)->first();
+        // First check if we already have the merchant in the app container
+        if (app()->has('currentMerchant')) {
+            return app('currentMerchant');
+        }
 
-            // If still not found, try subdomain
-            if (!$merchant) {
-                $hostParts = explode('.', $host);
-                if (count($hostParts) > 1) {
-                    $subdomain = $hostParts[0];
-                    $merchant = \App\Models\Merchant::where('slug', $subdomain)->first();
+        // Try to identify merchant from the host
+        $host = request()->getHost();
+        $appDomain = config('app.domain');
+
+        // If we're on the main app domain, return null (no merchant context)
+        if ($host === $appDomain) {
+            return null;
+        }
+
+        // Check for custom domain
+        $merchant = Merchant::where('domain', $host)->first();
+
+        // If not found by domain, try subdomain
+        if (!$merchant) {
+            $hostParts = explode('.', $host);
+            if (count($hostParts) > 1) {
+                $subdomain = $hostParts[0];
+
+                // Don't process 'www' as a subdomain
+                if ($subdomain !== 'www') {
+                    $merchant = Merchant::where('slug', $subdomain)->first();
                 }
             }
-
-            // If merchant found, set it for the app
-            if ($merchant) {
-                app()->instance('currentMerchant', $merchant);
-            } else {
-                return abort(403, 'Merchant not found');
-            }
         }
-        return $merchant;
+
+        // If merchant found, store it in the container
+        if ($merchant) {
+            app()->instance('currentMerchant', $merchant);
+            return $merchant;
+        }
+
+        // No merchant found for this domain/subdomain
+        return null;
     }
 
     public static function generateBreadCrumbs($currentPageName)

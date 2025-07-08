@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth'              => \App\Http\Middleware\Authenticate::class,
             'verified'         => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'redirect.www'     => \App\Http\Middleware\RedirectWwwToNonWww::class,
+            'require.merchant' => \App\Http\Middleware\RequireMerchantDomain::class,
         ]);
 
         // Apply www redirect middleware first, then identify.merchant middleware
