@@ -23,10 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'identify.merchant' => \App\Http\Middleware\IdentifyMerchant::class, #get merchant for each user
             'auth'              => \App\Http\Middleware\Authenticate::class,
             'verified'         => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'redirect.www'     => \App\Http\Middleware\RedirectWwwToNonWww::class,
         ]);
 
-        // Apply identify.merchant middleware globally to ensure it runs early
+        // Apply www redirect middleware first, then identify.merchant middleware
         $middleware->web([
+            \App\Http\Middleware\RedirectWwwToNonWww::class,
             \App\Http\Middleware\IdentifyMerchant::class,
         ]);
     })
@@ -49,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // For subdomains, handle user authentication
             if ($isSubdomain && $guard === 'web') {
                 $subdomain = $hostParts[0];
-                $merchant = \App\Models\Merchant::where('domain', $host)
+                $merchant = Merchant::where('domain', $host)
                     ->orWhere('slug', $subdomain)
                     ->first();
 

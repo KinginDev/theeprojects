@@ -24,7 +24,7 @@ class IdentifyMerchant {
             return $next($request);
         }
 
-        // Check for custom domain or subdomain
+        // Check for custom domain
         $merchant = Merchant::where('domain', $host)->first();
 
         // If not found by domain, check if it's a subdomain
@@ -32,15 +32,17 @@ class IdentifyMerchant {
             $hostParts = explode('.', $host);
             $subdomain = $hostParts[0];
 
-            $merchant = Merchant::where('slug', $subdomain)->first();
+            // Don't process 'www' as a subdomain
+            if ($subdomain !== 'www') {
+                $merchant = Merchant::where('slug', $subdomain)->first();
+            }
         }
 
-
-        if ( $merchant ) {
-            app()->instance( 'currentMerchant', $merchant );
-            View::share( 'currentMerchant', $merchant );
+        if ($merchant) {
+            app()->instance('currentMerchant', $merchant);
+            View::share('currentMerchant', $merchant);
         }
 
-        return $next( $request );
+        return $next($request);
     }
 }
