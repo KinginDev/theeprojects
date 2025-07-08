@@ -86,13 +86,16 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
     });
 
 
- // CMS - Pages
+
+
+    // CMS - Pages
     Route::resource('pages', PageController::class);
 
     // CMS - Menus
     Route::resource('menus', MenuController::class);
 
     // CMS - Menu Items
+    Route::get('menus/sort', [MenuItemController::class, 'sort'])->name('menu-items.sort');
     Route::post('menus/{menu}/items', [MenuItemController::class, 'store'])->name('menu-items.store');
     Route::put('menu-items/{menuItem}', [MenuItemController::class, 'update'])->name('menu-items.update');
     Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->name('menu-items.destroy');

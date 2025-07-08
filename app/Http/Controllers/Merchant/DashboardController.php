@@ -576,9 +576,9 @@ class DashboardController extends Controller
 
     public function edit_profile()
     {
-        $user = Auth::user();
+        $merchant = Auth::guard('merchant')->user();
         return view('merchant-layout.editUser', [
-            'user' => $user,
+            'merchant' => $merchant,
         ]);
     }
 
@@ -807,60 +807,27 @@ class DashboardController extends Controller
             'upgrade'  => 'nullable|integer',
         ]);
 
-        $user = User::findOrFail($id);
+        $merchant = Merchant::findOrFail($id);
         $isUpgradedToTopUser = false;
 
-        if (isset($validatedData['upgrade'])) {
-            // Reset all earners to 0 initially
-            $user->smart_earners   = 0;
-            $user->topuser_earners = 0;
-            $user->api_earners     = 0;
-
-            // Set the specific earner field based on upgrade value
-            switch ($validatedData['upgrade']) {
-                case 1:
-                    $user->smart_earners = 1;
-                    break;
-                case 2:
-                    $user->topuser_earners = 1;
-                    $isUpgradedToTopUser   = true; // Mark as upgraded to topuser
-                    break;
-                case 3:
-                    $user->api_earners = 1;
-                    break;
-                default:
-                    // Handle unexpected values if necessary
-                    break;
-            }
+        if($request->filled('name')){
+            $merchant->name = $validatedData['name'];
+            $merchant->slug = \Str::slug($validatedData['name']);
+            $merchant->domain = $merchant->external_domain_active ? $merchant->domain : \Str::slug($validatedData['name']) . '.' . config('app.domain');
         }
 
-        // Update basic user information
-        $user->name    = $validatedData['name'];
-        $user->tel     = $validatedData['tel'];
-        $user->address = $validatedData['address'];
+        // $merchant->tel     = $validatedData['tel'];
+        // $merchant->address = $validatedData['address'];
 
         // If password is provided, hash and update it
         if ($request->filled('password')) {
-            $user->password = Hash::make($validatedData['password']);
+            $merchant->password = Hash::make($validatedData['password']);
         }
 
-        // Check if the user was referred and upgraded to topuser
-        if ($isUpgradedToTopUser && ! empty($user->refferal_user)) {
-            // Find the referrer
-            $referrer = User::where('username', $user->refferal_user)->first();
-
-            if ($referrer) {
-                // Add 500 to the referrer's balance
-                $referrer->wallet->increment('balance', 500);
-                $referrer->increment('refferal_bonus', 500);
-            }
-        }
-
-        // Save the user
-        $user->save();
+        $merchant->save();
 
         // Redirect or return response
-        return redirect()->route('merchant.edit.user', ['id' => $user->id])
+        return redirect()->route('merchant.edit_profile')
             ->with('success', 'User updated successfully.');
     }
 

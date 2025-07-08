@@ -126,4 +126,20 @@ class MenuItemController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function sort(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:merchant_menu_items,id',
+            'items.*.order' => 'required|integer|min:0',
+        ]);
+
+        foreach ($request->input('items') as $item) {
+            $menuItem = MerchantMenuItem::find($item['id']);
+            $menuItem->update(['order' => $item['order']]);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

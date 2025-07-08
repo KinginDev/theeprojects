@@ -14,7 +14,7 @@ class Merchant extends User
 
     protected $with = ['preferences'];
 
-    protected $appends = ['external_domain'];
+    protected $appends = ['external_domain_active'];
 
     protected const APP_DOMAIN = 'theeprojects.test';
 
@@ -95,16 +95,17 @@ class Merchant extends User
         }
 
         // Update or add the getExternalDomainActiveAttribute method
-        public function getExternalDomainActiveAttribute()
-        {
-            // Check if external_domain_active is set in attributes
-            if (isset($this->attributes['external_domain_active'])) {
-                return (bool)$this->attributes['external_domain_active'];
-            }
-
-            // Default to false
-            return false;
+    public function getExternalDomainActiveAttribute()
+    {
+        // Check if external_domain_active is set in attributes
+        if (isset($this->attributes['external_domain_active'])) {
+            return (bool)$this->attributes['external_domain_active'];
         }
+
+        // Default to false
+        return false;
+    }
+
     /**
      * Check if a domain belongs to this merchant
      */

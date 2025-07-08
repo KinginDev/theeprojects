@@ -15,15 +15,17 @@ class MenuController extends Controller
         $menus = MerchantMenu::where('merchant_id', Auth::guard('merchant')->id())
             ->orderBy('name')
             ->paginate(10);
-
-
-        return view('merchant-layout.cms.menus.index', compact('menus'));
+            $locations = ['header', 'footer', 'sidebar'];
+        return view('merchant-layout.cms.menus.create', compact('menus', 'locations'));
     }
 
     public function create()
     {
         $locations = ['header', 'footer', 'sidebar'];
-        return view('merchant-layout.cms.menus.create', compact('locations'));
+        $menus = MerchantMenu::where('merchant_id', Auth::guard('merchant')->id())
+            ->orderBy('name')
+            ->paginate(10);
+        return view('merchant-layout.cms.menus.create', compact('locations', 'menus'));
     }
 
     public function store(Request $request)
@@ -50,7 +52,7 @@ class MenuController extends Controller
             'is_active' => $request->input('is_active', true),
         ]);
 
-        return redirect()->route('merchant-layout.menus.index', $menu->id)
+        return redirect()->route('merchant.menus.index', $menu->id)
             ->with('success', 'Menu created successfully. Now add some items to it.');
     }
 
