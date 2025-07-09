@@ -189,4 +189,74 @@ class AuthController extends Controller {
         session()->regenerateToken();
         return redirect()->route( 'merchant.login' );
     }
+
+    public function subMerchantOnboardShowPage(Request $request, $token) {
+
+          $merchant = Merchant::where('token', $token)->first();
+        if(!$merchant->isSubMerchant()) {
+            return redirect()->route('merchant.dashboard')
+                ->withErrors(['error' => 'Merchant is not a sub-merchant']);
+        }
+        // Check if the merchant is authenticated
+
+        $parentMerchant  = $merchant->parentMerchant;
+        if (!$merchant) {
+            return redirect()->route('merchant.login')->withErrors(['message' => 'You must be logged in to access this page.']);
+        }
+
+        // Check if the merchant has completed onboarding
+        if ($merchant->onboarded_at) {
+            return redirect()->route('merchant.dashboard')->withErrors(['message' => 'You have already completed the onboarding process.']);
+        }
+
+        // Show the sub-merchant onboarding page
+        return view('merchant-layout.auth.sub-merchant-onboard', compact('merchant', 'parentMerchant'));
+    }
+
+    public function subMerchantOnboardNotice(Request $request) {
+        // Check if the merchant is authenticated
+        $merchant = Auth::guard('merchant')->user();
+
+
+        // Check if the merchant has completed onboarding
+        if ($merchant->onboarded_at) {
+            return redirect()->route('merchant.dashboard')->withErrors(['message' => 'You have already completed the onboarding process.']);
+        }
+
+        // Show the sub-merchant onboarding notice page
+        return view('merchant-layout.auth.sub-merchant-onboard-notice', compact('merchant'));
+    }
+
+    public function subMerchantOnboardStore(Request $request, $token) {
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:merchants,email',
+            'phone' => 'required|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
+            'permissions' => 'array',
+        ]);
+
+        // Find the merchant by token
+        $merchant = Merchant::where('token', $token)->first();
+        if (!$merchant) {
+            return redirect()->route('merchant.login')->withErrors(['message' => 'Invalid onboarding token.']);
+        }
+
+        // Create the sub-merchant
+        $subMerchant = new Merchant($request->only('name', 'email', 'phone', 'password'));
+        $subMerchant->password = Hash::make($request->password);
+        $subMerchant->parent_id = $merchant->id; // Set the parent merchant ID
+        $subMerchant->domain = $merchant->domain; // Set the domain to the parent's domain
+        $subMerchant->save();
+
+        // Assign permissions or roles if provided
+        if ($request->has('permissions')) {
+            $subMerchant->permissions = json_encode($request->permissions);
+            $subMerchant->save();
+        }
+
+        // Redirect to the dashboard with success message
+        return redirect()->route('merchant.dashboard')->with('success', 'Sub-merchant onboarded successfully!');
+    }
 }

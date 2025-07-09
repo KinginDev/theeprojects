@@ -159,6 +159,16 @@
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                     <i class="ri-bill-line"></i>
+                    <span>Sub Merchants</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="{{ route('merchant.manage-merchants') }}">View All</a></li>
+                    <li><a href="{{ route('merchant.manage-roles') }}">Roles</a></li>
+                    </ul>
+                </li>
+                 <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="ri-bill-line"></i>
                     <span>Contact Users</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
@@ -174,10 +184,9 @@
                     <ul class="sub-menu" aria-expanded="false">
                     <li><a href="{{ route('merchant.site_setting') }}">Site Setting</a></li>
                     <li><a href="{{ route('merchant.edit_profile') }}">Edit Profile</a></li>
-                    <li><a href="{{ route('merchant.add_account') }}">Add New User/Marchant</a></li>
-                    <li><a href="{{ route('merchant.marchant') }}">View Marchant</a></li>
-                    </ul>
+
                 </li>
+
                 <li class="menu-title">Others</li>
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">

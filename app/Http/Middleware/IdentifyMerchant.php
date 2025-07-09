@@ -27,6 +27,12 @@ class IdentifyMerchant {
         // Check for custom domain
         $merchant = Merchant::where('domain', $host)->first();
 
+
+        if($merchant->isSubMerchant() && !$merchant->onboarded_at) {
+            // If this is a sub-merchant, we can skip identifying a merchant
+            return $next($request);
+        }
+
         // If not found by domain, check if it's a subdomain
         if (!$merchant) {
             $hostParts = explode('.', $host);

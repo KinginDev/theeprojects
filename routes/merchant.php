@@ -5,6 +5,7 @@ use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\Merchant\AuthController;
 use App\Http\Controllers\Merchant\MenuController;
 use App\Http\Controllers\Merchant\PageController;
+use App\Http\Controllers\Merchant\UserController;
 use App\Http\Controllers\Merchant\MenuItemController;
 use App\Http\Controllers\Merchant\DashboardController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -22,6 +23,16 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
     Route::post('/forget/password', [AuthController::class, 'sendPasswordRequest'])->name('forget.password');
     Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('update.password');
+
+
+    Route::get('/merchant/submerchant-onboard/page/{token}', [AuthController::class, 'subMerchantOnboardShowPage'])
+    ->name('onboarding.page');
+
+     Route::get('/merchant/submerchant-onboard/notice/{token}', [AuthController::class, 'subMerchantOnboardNotice'])
+    ->name('onboarding.notice');
+    Route::post('/merchant/submerchant-onboard/store/{token}', [AuthController::class, 'subMerchantOnboardStore'])
+    ->name('onboarding.store');
+
 
     // Email verification routes for merchants
     Route::get('/email/verify', function () {
@@ -100,4 +111,57 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
     Route::put('menu-items/{menuItem}', [MenuItemController::class, 'update'])->name('menu-items.update');
     Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->name('menu-items.destroy');
     Route::post('menus/{menu}/reorder', [MenuItemController::class, 'reorder'])->name('menu-items.reorder');
+
+
+
+
+      // Sub-merchant management
+    Route::get('/sub-merchants', [UserController::class, 'manageMerchants'])
+        ->name('manage-merchants')
+        ->middleware('merchant.permission:manage_merchants');
+
+    Route::get('/sub-merchants/create', [UserController::class, 'createSubMerchantForm'])
+        ->name('create-sub-merchant-form')
+        ->middleware('merchant.permission:manage_merchants');
+
+    Route::post('/sub-merchants/store', [UserController::class, 'storeSubMerchant'])
+        ->name('store-sub-merchant')
+        ->middleware('merchant.permission:manage_merchants');
+
+    Route::get('/sub-merchants/edit/{id}', [UserController::class, 'editSubMerchant'])
+        ->name('edit-sub-merchant')
+        ->middleware('merchant.permission:manage_merchants');
+
+    Route::put('/sub-merchants/update/{id}', [UserController::class, 'updateSubMerchant'])
+        ->name('update-sub-merchant')
+        ->middleware('merchant.permission:manage_merchants');
+
+    Route::get('/sub-merchants/toggle-status/{id}', [UserController::class, 'toggleSubMerchantStatus'])
+        ->name('toggle-sub-merchant-status')
+        ->middleware('merchant.permission:manage_merchants');
+
+    // Role management
+    Route::get('/roles', [UserController::class, 'manageRoles'])
+        ->name('manage-roles')
+        ->middleware('merchant.permission:manage_roles');
+
+    Route::get('/roles/create', [UserController::class, 'createRoleForm'])
+        ->name('create-role-form')
+        ->middleware('merchant.permission:manage_roles');
+
+    Route::post('/roles/store', [UserController::class, 'storeRole'])
+        ->name('store-role')
+        ->middleware('merchant.permission:manage_roles');
+
+    Route::get('/roles/edit/{id}', [UserController::class, 'editRole'])
+        ->name('edit-role')
+        ->middleware('merchant.permission:manage_roles');
+
+    Route::post('/roles/update/{id}', [UserController::class, 'updateRole'])
+        ->name('update-role')
+        ->middleware('merchant.permission:manage_roles');
+
+    Route::delete('/roles/delete/{id}', [UserController::class, 'deleteRole'])
+        ->name('delete-role')
+        ->middleware('merchant.permission:manage_roles');
 });

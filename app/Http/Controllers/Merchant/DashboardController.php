@@ -816,8 +816,8 @@ class DashboardController extends Controller
             $merchant->domain = $merchant->external_domain_active ? $merchant->domain : \Str::slug($validatedData['name']) . '.' . config('app.domain');
         }
 
-        // $merchant->tel     = $validatedData['tel'];
-        // $merchant->address = $validatedData['address'];
+        $merchant->phone     = $validatedData['tel'];
+        $merchant->address = $validatedData['address'];
 
         // If password is provided, hash and update it
         if ($request->filled('password')) {

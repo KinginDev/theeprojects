@@ -15,7 +15,7 @@ use App\Http\Controllers\utilitiesPaymentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
-Route::middleware(['require.merchant'])->group(function () {
+Route::middleware(['identify.merchant','require.merchant'])->group(function () {
     // Handle custom domains
     Route::group([], function () {
 

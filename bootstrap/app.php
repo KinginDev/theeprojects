@@ -25,12 +25,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified'         => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'redirect.www'     => \App\Http\Middleware\RedirectWwwToNonWww::class,
             'require.merchant' => \App\Http\Middleware\RequireMerchantDomain::class,
+             'merchant.permission' => \App\Http\Middleware\MerchantPermission::class,
         ]);
 
         // Apply www redirect middleware first, then identify.merchant middleware
         $middleware->web([
             \App\Http\Middleware\RedirectWwwToNonWww::class,
-            \App\Http\Middleware\IdentifyMerchant::class,
+            // \App\Http\Middleware\IdentifyMerchant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
