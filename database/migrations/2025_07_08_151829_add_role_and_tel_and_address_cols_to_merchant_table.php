@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('merchants', function (Blueprint $table) {
             $table->unsignedBigInteger('parent_merchant_id')->nullable();
-            $table->string('address')->nullable()->after('phone');
 
             $table->foreign('parent_merchant_id')->references('id')->on('merchants')->onDelete('set null');
 
