@@ -1,5 +1,6 @@
 <ul class="navbar-nav">
     @foreach ($menuItems as $item)
+
         <li class="nav-item {{ count($item->children) > 0 ? 'dropdown' : '' }}">
             @if (count($item->children) > 0)
                 <a class="nav-link dropdown-toggle" href="{{ $item->full_url }}" id="navbarDropdown{{ $item->id }}"

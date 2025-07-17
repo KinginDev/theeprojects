@@ -22,7 +22,7 @@
     @stack('after_styles')
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
@@ -48,11 +48,11 @@
         </nav>
     </header>
 
-    <main class="site-content">
+    <main class="site-content flex-grow-1">
         @yield('content')
     </main>
 
-    <footer class="site-footer bg-dark text-white py-4 mt-5">
+    <footer class="site-footer bg-dark text-white py-4 mt-auto">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
