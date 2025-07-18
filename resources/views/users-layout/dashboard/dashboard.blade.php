@@ -374,7 +374,7 @@
                                                value="{{ url('/registration') . '?ref=' . (auth()->user()->user_id ?? 'defaultID') }}"
                                                readonly>
                                         <button class="btn btn-primary" type="button" id="copy_link_btn"
-                                                onclick="copyToClipboard('referral_link', 'copy_link_btn')">
+                                                onclick="copyToElementToClipboard('referral_link', 'copy_link_btn')">
                                             <i class="bi bi-clipboard me-1"></i>
                                             Copy
                                         </button>
@@ -388,7 +388,7 @@
                                                value="{{ auth()->user()->user_id ?? 'defaultID' }}"
                                                readonly>
                                         <button class="btn btn-primary" type="button" id="copy_code_btn"
-                                                onclick="copyToClipboard('referral_code', 'copy_code_btn')">
+                                                onclick="copyToElementToClipboard('referral_code', 'copy_code_btn')">
                                             <i class="bi bi-clipboard me-1"></i>
                                             Copy
                                         </button>
@@ -711,22 +711,6 @@
             document.getElementById('total').textContent = '₦' + total.toFixed(2);
         });
 
-        // Copy to clipboard function
-        function copyToClipboard(elementId, buttonId) {
-            const element = document.getElementById(elementId);
-            const button = document.getElementById(buttonId);
-            const originalText = button.innerHTML;
 
-            element.select();
-            document.execCommand('copy');
-
-            button.innerHTML = '<i class="bi bi-check2"></i> Copied!';
-            button.classList.add('btn-success');
-
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('btn-success');
-            }, 2000);
-        }
     </script>
 @endsection

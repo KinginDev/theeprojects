@@ -11,6 +11,9 @@ use App\Classes\Helper;
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Noty Notification -->
+    <link href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta/lib/noty.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta/lib/themes/mint.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: {{ $configuration->template_color ?? '#4F46E5' }};
@@ -304,50 +307,63 @@ use App\Classes\Helper;
         .success-animation {
             animation: pulse 0.5s ease-in-out;
         }
+
+        /* Chart animations */
+        #usageChart.success-animation {
+            position: relative;
+        }
+
+        #usageChart.success-animation::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: var(--card-border-radius);
+            animation: flash 0.8s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
     </style>
 @endsection
 
 @section('content')
-    <div class="main-content ">
+    <div class="main-content electricity-page">
         <div class="page-content">
             <div class="container-fluid">
-               <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h4 class="text-xl font-semibold mb-1">Buy Electricity</h4>
                         <p class="text-gray-500">Purchase electricity for your home</p>
                     </div>
                     {!! Helper::generateBreadCrumbs('Electricity') !!}
                 </div>
-            </div>
-        </div>
-<div class="container-fluid">
+
                 <div class="row">
+
+                    <!-- Wallet Balance Card -->
+                    <x-users.wallet-balance></x-users.wallet-balance>
                     <!-- Left Column: Purchase Form -->
                     <div class="col-lg-8">
-                        <!-- Wallet Balance Card -->
-                        <div class="wallet-balance mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <p class="text-white mb-1 opacity-90">Wallet Balance</p>
-                                    <h3 class="text-white mb-0">₦{{ number_format(auth()->user()->wallet->balance ?? 0, 2) }}</h3>
-                                </div>
-                                <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#fundWalletModal">
-                                    <span class="material-icons-round align-middle me-1" style="font-size: 18px;">add</span>
-                                    Fund Wallet
-                                </button>
-                            </div>
-                        </div>
+
 
                         <!-- Purchase Form Card -->
                         <div class="meter-info-card">
-                            <form id="electricityForm" class="custom-validation">
+                        <div class="custom-validation"></div>
+                            <form id="electricityForm" class="">
                                 @csrf
                                 <!-- Disco Selection -->
                                 <div class="mb-4">
                                     <label class="form-label">Select Distribution Company</label>
                                     <div class="disco-select">
                                         @foreach ($products as $product)
-                                            <div class="disco-option" data-disco="{{ $product->slug }}">
+                                            <div class="disco-option" data-disco="{{ $product->service_name }}">
                                                 <div class="disco-logo">
                                                     <img src="{{ asset('assets/images/brands/' . $product->name . '.png') }}"
                                                          alt="{{ $product->name }}" class="img-fluid">
@@ -390,7 +406,7 @@ use App\Classes\Helper;
                                     <span class="material-icons-round me-2">bolt</span>
                                     Verify Meter
                                 </button>
-                            </form
+                            </form>
                         </div>
 
                         <!-- Meter Information Card -->
@@ -398,7 +414,7 @@ use App\Classes\Helper;
                             <h5 class="mb-4">Meter Information</h5>
                             <div class="meter-info-item">
                                 <span class="text-gray-600">Customer Name</span>
-                                <span class="text-gray-800" id="customerName"></span>
+                                <span class="text-gray-800 fw-bold" id="customerName"></span>
                             </div>
                             <div class="meter-info-item">
                                 <span class="text-gray-600">Address</span>
@@ -406,542 +422,243 @@ use App\Classes\Helper;
                             </div>
                             <div class="meter-info-item">
                                 <span class="text-gray-600">Meter Number</span>
-                                <span class="text-gray-800" id="meterNumberConfirm"></span>
+                                <span class="text-gray-800 fw-bold" id="meterNumberConfirm"></span>
                             </div>
                         </div>
 
-                        <!-- Quick Amounts -->
-                        <div class="mb-4">
-                            <label class="form-label">Quick Amounts</label>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <button type="button" class="btn btn-outline-primary quick-amount" data-amount="1000">₦1,000</button>
-                                <button type="button" class="btn btn-outline-primary quick-amount" data-amount="2000">₦2,000</button>
-                                <button type="button" class="btn btn-outline-primary quick-amount" data-amount="5000">₦5,000</button>
-                                <button type="button" class="btn btn-outline-primary quick-amount" data-amount="10000">₦10,000</button>
-                            </div>
-                        </div>
+                        <div id="purchaseOptions" style="display: none;">
+                            <!-- Quick Amounts -->
+                            <div class="meter-info-card mb-4">
+                                <h5 class="mb-3">Select Amount</h5>
+                                <div class="d-flex gap-3 flex-wrap mb-3">
+                                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="1000">₦1,000</button>
+                                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="2000">₦2,000</button>
+                                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="5000">₦5,000</button>
+                                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="10000">₦10,000</button>
+                                    <input type="hidden" id="amount" name="amount" value="">
+                                </div>
 
-                        <!-- Auto Purchase Toggle -->
-                        <div class="auto-purchase-toggle">
-                            <div>
-                                <input type="checkbox" id="autoPurchase" class="toggle-switch">
-                                <label for="autoPurchase" class="ms-2">Auto Purchase</label>
-                            </div>
-                            <small class="text-muted">Enable to automatically purchase electricity when balance is low</small>
-                        </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">₦</span>
+                                    <input type="number" class="form-control" id="customAmount" placeholder="Enter custom amount">
+                                </div>
 
-                        <!-- Submit Purchase Button -->
-                        <button type="button" class="submit-button" id="submitPurchase">
-                            <span class="material-icons-round me-2">shopping_cart</span>
-                            Purchase Electricity
-                        </button>
+                                <div class="input mb-3">
+                                    <input type="text" class="form-control" id="phone" placeholder="enter phone number">
+                                </div>
+
+
+                            </div>
+
+                            <!-- Submit Purchase Button -->
+                            <button type="submit" class="submit-button" id="submitPurchase">
+                                <span class="material-icons-round me-2">shopping_cart</span>
+                                Purchase Electricity
+                            </button>
+                        </div>
                     </div>
 
 
-                </div>
+
                  <!-- Right Column: Usage Chart & Recent Purchases -->
-                    <div class="col-lg-4">
-                        <!-- Usage Chart Card -->
-                        <div class="meter-info-card mb-4">
-                            <h5 class="mb-4">Usage Chart</h5>
-                            <div id="usageChart"></div>
-                        </div>
+                <div class="col-lg-4">
+                    <!-- Usage Chart Card -->
+                    <div class="meter-info-card mb-4">
+                        <h5 class="mb-4">Purchase Chart</h5>
+                        <div id="usageChart"></div>
+                    </div>
 
-                        <!-- Recent Purchases Card -->
-                        <div class="recent-purchases meter-info-card">
-                            <h5 class="mb-4">Recent Purchases</h5>
-                            <div class="purchase-item">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-gray-600">Electricity Purchase</span>
-                                        <span class="text-gray-800">₦2,500</span>
-                                    </div>
-                                    <div class="text-muted">Meter: 1234567890</div>
+                    <!-- Recent Purchases Card -->
+                    <div class="recent-purchases meter-info-card">
+                        <h5 class="mb-4">Recent Purchases</h5>
+
+                        @forelse($recentTransactions  as $transaction)
+                        <div class="purchase-item" id="{{ $transaction->id }}" data-id="{{ $transaction->id }}" data-token="{{ $transaction->purchased_code }}">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-gray-600">{{Str::title($transaction->meter_type)}} Purchase</span>
+                                    <span class="text-gray-800">₦{{ number_format($transaction->amount ?? 0) }}</span>
                                 </div>
-                                <div>
-                                    <span class="badge bg-success">Delivered</span>
-                                </div>
+                                <div class="text-muted"> Meter No.: {{ $transaction->identity ?? 'N/A' }}</div>
+
                             </div>
-                            <div class="purchase-item">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-gray-600">Electricity Purchase</span>
-                                        <span class="text-gray-800">₦1,000</span>
-                                    </div>
-                                    <div class="text-muted">Meter: 0987654321</div>
-                                </div>
-                                <div>
-                                    <span class="badge bg-danger">Failed</span>
-                                </div>
-                            </div>
-                            <div class="purchase-item">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-gray-600">Electricity Purchase</span>
-                                        <span class="text-gray-800">₦3,000</span>
-                                    </div>
-                                    <div class="text-muted">Meter: 1122334455</div>
-                                </div>
-                                <div>
-                                    <span class="badge bg-success">Delivered</span>
-                                </div>
+                            <div>
+                                <span class="badge {{ $transaction->status === 'pending' ? 'bg-warning' : ($transaction->status === 'delivered' ? 'bg-success' : 'bg-danger') }}">{{ Str::title($transaction->status) }}</span>
                             </div>
                         </div>
-                    </div>
-            </div>
-    </div>
-        <!-- Success Modal -->
-        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="successModalLabel">Success</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Your transaction was successful!</p>
-                        <p>Transaction ID: <strong id="transactionId"></strong></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                        @empty
+                        <div class="text-muted">No recent purchases found.</div>
+                        @endforelse
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Error Modal -->
-        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>There was an error processing your request. Please try again.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- End Preloader -->
+  @include('users-layout.dashboard.partials.electricity.modals')
 
-    <script>
-        $(document).ready(function () {
-            // Show preloader before making the API call
-            $('#checkBillcode').on('click', function (event) {
-                event.preventDefault();
-
-                var billerCode = $('#meter_number').val();
-                var meterType = $('#meterType').val();
-                var distributionCompany = $('#distributionCompany').val();
-
-                if (!billerCode || !meterType || !distributionCompany) {
-                    Swal.fire({
-                        title: "Error",
-                        text: "Please fill in all required fields.",
-                        icon: "error"
-                    });
-                    return;
-                }
-
-                // Show preloader
-                $('#preloader').css('display', 'flex');
-
-                $.ajax({
-                    url: '/tv/billcode/electricity',
-                    method: 'POST',
-                    data: {
-                        billerCode: billerCode,
-                        meterType: meterType,
-                        distributionCompany: distributionCompany,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function (response) {
-                        console.log(response.result);
-
-                        // Ensure response.data exists
-                        if (response && response.result) {
-                            if (response.result.content.error) {
-                                Swal.fire({
-                                    title: "Error",
-                                    text: response.message ||
-                                        "Invalid Meter Number. Please check and Try Again",
-                                    icon: "error"
-                                });
-                            } else {
-                                $('#customerName').text(response.result.content
-                                    .Customer_Name);
-                                $('#currentBouquet').text(response.result.content.Address);
-                                $('#dueDate').text(response.result.content
-                                    .Customer_District);
-                                $('#renewalAmount').text(response.result.content
-                                    .Meter_Number);
-
-                                // Show the inner form and card
-                                $('.hideInnerForm').css("display", "block");
-                                $('.electricCard').css("display", "block");
-
-                            }
-
-                        } else {
-                            Swal.fire({
-                                title: "Error",
-                                text: response.message ||
-                                    "Invalid response structure received.",
-                                icon: "error"
-                            });
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error: ' + error);
-                        console.error('Status: ' + status);
-                        console.error(xhr.responseText);
-                        Swal.fire({
-                            title: "An error occurred",
-                            text: "Please try again.",
-                            icon: "error"
-                        });
-                    },
-                    complete: function () {
-                        // Hide preloader after the response
-                        $('#preloader').hide();
-                    }
-                });
-            });
-
-            // Handle form submission
-            $('#submitForm').click(function (e) {
-                e.preventDefault();
-
-                Swal.fire({
-                    title: "Processing...",
-                    html: "Please wait...",
-                    timer: 2000,
-                    timerProgressBar: true,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                }).then((result) => {
-                    if (result.dismiss === Swal.DismissReason.timer) {
-                        // Show preloader before submission
-                        $('#preloader').css('display', 'flex');
-                        var formData = $('#electricityForm').serialize();
-                        console.log(formData);
-
-                        $.ajax({
-                            url: '{{ route('users.electricity.purchase', [
-        'slug' => Helper::merchant()->slug
-    ]) }}',
-                            type: 'POST',
-                            data: formData,
-                            dataType: 'json',
-                            success: function (response) {
-                                console.log(response);
-                                if (response.status === 'delivered') {
-                                    Swal.fire({
-                                        title: "Success!!!",
-                                        text: response.message,
-                                        icon: "success"
-                                    }).then(() => {
-                                        window.location.href =
-                                            '/success?hash=' +
-                                            encodeURIComponent(
-                                                response.result
-                                                    .requestId);
-                                    });
-                                } else if (response.status === 'failed') {
-                                    Swal.fire({
-                                        title: "Error, Please try again!!!",
-                                        text: response.message,
-                                        icon: "error"
-                                    });
-                                }
-                            },
-                            error: function (error) {
-                                console.log(error);
-                                Swal.fire({
-                                    title: "An error occurred",
-                                    text: "Please try again.",
-                                    icon: "error"
-                                });
-                            },
-                            complete: function () {
-                                // Hide preloader after form submission is complete
-                                $('#preloader').hide();
-                            }
-                        });
-                    }
-                });
-            });
-        });
-    </script>
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta/lib/noty.js"></script>
 <script>
+  window.ElectricityConfig = {
+    validateMeterUrl: "{{ route('users.meterCodeVerify') }}",
+    purchaseUrl:      "{{ route('users.electricity.purchase') }}",
+    csrfToken:        "{{ csrf_token() }}",
+    chartData: @json($trxChartData),
+    chartLabels: {!! $chartLabels !!},
+    chartValues: {!! $chartValues !!}
+  };
+</script>
+
+<script src="{{ asset('assets/js/users/electricity-chart.js') }}"></script>
+<script src="{{ asset('assets/js/users/electricity.js') }}"></script>
+
+<script>
+// Fix for accessibility issue with modal focus management
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize variables
-    let selectedDisco = '';
-    let meterInfo = null;
+  const successModal = document.getElementById('successModal');
+  const errorModal = document.getElementById('errorModal');
+  let previousFocusElement = null;
 
-    // Chart initialization
-    const options = {
-        series: [{
-            name: 'Usage',
-            data: [30, 40, 35, 50, 49, 60, 70],
-        }],
-        chart: {
-            type: 'line',
-            height: 300,
-            toolbar: {
-                show: false
-            },
-            zoom: {
-                enabled: false
-            }
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 3,
-            colors: [getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()]
-        },
-        grid: {
-            borderColor: 'var(--gray-200)',
-            strokeDashArray: 4,
-            padding: {
-                left: 20,
-                right: 20
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        markers: {
-            size: 6,
-            colors: ['#fff'],
-            strokeColors: 'var(--primary-color)',
-            strokeWidth: 3
-        },
-        tooltip: {
-            theme: 'dark',
-            y: {
-                formatter: function(value) {
-                    return value + ' kWh'
-                }
-            }
-        },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.7,
-                opacityTo: 0.3,
-                stops: [0, 90, 100]
-            }
-        },
-        xaxis: {
-            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            labels: {
-                style: {
-                    colors: 'var(--gray-500)'
-                }
-            },
-            axisBorder: {
-                show: false
-            }
-        },
-        yaxis: {
-            labels: {
-                formatter: function(value) {
-                    return value + ' kWh';
-                },
-                style: {
-                    colors: 'var(--gray-500)'
-                }
-            }
+  // Save original aria-hidden values before Bootstrap modifies them
+  document.querySelectorAll('[aria-hidden]').forEach(element => {
+    if (!element.hasAttribute('data-aria-hidden-original')) {
+      element.setAttribute('data-aria-hidden-original', element.getAttribute('aria-hidden'));
+    }
+  });
+
+  // Helper function to manage focus trapping in a modal
+  function setupFocusTrap(modal) {
+    if (!modal) return;
+
+    // Get focusable elements, prioritize those with data-focus-first attribute
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    let firstFocusableElement = null;
+    let lastFocusableElement = null;
+
+    // First check if we have an element with data-focus-first
+    const priorityFocusElement = modal.querySelector('[data-focus-first="true"]');
+    if (priorityFocusElement) {
+      firstFocusableElement = priorityFocusElement;
+    } else if (focusableElements.length > 0) {
+      firstFocusableElement = focusableElements[0];
+    }
+
+    if (focusableElements.length > 0) {
+      lastFocusableElement = focusableElements[focusableElements.length - 1];
+    }
+
+    if (!firstFocusableElement || !lastFocusableElement) return;
+
+    // Setup keyboard handling for focus trapping
+    modal.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstFocusableElement) {
+            lastFocusableElement.focus();
+            e.preventDefault();
+          }
+        } else { // Just Tab
+          if (document.activeElement === lastFocusableElement) {
+            firstFocusableElement.focus();
+            e.preventDefault();
+          }
         }
-    };
+      } else if (e.key === 'Escape') {
+        // Close the modal on Escape
+        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+        if (bootstrapModal) {
+          bootstrapModal.hide();
+        }
+      }
+    });
+  }
 
-    const chart = new ApexCharts(document.querySelector("#usageChart"), options);
-    chart.render();
+  // Setup focus management for success modal
+  if (successModal) {
+    setupFocusTrap(successModal);
 
-    // Event Handlers
-    const discoOptions = document.querySelectorAll('.disco-option');
-    const meterNumberInput = document.querySelector('#meter_number');
-    const checkBillcodeBtn = document.querySelector('#checkBillcode');
-    const submitPurchaseBtn = document.querySelector('#submitPurchase');
-    const quickAmountBtns = document.querySelectorAll('.quick-amount');
+    successModal.addEventListener('shown.bs.modal', function() {
+      // Store the previously focused element
+      previousFocusElement = document.activeElement;
 
-    // Disco selection
-    discoOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            discoOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            selectedDisco = this.dataset.disco;
-            document.querySelector('#distributionCompany').value = selectedDisco;
+      // Focus on the download receipt button when the modal is shown
+      const downloadBtn = document.getElementById('downloadReceipt');
+      if (downloadBtn) {
+        downloadBtn.focus();
+      }
+    });
+
+    successModal.addEventListener('hidden.bs.modal', function() {
+      // Delay the focus restoration to ensure the modal is fully closed
+      setTimeout(() => {
+        // Return focus to the element that had focus before the modal opened
+        if (previousFocusElement && typeof previousFocusElement.focus === 'function') {
+          previousFocusElement.focus();
+          // Set a small timeout to ensure focus isn't immediately moved elsewhere
+          setTimeout(() => {
+            if (document.activeElement !== previousFocusElement) {
+              previousFocusElement.focus();
+            }
+          }, 10);
+        }
+
+        // Reset document-wide aria-hidden attributes that might have been set by Bootstrap
+        document.querySelectorAll('[aria-hidden="true"]').forEach(element => {
+          // Only remove aria-hidden from elements that are outside our modal
+          // and are not naturally aria-hidden elements
+          if (!successModal.contains(element) && element !== successModal &&
+              !element.hasAttribute('data-aria-hidden-original')) {
+            element.removeAttribute('aria-hidden');
+          }
         });
+      }, 100);
+    });
+  }
+
+  // Setup focus management for error modal
+  if (errorModal) {
+    setupFocusTrap(errorModal);
+
+    errorModal.addEventListener('shown.bs.modal', function() {
+      // Store the previously focused element
+      previousFocusElement = document.activeElement;
+
+      // Focus on the retry button when the modal is shown
+      const retryBtn = document.getElementById('retryButton');
+      if (retryBtn) {
+        retryBtn.focus();
+      }
     });
 
-    // Meter number validation
-    let meterValidationTimeout;
-    meterNumberInput.addEventListener('input', function() {
-        clearTimeout(meterValidationTimeout);
-        const value = this.value.trim();
-
-        // Update UI to show typing state
-        this.classList.remove('is-valid', 'is-invalid');
-        if (value) {
-            this.classList.add('is-validating');
-
-            // Debounce the validation
-            meterValidationTimeout = setTimeout(() => validateMeterNumber(value), 500);
-        } else {
-            this.classList.remove('is-validating');
-        }
-
-        validateForm();
-    });
-
-    // Quick amount selection
-    quickAmountBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            quickAmountBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            document.querySelector('#amount').value = this.dataset.amount;
-            validateForm();
-        });
-    });
-
-    // Form validation
-    function validateForm() {
-        const selectedDisco = document.querySelector('.disco-option.active');
-        const meterNumber = meterNumberInput.value.trim();
-        const amount = document.querySelector('#amount').value;
-
-        submitPurchaseBtn.disabled = !selectedDisco || !meterNumber || !amount || meterNumberInput.classList.contains('is-invalid');
-    }
-
-    // Meter number validation
-    async function validateMeterNumber(meterNumber) {
-        try {
-            const selectedDisco = document.querySelector('.disco-option.active');
-            if (!selectedDisco) {
-                showError('Please select a disco first');
-                return;
+    errorModal.addEventListener('hidden.bs.modal', function() {
+      // Delay the focus restoration to ensure the modal is fully closed
+      setTimeout(() => {
+        // Return focus to the element that had focus before the modal opened
+        if (previousFocusElement && typeof previousFocusElement.focus === 'function') {
+          previousFocusElement.focus();
+          // Set a small timeout to ensure focus isn't immediately moved elsewhere
+          setTimeout(() => {
+            if (document.activeElement !== previousFocusElement) {
+              previousFocusElement.focus();
             }
-
-            // Show loading state
-            meterNumberInput.classList.add('is-validating');
-            checkBillcodeBtn.disabled = true;
-
-            // API call would go here
-            // For demo, simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Success
-            meterNumberInput.classList.remove('is-validating', 'is-invalid');
-            meterNumberInput.classList.add('is-valid');
-
-            // Update chart with new data
-            updateUsageHistory(meterNumber);
-
-        } catch (error) {
-            meterNumberInput.classList.remove('is-validating', 'is-valid');
-            meterNumberInput.classList.add('is-invalid');
-            showError('Invalid meter number');
-        } finally {
-            checkBillcodeBtn.disabled = false;
-        }
-    }
-
-    // Update usage history chart
-    function updateUsageHistory(meterNumber) {
-        // Simulate API call
-        const mockData = [25, 35, 30, 45, 40, 50, 45];
-        chart.updateSeries([{
-            data: mockData
-        }]);
-    }
-
-    // Helper functions
-    function validateForm() {
-        if (!selectedDisco) {
-            showError('Please select a distribution company');
-            return false;
+          }, 10);
         }
 
-        if (!document.querySelector('input[name="type"]:checked')) {
-            showError('Please select a meter type');
-            return false;
-        }
-
-        if (!meterNumberInput.value || meterNumberInput.value.length < 10) {
-            showError('Please enter a valid meter number');
-            return false;
-        }
-
-        return true;
-    }
-
-    function displayMeterInfo(info) {
-        document.querySelector('#customerName').textContent = info.Customer_Name;
-        document.querySelector('#customerAddress').textContent = info.Address;
-        document.querySelector('#meterNumberConfirm').textContent = info.Meter_Number;
-    }
-
-    // Utility Functions
-    function showError(message) {
-        // Create error notification
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'alert alert-danger alert-dismissible fade show';
-        errorDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-
-        // Insert at top of form
-        const form = document.querySelector('form');
-        form.insertBefore(errorDiv, form.firstChild);
-
-        // Auto dismiss after 5 seconds
-        setTimeout(() => {
-            errorDiv.classList.remove('show');
-            setTimeout(() => errorDiv.remove(), 150);
-        }, 5000);
-    }
-
-    // Format currency
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: 'NGN'
-        }).format(amount);
-    }
-
-    // Add loading spinner
-    function showLoading(element) {
-        const spinner = document.createElement('span');
-        spinner.className = 'spinner-border spinner-border-sm ms-1';
-        spinner.setAttribute('role', 'status');
-        spinner.innerHTML = '<span class="visually-hidden">Loading...</span>';
-        element.appendChild(spinner);
-        return () => spinner.remove();
-    }
-
-    // Auto-resize meter input
-    meterNumberInput.addEventListener('input', function() {
-        this.style.width = Math.max(8, this.value.length) + 'ch';
+        // Reset document-wide aria-hidden attributes that might have been set by Bootstrap
+        document.querySelectorAll('[aria-hidden="true"]').forEach(element => {
+          // Only remove aria-hidden from elements that are outside our modal
+          // and are not naturally aria-hidden elements
+          if (!errorModal.contains(element) && element !== errorModal &&
+              !element.hasAttribute('data-aria-hidden-original')) {
+            element.removeAttribute('aria-hidden');
+          }
+        });
+      }, 100);
     });
-
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+  }
 });
 </script>
 @endsection

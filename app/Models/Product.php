@@ -23,4 +23,14 @@ class Product extends Model
         'type'      => ProductTypes::class,
         'is_active' => 'boolean',
     ];
+
+   public function percentage()
+    {
+        return $this->hasOne(Percentage::class);
+    }
+
+    public function merchantPreferences()
+    {
+        return $this->hasMany(MerchantPreferences::class, 'merchant_id');
+    }
 }

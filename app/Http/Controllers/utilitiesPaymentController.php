@@ -2,9 +2,11 @@
 namespace App\Http\Controllers;
 
 use DateTime;
+use stdClass;
 use DateTimeZone;
 use App\Models\User;
 use GuzzleHttp\Client;
+use App\Classes\Helper;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\Referral;
@@ -14,7 +16,7 @@ use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\TvTransaction;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -24,246 +26,17 @@ use App\Services\ElectricityService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ElectricityTransaction;
 
-class utilitiesPaymentController extends Controller
+class UtilitiesPaymentController extends Controller
 {
 
-    public function __construct(ElectricityService $eleService)
+    public function __construct(ElectricityService $electricityService)
     {
-        $this->eleService = $eleService;
-    }
-    public function indexElectricity()
-    {
-        $user = Auth::user();
-
-        if ($user) {
-            // Retrieve all data for the user from the database
-            $userData      = User::where('id', $user->id)->first();
-            $notifications = Notification::where('username', $user->username)->get();
-
-            $products = Product::where('type', 'electricity')
-                ->where('is_active', true)
-                ->get();
-
-            return view('users-layout.dashboard.electricity', [
-                'userData'      => $userData,
-                'notifications' => $notifications,
-                'products'     => $products
-            ]);
-        }
+        $this->electricityService = $electricityService;
+        $merchantConfig = Helper::merchant();
+        $preferences = $merchantConfig->preferences;
+        $this->electricityService->setSettings($preferences);
     }
 
-    public function purchaseElectricity(Request $request)
-    {
-        try {
-            // Get active electricity products
-            $products = Product::where('type', 'electricity')
-                ->where('is_active', true)
-                ->get();
-
-            $serviceNames = $products->pluck('name')->map(function ($name) {
-                return Str::lower($name);
-            })->implode(',');
-
-            // Validate request
-            $validatedData = $request->validate([
-                'distribution_company' => 'required|in:' . $serviceNames,
-                'type' => 'required|in:prepaid,postpaid',
-                'meter_number' => 'required',
-                'tel' => 'required|numeric',
-                'email' => 'required|email',
-                'amount' => 'required|numeric|min:1',
-            ]);
-
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User not authenticated'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Get user's wallet balance
-            $userBalance = $user->wallet->balance ?? 0;
-            if ($userBalance < $validatedData['amount']) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Insufficient wallet balance'
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Get profit percentage from settings
-            $profitPercentage = percentage::where('action', 'electricity')->first();
-            $percentageValue = $profitPercentage ? $profitPercentage->percentage : 0;
-            $finalAmount = $validatedData['amount'] * (1 - ($percentageValue / 100));
-            $percentProfit = $validatedData['amount'] - $finalAmount;
-
-            // Begin transaction
-            \DB::beginTransaction();
-            try {
-                // Verify meter number first
-                $verificationData = [
-                    'meter_number' => $validatedData['meter_number'],
-                    'service_name' => $validatedData['distribution_company'],
-                    'type' => $validatedData['type']
-                ];
-
-                $verificationResult = $this->eleService->verifyMeterNumber($verificationData);
-                if (!$verificationResult || ($verificationResult['status'] ?? '') !== 'success') {
-                    throw new \Exception('Meter number verification failed: ' . ($verificationResult['message'] ?? 'Unknown error'));
-                }
-
-
-                $data = [
-                    'meter_number' => $validatedData['meter_number'],
-                    'service_name' => $validatedData['distribution_company'],
-                    'type' => $validatedData['type'],
-                    'email' => $validatedData['email'],
-                    'tel' => $validatedData['tel'],
-                    'amount' => $finalAmount
-                ];
-
-                $result = $this->eleService->requestToken($data);
-
-                // Create main transaction record
-                $transaction = Transaction::initialize([
-                    'transactable_type' => User::class,
-                    'transactable_id' => $user->id,
-                    'amount' => $validatedData['amount'],
-                    'type' => 'electricity',
-                    'kind' => 'debit',
-                    'status' => 'success',
-                    'payload' => [
-                        'meter_number' => $validatedData['meter_number'],
-                        'distribution_company' => $validatedData['distribution_company'],
-                        'type' => $validatedData['type'],
-                        'email' => $validatedData['email'],
-                        'tel' => $validatedData['tel']
-                    ],
-                    'reference' => $result->request_id
-                ]);
-
-                // Deduct amount from user's wallet
-                $currentBal = $userBalance - $validatedData['amount'];
-                $user->wallet->update(['balance' => $currentBal]);
-
-                // Create wallet transaction
-                WalletTransaction::create([
-                    'wallet_owner_id' => $user->id,
-                    'wallet_owner_type' => User::class,
-                    'wallet_id' => $user->wallet->id,
-                    'transaction_id' => $transaction->id,
-                    'amount' => $validatedData['amount'],
-                    'type' => 'debit',
-                    'description' => 'Electricity purchase for meter ' . $validatedData['meter_number'],
-                    'prev_balance' => $userBalance,
-                    'current_balance' => $currentBal
-                ]);
-
-
-
-
-                if (!$result || ($result->status ?? '') !== 'success') {
-                    throw new \Exception('Electricity purchase failed: ' . ($result->message ?? 'Unknown error'));
-                }
-
-                // Create electricity transaction record
-                ElectricityTransaction::create([
-                    'user_id' => $user->id,
-                    'transaction_id' => $transaction->id,
-                    'username' => $user->username,
-                    'product_name' => $validatedData['distribution_company'],
-                    'type' => $validatedData['type'],
-                    'tel' => $validatedData['tel'],
-                    'amount' => $validatedData['amount'],
-                    'reference' => $transaction->reference,
-                    'purchased_code' => $result->purchased_code ?? null,
-                    'response_description' => $result->response_description ?? 'Transaction successful',
-                    'transaction_date' => now(),
-                    'identity' => $validatedData['meter_number'],
-                    'prev_bal' => $userBalance,
-                    'current_bal' => $currentBal,
-                    'percent_profit' => $percentProfit,
-                    'status' => 'successful'
-                ]);
-
-                // Update main transaction status
-                $transaction->update([
-                    'status' => 'success',
-                    'provider_reference' => $result->purchased_code ?? null
-                ]);
-
-                // Commit transaction
-                \DB::commit();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Electricity purchase successful',
-                    'data' => [
-                        'token' => $result->purchased_code ?? null,
-                        'amount' => $validatedData['amount'],
-                        'reference' => $transaction->reference,
-                        'meter_number' => $validatedData['meter_number']
-                    ]
-                ]);
-
-            } catch (\Exception $e) {
-                \DB::rollBack();
-
-                // Attempt to reverse wallet transaction if it was deducted
-                if (isset($user) && isset($userBalance)) {
-                    $user->wallet->update(['balance' => $userBalance]);
-                }
-
-                throw $e;
-            }
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'An error occurred: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private function verifyMeterNumber($meterNumber, $type, $distributionCompany)
-    {
-        $configuration = Setting::first();
-        // Set up Guzzle client for meter verification
-        $client = new Client();
-        $apiUrl = $configuration->electricity_verify_api_url;
-
-        // Set up API request data for meter verification
-        $verificationData = [
-            "billersCode" => $meterNumber,
-            "serviceID"   => $distributionCompany,
-            "type"        => $type,
-        ];
-
-        try {
-            // Set up cURL config for meter verification
-            $verificationResponse = $client->post($apiUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
-                ],
-                'json'    => $verificationData,
-            ]);
-
-            // Decode the response for meter verification
-            $verificationResult = json_decode($verificationResponse->getBody());
-
-            // Check if the meter verification was successful
-            if (isset($verificationResult->code) && $verificationResult->code === "000") {
-                return ['status' => 'verified', 'message' => 'Meter number verified'];
-            } else {
-                return ['status' => 'failed', 'message' => 'Meter number verification failed', 'result' => $verificationResult];
-            }
-        } catch (\Exception $e) {
-            // Return an error response with exception details for meter verification
-            return ['status' => 'failed', 'message' => 'Error during meter verification API request', 'exception' => $e->getMessage()];
-        }
-    }
 
     public function indexTv()
     {
@@ -1079,64 +852,6 @@ class utilitiesPaymentController extends Controller
             }
         } catch (\Exception $e) {
             // Return error if an exception occurs
-            return response()->json(['status' => 'failed', 'message' => 'Error during API request', 'exception' => $e->getMessage()]);
-        }
-    }
-
-    public function meterCodeVerify(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'billerCode'          => 'required|string',
-            'meterType'           => 'required|string',
-            'distributionCompany' => 'required|string',
-        ]);
-
-        // Process the form data
-        $billerCode          = $request->input('billerCode');
-        $meterType           = $request->input('meterType');
-        $distributionCompany = $request->input('distributionCompany');
-
-        // Get the current timestamp
-        $current_time   = new DateTime('now', new DateTimeZone('Africa/Lagos'));
-        $formatted_time = $current_time->format("YmdHis");
-
-        // Generate a random alphanumeric string
-        $additional_chars = "89htyyo";
-        $request_id       = $formatted_time . $additional_chars;
-        while (strlen($request_id) < 12) {
-            $request_id .= "x";
-        }
-        $configuration = Setting::first();
-        // Set up Guzzle client
-        $client = new Client();
-        $apiUrl = $configuration->electricity_verify_api_url;
-
-        // Set up API request data
-        $data = [
-            "billersCode" => $billerCode,
-            "serviceID"   => $distributionCompany,
-            "type"        => $meterType,
-        ];
-
-        try {
-            // Set up cURL config
-            $response = $client->post($apiUrl, [
-                'headers' => [
-                    'api-key'      => $configuration->api_key,
-                    'secret-key'   => $configuration->secret_key,
-                    'Content-Type' => 'application/json',
-                ],
-                'json'    => $data,
-            ]);
-
-            // Decode the response
-            $result = json_decode($response->getBody(), true);
-
-            // Return the result
-            return response()->json(['result' => $result]);
-        } catch (\Exception $e) {
-            // Return an error response with exception details
             return response()->json(['status' => 'failed', 'message' => 'Error during API request', 'exception' => $e->getMessage()]);
         }
     }

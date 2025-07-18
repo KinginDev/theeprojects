@@ -558,8 +558,8 @@ class DashboardController extends Controller
 
     public function site_setting()
     {
-        $settings = Setting::first();
         $user     = Auth::guard('merchant')->user();
+        $settings = $user->preferences;
         $target   = storage_path('app/public');
         $link     = public_path('storage');
 
@@ -657,7 +657,7 @@ class DashboardController extends Controller
 
     public function updateSetting(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('merchant')->user();
 
         $validatedData = $request->validate([
             'site_name'                 => 'required|string|max:255',
@@ -708,7 +708,7 @@ class DashboardController extends Controller
             'external_domain'           => 'nullable|string|regex:/^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/'
         ]);
 
-        $settings = Setting::first();
+        $settings = $user->preferences;
 
         if ($request->hasFile('site_logo')) {
             if ($settings->site_logo) {
@@ -718,7 +718,7 @@ class DashboardController extends Controller
         }
 
 
-        $merchant = Auth::guard('merchant')->user();
+        $merchant = $user;
         // Update merchant's external domain if provided
         if ($request->filled('external_domain')) {
             $externalDomain = strtolower($request->external_domain);

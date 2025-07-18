@@ -19,7 +19,7 @@ class WalletTransaction extends BaseProduct
         'amount',
         'type', // credit or debit
         'description',
-        'meta_data',
+        'payload',
         'prev_balance',
         'current_balance',
     ];
@@ -28,7 +28,7 @@ class WalletTransaction extends BaseProduct
         'amount'          => 'decimal:2',
         'prev_balance'    => 'decimal:2',
         'current_balance' => 'decimal:2',
-        'meta_data'       => 'array',
+        'payload'       => 'array',
     ];
 
     /**

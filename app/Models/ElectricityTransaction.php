@@ -27,10 +27,19 @@ class ElectricityTransaction extends BaseProduct
         'status',
         'created_at',
         'updated_at',
+        "transaction_id",
+        'user_id',
     ];
 
     protected $casts = [
         'transaction_date' => 'datetime',
         'amount'           => 'decimal:2',
     ];
+
+    public $appends = ['meter_type'];
+
+    public function getMeterTypeAttribute(): string
+    {
+        return $this->attributes['type'] ?? '';
+    }
 }

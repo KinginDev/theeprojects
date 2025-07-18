@@ -57,7 +57,7 @@ class Merchant extends User
      */
     public function wallet()
     {
-        return $this->hasOne(Wallet::class, 'owner_id', 'id');
+        return $this->hasOne(Wallet::class, 'owner_id', 'id')->where('owner_type', 'App\Models\Merchant');
     }
 
     // Method to get the homepage

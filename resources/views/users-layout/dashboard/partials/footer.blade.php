@@ -50,7 +50,6 @@
 
 
 <script>
-
    function togglePassword(inputId) {
         const input = document.getElementById(inputId);
         const type = input.type === 'password' ? 'text' : 'password';
@@ -60,6 +59,57 @@
         icon.classList.toggle('bi-eye');
         icon.classList.toggle('bi-eye-slash');
     }
+
+    function copyToClipboard(text) {
+        if (!text ) throw new Error('No text provided to copy');
+        console.log("Copying...", text);
+        navigator.clipboard.writeText(text).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Copied!',
+                text: 'The text has been copied to your clipboard.',
+                confirmButtonText: 'OK'
+            });
+        }).catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to copy text. Please try again.',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
+
+     // Copy to clipboard function
+        function copyToElementToClipboard(elementId, buttonId) {
+            const element = document.getElementById(elementId);
+            const button = document.getElementById(buttonId);
+            const originalText = button.innerHTML;
+
+            element.select();
+            document.execCommand('copy');
+
+            button.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+            button.classList.add('btn-success');
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+            }, 2000);
+        }
+
+          function textToTitleCase(text) {
+        if (!text) return '';
+        return text.replace(/\w\S*/g, function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
+
+        window.copyToClipboard = copyToClipboard;
+        window.copyToElementToClipboard = copyToElementToClipboard;
+        window.textToTitleCase = textToTitleCase;
+
+
 </script>
 
 @yield('scripts')

@@ -10,7 +10,7 @@ use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
 use App\Http\Controllers\allPaymentController;
 use App\Http\Controllers\transactionController;
-use App\Http\Controllers\utilitiesPaymentController;
+use App\Http\Controllers\UtilitiesPaymentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
@@ -55,11 +55,11 @@ Route::middleware(['identify.merchant'])->group(function () {
             Route::post('/data/purchase/data', [dataController::class, 'dataPurchaseMtnAirtelGifting'])->name('data.purchase.mtn.airtel.data');
             Route::get('/network/get/plans', [dataController::class, 'dataMtnAirtelGifting'])->name('data.mtn.airtel.gifting');
 
-            Route::get('/electricity', [utilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
-            Route::get('/tv', [utilitiesPaymentController::class, 'indexTv'])->name('tv');
-            Route::get('/upgradeTopuser', [utilitiesPaymentController::class, 'upgradeTopuser'])->name('upgradeTopuser');
-            Route::get('/education', [utilitiesPaymentController::class, 'education'])->name('education');
-            Route::get('/insurance', [utilitiesPaymentController::class, 'insurance'])->name('insurance');
+            Route::get('/electricity', [UtilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
+            Route::get('/tv', [UtilitiesPaymentController::class, 'indexTv'])->name('tv');
+            Route::get('/upgradeTopuser', [UtilitiesPaymentController::class, 'upgradeTopuser'])->name('upgradeTopuser');
+            Route::get('/education', [UtilitiesPaymentController::class, 'education'])->name('education');
+            Route::get('/insurance', [UtilitiesPaymentController::class, 'insurance'])->name('insurance');
 
 
 
@@ -102,10 +102,10 @@ Route::middleware(['identify.merchant'])->group(function () {
             });
 
             Route::prefix('electricity')->group(function () {
-                Route::get('/', [utilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
-                Route::post('/verify-meter', [utilitiesPaymentController::class, 'verifyMeterNumber'])->name('electricity.verifyMeter');
-                Route::post('/purchase', [utilitiesPaymentController::class, 'purchaseElectricity'])->name('electricity.purchase');
-                Route::post('/tv/billcode/electricity', [utilitiesPaymentController::class, 'meterCodeVerify'])->name('meterCodeVerify');
+                Route::get('/', [UtilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
+                Route::post('/verify-meter', [UtilitiesPaymentController::class, 'verifyMeterNumber'])->name('electricity.verifyMeter');
+                Route::post('/purchase', [UtilitiesPaymentController::class, 'purchaseElectricity'])->name('electricity.purchase');
+                Route::post('/tv/billcode/electricity', [UtilitiesPaymentController::class, 'meterCodeVerify'])->name('meterCodeVerify');
             });
 
         });

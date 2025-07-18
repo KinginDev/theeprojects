@@ -35,7 +35,7 @@ Route::domain(config('app.domain'))->group(function () {
 
     Route::put('/settings-update', [adminController::class, 'updateSetting'])->name('settings.update');
 
-    // Route::post('/user/top-up', [utilitiesPaymentController::class, 'topUp'])->name('userTopUp');
+    // Route::post('/user/top-up', [UtilitiesPaymentController::class, 'topUp'])->name('userTopUp');
 
     // Route to update the fee dynamically
     Route::post('/admin/fee-config', [adminController::class, 'updateFee'])->name('admin.updateFee');

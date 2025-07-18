@@ -4,14 +4,15 @@ use App\Classes\Helper;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\dataController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\usersController;
 use App\Http\Controllers\logoutController;
 use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
 use App\Http\Controllers\allPaymentController;
+use App\Http\Controllers\ElectricityController;
 use App\Http\Controllers\transactionController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\utilitiesPaymentController;
+use App\Http\Controllers\UtilitiesPaymentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
@@ -39,8 +40,6 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             })->middleware(['signed'])->name('verification.verify');
             Route::post('/email/verification-notification', [authController::class, 'sendVerificationEmail'])->name('verification.send');
 
-        Route::middleware(['auth:web'])->group(function () {
-
             // ... rest of the routes remain the same ...
             // routes/transactions.
             Route::post('/make/payment', [allPaymentController::class, 'makePayment'])->name('make.payment');
@@ -54,11 +53,11 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             Route::post('/data/purchase/data', [dataController::class, 'dataPurchaseMtnAirtelGifting'])->name('data.purchase.mtn.airtel.data');
             Route::get('/network/get/plans', [dataController::class, 'dataMtnAirtelGifting'])->name('data.mtn.airtel.gifting');
 
-            Route::get('/electricity', [utilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
-            Route::get('/tv', [utilitiesPaymentController::class, 'indexTv'])->name('tv');
-            Route::get('/upgradeTopuser', [utilitiesPaymentController::class, 'upgradeTopuser'])->name('upgradeTopuser');
-            Route::get('/education', [utilitiesPaymentController::class, 'education'])->name('education');
-            Route::get('/insurance', [utilitiesPaymentController::class, 'insurance'])->name('insurance');
+            Route::get('/electricity', [UtilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
+            Route::get('/tv', [UtilitiesPaymentController::class, 'indexTv'])->name('tv');
+            Route::get('/upgradeTopuser', [UtilitiesPaymentController::class, 'upgradeTopuser'])->name('upgradeTopuser');
+            Route::get('/education', [UtilitiesPaymentController::class, 'education'])->name('education');
+            Route::get('/insurance', [UtilitiesPaymentController::class, 'insurance'])->name('insurance');
 
 
 
@@ -101,10 +100,10 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             });
 
             Route::prefix('electricity')->group(function () {
-                Route::get('/', [utilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
-                Route::post('/verify-meter', [utilitiesPaymentController::class, 'verifyMeterNumber'])->name('electricity.verifyMeter');
-                Route::post('/purchase', [utilitiesPaymentController::class, 'purchaseElectricity'])->name('electricity.purchase');
-                Route::post('/tv/billcode/electricity', [utilitiesPaymentController::class, 'meterCodeVerify'])->name('meterCodeVerify');
+                Route::get('/', [ElectricityController::class, 'indexElectricity'])->name('electricity');
+                Route::post('/verify-meter', [ElectricityController::class, 'verifyMeterNumber'])->name('electricity.verifyMeter');
+                Route::post('/purchase', [ElectricityController::class, 'purchaseElectricity'])->name('electricity.purchase');
+                Route::post('verify/meter', [ElectricityController::class, 'meterCodeVerify'])->name('meterCodeVerify');
             });
 
         });
@@ -113,4 +112,3 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
     });
 });
 
-});

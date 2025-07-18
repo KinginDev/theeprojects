@@ -14,4 +14,9 @@ class Percentage extends Model
         'topuser_earners_percent',
         'api_earners_percent',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

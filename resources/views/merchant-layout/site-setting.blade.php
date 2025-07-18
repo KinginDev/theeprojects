@@ -200,6 +200,38 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="electricity_pay_api_url" class="form-label">VTPASS Electricity Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('electricity_pay_api_url') is-invalid @enderror"
+                                                            id="electricity_pay_api_url" name="electricity_pay_api_url"
+                                                            value="{{ old('electricity_pay_api_url', $settings->electricity_pay_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('electricity_pay_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                              <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="electricity_verify_api_url" class="form-label">VTPASS Electricity Verify Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('electricity_verify_api_url') is-invalid @enderror"
+                                                            id="electricity_verify_api_url" name="electricity_verify_api_url"
+                                                            value="{{ old('electricity_verify_api_url', $settings->electricity_verify_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('electricity_verify_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <hr />
                                             <div class="col-md-6">
                                                 <div class="form-group">
