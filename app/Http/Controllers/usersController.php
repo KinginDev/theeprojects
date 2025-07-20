@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 
-class UsersController extends Controller
+class usersController extends Controller
 {
     /**
      * Display the user dashboard with various statistics and recent transactions.

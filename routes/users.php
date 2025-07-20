@@ -6,7 +6,7 @@ use App\Http\Controllers\TvController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\dataController;
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\UsersController;
+use App\Http\Controllers\usersController;
 use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
 use App\Http\Controllers\AllPaymentController;
@@ -43,7 +43,7 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             // ... rest of the routes remain the same ...
             // routes/transactions.
             Route::post('/make/payment', [AllPaymentController::class, 'makePayment'])->name('make.payment');
-            Route::get('/dashboard', [UsersController::class, 'dashboard'])->name('dashboard');
+            Route::get('/dashboard', [usersController::class, 'dashboard'])->name('dashboard');
             Route::get('/transactions', [transactionController::class, 'calculateTransactions'])->name('usertransactions');
 
 

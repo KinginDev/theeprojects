@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UsersController;
+use App\Http\Controllers\usersController;
 use App\Http\Controllers\Admin\authController;
 use App\Http\Controllers\Admin\DashboardController;
 
@@ -20,7 +20,7 @@ Route::domain(config('app.domain'))
     // Protected routes - require admin authentication
     Route::middleware('auth:admin')->group(function () {
         Route::post('logout', [authController::class, 'logout'])->name('logout');
-        Route::get('/admin/generate-user-emails-csv', [UsersController::class, 'generateUserEmailsCSV'])->name('generateUserEmailsCSV');
+        Route::get('/admin/generate-user-emails-csv', [usersController::class, 'generateUserEmailsCSV'])->name('generateUserEmailsCSV');
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::post('logout', [authController::class, 'logout'])->name('logout');
 
