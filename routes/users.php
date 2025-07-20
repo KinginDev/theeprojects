@@ -1,17 +1,17 @@
 <?php
 
-use App\Http\Controllers\EducationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TvController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\dataController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\usersController;
-use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
+use App\Http\Controllers\EducationController;
 use App\Http\Controllers\AllPaymentController;
 use App\Http\Controllers\ElectricityController;
 use App\Http\Controllers\transactionController;
+use App\Http\Controllers\User\AirtimeController;
 use App\Http\Controllers\UtilitiesPaymentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
