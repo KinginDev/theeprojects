@@ -2,13 +2,13 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AllPaymentController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\authController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('app.domain'))->group(function () {
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [authController::class, 'logout'])->name('logout');
     Route::any('/webhook/process', [AllPaymentController::class, 'processWebhook'])->name('webhook.process');
 
     Route::middleware('guest:web')->group(function () {

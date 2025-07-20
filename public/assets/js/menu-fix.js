@@ -21,7 +21,7 @@ if (typeof jQuery !== 'undefined') {
                     if ($(this).hasClass("has-arrow")) {
                         var menuTitle = $(this).find('span').text().trim();
                         $(this).attr("title", menuTitle + " (has submenu)");
-                        
+
                         // Set data-title for submenu
                         var subMenu = $(this).next("ul.sub-menu");
                         if (subMenu.length && !subMenu.attr('data-title')) {
@@ -40,7 +40,7 @@ if (typeof jQuery !== 'undefined') {
 
             // Initialize menu attributes
             initMenuAttributes();
-            
+
             // Create overlay for mobile if it doesn't exist
             if ($(".vertical-menu-overlay").length === 0) {
                 $("body").append('<div class="vertical-menu-overlay"></div>');
@@ -52,10 +52,10 @@ if (typeof jQuery !== 'undefined') {
                     $("body").addClass("vertical-collpsed");
                     $(".vertical-menu").css("left", "-70px");
                 }
-                
+
                 applyMenuStyles();
             }
-            
+
             // Apply appropriate styles based on menu state
             function applyMenuStyles() {
                 if ($("body").hasClass("vertical-collpsed")) {
@@ -64,9 +64,9 @@ if (typeof jQuery !== 'undefined') {
                         "margin-right": "0",
                         "margin": "0 auto"
                     });
-                    
+
                     $("#sidebar-menu ul li a span").css("opacity", "0");
-                    
+
                     // Set proper menu dimensions
                     $(".vertical-menu").css("width", "70px");
                     $(".main-content").css("margin-left", "70px");
@@ -76,20 +76,20 @@ if (typeof jQuery !== 'undefined') {
                         "margin-right": "10px",
                         "margin": ""
                     });
-                    
+
                     $("#sidebar-menu ul li a span").css("opacity", "1");
-                    
+
                     // Set proper menu dimensions
                     $(".vertical-menu").css("width", "250px");
                     $(".main-content").css("margin-left", "250px");
                 }
             }
-            
+
             // Handle submenu hover in collapsed mode
             function setupSubmenuHover() {
                 // Remove any existing hover handlers first
                 $("#sidebar-menu ul li").off("mouseenter mouseleave");
-                
+
                 // Only add hover handlers if we're in collapsed mode
                 if ($("body").hasClass("vertical-collpsed")) {
                     $("#sidebar-menu ul li").hover(
@@ -98,7 +98,7 @@ if (typeof jQuery !== 'undefined') {
                                 var parentTop = $(this).position().top;
                                 var windowHeight = $(window).height();
                                 var submenuHeight = $(this).find("ul.sub-menu").outerHeight() || 200;
-                                
+
                                 // Adjust position to keep submenu in viewport
                                 if (parentTop + submenuHeight > windowHeight) {
                                     var newTop = Math.max(0, windowHeight - submenuHeight - 20);
@@ -106,7 +106,7 @@ if (typeof jQuery !== 'undefined') {
                                 } else {
                                     $(this).find("ul.sub-menu").css("top", parentTop);
                                 }
-                                
+
                                 $(this).find("ul.sub-menu").stop().fadeIn(150);
                                 $(this).addClass("submenu-active");
                             }
@@ -118,46 +118,46 @@ if (typeof jQuery !== 'undefined') {
                     );
                 }
             }
-            
+
             // Toggle menu state
             $("#vertical-menu-btn").on("click", function(e) {
                 e.preventDefault();
-                
+
                 // Toggle mobile menu state
                 $("body").toggleClass("sidebar-enable");
-                
+
                 // Only toggle collapsed state on desktop
                 if ($(window).width() >= 992) {
                     $("body").toggleClass("vertical-collpsed");
                 }
-                
+
                 // Update mobile overlay state
                 if ($(window).width() < 992 && $("body").hasClass("sidebar-enable")) {
                     $(".vertical-menu-overlay").addClass("active");
                 } else {
                     $(".vertical-menu-overlay").removeClass("active");
                 }
-                
+
                 // Apply appropriate styles after a short delay
                 setTimeout(function() {
                     applyMenuStyles();
                     setupSubmenuHover();
                 }, 50);
             });
-            
+
             // Close sidebar when clicking outside or on overlay
             $(document).on("click", ".vertical-menu-overlay", function() {
                 $("body").removeClass("sidebar-enable");
                 $(".vertical-menu-overlay").removeClass("active");
             });
-            
+
             $(document).on("click", function(e) {
                 if ($(e.target).closest('.vertical-menu, #vertical-menu-btn').length === 0) {
                     $("body").removeClass("sidebar-enable");
                     $(".vertical-menu-overlay").removeClass("active");
                 }
             });
-            
+
             // Handle window resize
             $(window).resize(function() {
                 if ($(window).width() < 992) {
@@ -170,11 +170,11 @@ if (typeof jQuery !== 'undefined') {
                         $(".vertical-menu").css("left", "0");
                     }
                 }
-                
+
                 applyMenuStyles();
                 setupSubmenuHover();
             });
-            
+
             // Handle submenu toggle in expanded mode
             $(document).on("click", ".has-arrow", function(e) {
                 if (!$("body").hasClass("vertical-collpsed")) {
@@ -191,15 +191,12 @@ if (typeof jQuery !== 'undefined') {
                     }
                 }
             });
-            
+
             // Initialize menu state
             setInitialMenuState();
             setupSubmenuHover();
         });
-        
-    })(jQuery);
-}
-        });
 
     })(jQuery);
 }
+

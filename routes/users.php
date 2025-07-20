@@ -1,15 +1,12 @@
 <?php
 
-use App\Classes\Helper;
 use App\Http\Controllers\EducationController;
-use App\Services\TvService;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TvController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\authController;
 use App\Http\Controllers\dataController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\logoutController;
 use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\settingController;
 use App\Http\Controllers\AllPaymentController;
@@ -27,21 +24,21 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
      Route::get('page/{slug}', [PageController::class, 'show'])->name('merchant.page.show');
 
     Route::prefix('user')->name('users.')->group(function () {
-        Route::get('/login', [AuthController::class, 'login'])->name('login');
-        Route::get('/registration', [AuthController::class, 'registration'])->name('registration');
-        Route::post('/login', [AuthController::class, 'loginAction'])->name('loginAction');
-        Route::post('/registration-action', [AuthController::class, 'registrationAction'])->name('registrationAction');
-        Route::get('/forget_password', [AuthController::class, 'forget_password'])->name('show.password');
-        Route::post('/forgetPassword', [AuthController::class, 'forgetPasswordMail'])->name('forget.password');
-        Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-        Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('update.password');
+        Route::get('/login', [authController::class, 'login'])->name('login');
+        Route::get('/registration', [authController::class, 'registration'])->name('registration');
+        Route::post('/login', [authController::class, 'loginAction'])->name('loginAction');
+        Route::post('/registration-action', [authController::class, 'registrationAction'])->name('registrationAction');
+        Route::get('/forget_password', [authController::class, 'forget_password'])->name('show.password');
+        Route::post('/forgetPassword', [authController::class, 'forgetPasswordMail'])->name('forget.password');
+        Route::get('/password/reset/{token}', [authController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/update-password', [authController::class, 'updatePassword'])->name('update.password');
 
           Route::get('/email/verify', fn() => view('users-layout.auth.verify'))->name('verification.notice');
             Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
                 $request->fulfill();
                 return redirect('/user/dashboard');
             })->middleware(['signed'])->name('verification.verify');
-            Route::post('/email/verification-notification', [AuthController::class, 'sendVerificationEmail'])->name('verification.send');
+            Route::post('/email/verification-notification', [authController::class, 'sendVerificationEmail'])->name('verification.send');
 
             // ... rest of the routes remain the same ...
             // routes/transactions.
@@ -83,16 +80,11 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             Route::get('/fetch-fund-transactions', [TransactionController::class, 'fetchFundTransactions'])->name('fetch-fund-transactions');
             Route::get('/walletSummary', [transactionController::class, 'walletSummary'])->name('walletSummary');
 
-
             Route::get('/usersetting', [settingController::class, 'usersetting'])->name('user.setting');
             Route::put('/usersedit/{id}', [settingController::class, 'update'])->name('update.profile');
 
-
-            Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-
-
+            Route::get('/logout', [authController::class, 'logout'])->name('logout');
             Route::get('/usernotification', [transactionController::class, 'usernotification'])->name('usernotification');
-
 
             Route::get('/usersupport', [settingController::class, 'usersupport'])->name('usersupport');
             Route::post('/user/message', [settingController::class, 'sendMessage'])->name('user.message');

@@ -122,7 +122,7 @@
             padding: 90px 24px 60px;
             transition: margin-left 0.25s ease-in-out;
         }
-        
+
         .vertical-menu-enable .main-content {
             margin-left: 250px;
         }
@@ -275,7 +275,7 @@
         body.vertical-collpsed #sidebar-menu ul li.mm-active .sub-menu {
             display: none;
         }
-        
+
         /* Show submenu on hover for collapsed menu */
         body.vertical-collpsed #sidebar-menu ul li {
             position: relative;
@@ -457,7 +457,7 @@
             color: var(--merchant-primary);
             padding-left: 18px;
         }
-        
+
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:before {
             content: '';
             position: absolute;
@@ -469,7 +469,7 @@
             opacity: 0;
             transition: all 0.15s ease;
         }
-        
+
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover:before {
             width: 3px;
             opacity: 1;
