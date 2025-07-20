@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Monnify\MonnifyLaravel\Facades\Monnify;
 
-class allPaymentController extends Controller
+class AllPaymentController extends Controller
 {
     public function initializeMonnify(Request $request)
     {

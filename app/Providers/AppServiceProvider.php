@@ -25,14 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Share merchant preferences with all merchant views
         View::composer('merchant-layout.*', function ($view) {
-            if (Auth::guard('merchant')->check()) {
-                $merchantPreferences = Auth::guard('merchant')->user()->preferences;
-                $view->with('configuration', $merchantPreferences);
-            } else {
-                // For non-authenticated pages like login, use global settings
                 $settings = Helper::settings();
                 $view->with('configuration', $settings);
-            }
         });
 
         View::composer('users-layout.*', function ($view) {

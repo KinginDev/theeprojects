@@ -53,7 +53,7 @@ class Helper
 
     public static function generateBreadCrumbs($currentPageName)
     {
-        $prev_url          = url()->previous();
+        $prev_url          = Str::title(str_replace("_", " ",url()->previous()));
         $previous_basename = Str::title(basename(parse_url($prev_url, PHP_URL_PATH)));
 
         if (str_contains($previous_basename, 'login')) {

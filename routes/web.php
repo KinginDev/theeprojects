@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\adminController;
-use App\Http\Controllers\allPaymentController;
-use App\Http\Controllers\authController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AllPaymentController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('app.domain'))->group(function () {
-    Route::get('/logout', [authController::class, 'logout'])->name('logout');
-    Route::any('/webhook/process', [allPaymentController::class, 'processWebhook'])->name('webhook.process');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::any('/webhook/process', [AllPaymentController::class, 'processWebhook'])->name('webhook.process');
 
     Route::middleware('guest:web')->group(function () {
         Route::get('/', function () {
@@ -23,25 +23,25 @@ Route::domain(config('app.domain'))->group(function () {
 
 
     // Route::middleware('auth')->group(function () {
-    Route::any('/process/callback', [allPaymentController::class, 'processCallback'])->name('process.callback');
+    Route::any('/process/callback', [AllPaymentController::class, 'processCallback'])->name('process.callback');
 
     // });
 
     Route::middleware(['auth:admin'])->group(function () {
     #admin routes
-    Route::get('/admin/dashboard', [adminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
 
     #end admin routes
 
-    Route::put('/settings-update', [adminController::class, 'updateSetting'])->name('settings.update');
+    Route::put('/settings-update', [DashboardController::class, 'updateSetting'])->name('settings.update');
 
     // Route::post('/user/top-up', [UtilitiesPaymentController::class, 'topUp'])->name('userTopUp');
 
     // Route to update the fee dynamically
-    Route::post('/admin/fee-config', [adminController::class, 'updateFee'])->name('admin.updateFee');
+    Route::post('/admin/fee-config', [DashboardController::class, 'updateFee'])->name('admin.updateFee');
 
     // API endpoint to get the current Monnify fee
-    Route::get('/admin/monnify-fee', [adminController::class, 'getMonnifyFee'])->name('admin.getMonnifyFee');
+    Route::get('/admin/monnify-fee', [DashboardController::class, 'getMonnifyFee'])->name('admin.getMonnifyFee');
     });
 
     Route::middleware(['auth:web', 'verified'])->group(function () {

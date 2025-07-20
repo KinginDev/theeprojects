@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\allPaymentController;
+use App\Http\Controllers\AllPaymentController;
 use App\Http\Controllers\Merchant\AuthController;
 use App\Http\Controllers\Merchant\MenuController;
 use App\Http\Controllers\Merchant\PageController;
@@ -51,7 +51,7 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
     Route::post('register', [AuthController::class, 'register'])->name('register.submit');
     // Protected Routes
     Route::middleware(['auth:merchant', 'verified'])->group(function () {
-        Route::post('/make/payment', [allPaymentController::class, 'makePayment'])->name('make.payment');
+        Route::post('/make/payment', [AllPaymentController::class, 'makePayment'])->name('make.payment');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('users/{merchantId}', [DashboardController::class, 'getMerchantUsers'])->name('users');

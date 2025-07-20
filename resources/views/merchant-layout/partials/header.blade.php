@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title', 'Your Default Title')</title>
+    <title>@yield('title',  $configuration->site_name) - Merchant Portal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Merchant Dashboard" name="description" />
     <meta content="Themesdesign" name="author" />
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
@@ -23,210 +24,740 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.1.2/js/dataTables.bootstrap5.js"></script>
+    <!-- ApexCharts -->
+    <link href="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.css" rel="stylesheet">
 
     @stack('before_styles')
     @yield('styles')
     <style>
-      .logo-lg{
+        :root {
+            --merchant-primary: {{ $configuration->template_color ?? '#3a7cfd' }};
+            --merchant-primary-rgb: 58, 124, 253;
+            --merchant-secondary: {{ $configuration->header_color ?? '#2c3e50' }};
+            --merchant-text: {{ $configuration->test_color ?? '#333' }};
+            --merchant-light: #f8f9fa;
+            --merchant-dark: #343a40;
+            --merchant-success: #10b981;
+            --merchant-info: #3b82f6;
+            --merchant-warning: #f59e0b;
+            --merchant-danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Modern Header Styles for Merchant */
+        #page-topbar {
+            backdrop-filter: blur(10px);
+            background: var(--merchant-secondary) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            height: 70px;
+        }
+
+        .logo-lg {
             height: 40px !important;
             transition: all 0.3s ease;
         }
 
+        .navbar-header {
+            padding: 0 1.5rem;
+            height: 70px;
+        }
+
+        .header-item {
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Merchant-specific styling */
+        .merchant-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Improved Sidebar Navigation Styling */
+        .vertical-menu {
+            width: 250px;
+            background: #ffffff;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        body[data-sidebar="dark"] .vertical-menu {
+            background: #2a3042;
+        }
+
+        #layout-wrapper {
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 90px 24px 60px;
+            transition: all 0.3s;
+        }        .vertical-menu-enable .main-content {
+            margin-left: 250px;
+        }
+
+        body.sidebar-enable .vertical-menu {
+            left: 0;
+        }
+
+        /* Vertical menu overlay for mobile */
+        .vertical-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .vertical-menu-overlay.active {
+            display: block;
+        }
+
+        /* Improved icon alignment in collapsed state */
+        body.vertical-collpsed #sidebar-menu ul li {
+            position: relative;
+            text-align: center;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a {
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a i {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            float: none;
+        }
+
+        /* General Menu Transition Effects */
+        .vertical-menu {
+            transition: width 0.25s ease-in-out;
+        }
+
+        #sidebar-menu ul li a span {
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        #sidebar-menu ul li a i {
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .main-content {
+            transition: margin-left 0.25s ease-in-out;
+        }
+
+        /* Improved vertical-collapsed mode transition */
+        body.vertical-collpsed .vertical-menu {
+            overflow: visible;
+        }
+
+        @media (max-width: 991.98px) {
+            .vertical-menu {
+                left: -250px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 90px 12px 60px;
+            }
+
+            body.sidebar-enable .vertical-menu {
+                left: 0;
+            }
+        }        #sidebar-menu ul li a {
+            padding: 0.85rem 1.2rem;
+            color: #555;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 0 10px 3px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #sidebar-menu ul li a i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            width: 32px;
+            min-width: 32px;
+            background: rgba(var(--merchant-primary-rgb), 0.1);
+            border-radius: 8px;
+            color: var(--merchant-primary);
+            margin-right: 10px;
+            transition: all 0.3s;
+        }        /* Collapsed menu item styles */
+        body.vertical-collpsed .vertical-menu {
+            width: 70px !important;
+            z-index: 5;
+        }
+
+        body.vertical-collpsed .main-content {
+            margin-left: 70px;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a {
+            padding: 15px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a i {
+            margin: 0 auto;
+            font-size: 18px;
+            display: block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            position: relative;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a span {
+            display: none;
+        }
+
+        body.vertical-collpsed #sidebar-menu .menu-title {
+            display: none;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li.mm-active .sub-menu {
+            display: none;
+        }        /* Show submenu on hover for collapsed menu */
+        body.vertical-collpsed #sidebar-menu ul li {
+            position: relative;
+        }        body.vertical-collpsed #sidebar-menu ul li:hover > a {
+            position: relative;
+            color: var(--merchant-primary);
+            width: auto;
+            background-color: rgba(var(--merchant-primary-rgb), 0.08);
+            border-left: 3px solid var(--merchant-primary);
+        }
+
+        /* Enhanced visual indicator for menu items with submenus */
+        body.vertical-collpsed #sidebar-menu ul li a.has-arrow:after {
+            display: none;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a.has-arrow:before {
+            content: '\F0142';
+            font-family: "Material Design Icons";
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > a.has-arrow:before {
+            opacity: 1;
+            right: 10px;
+        }
+
+        /* Add visual indicator for items with submenus */
+        body.vertical-collpsed #sidebar-menu ul li a.has-arrow:after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--merchant-primary);
+            display: block;
+            opacity: 0.7;
+        }
+
+        /* Improve submenu active state */
+        body.vertical-collpsed #sidebar-menu ul li.submenu-active > a {
+            background-color: rgba(var(--merchant-primary-rgb), 0.08);
+        }
+
+        /* Show tooltip on hover with improved styling */
+        body.vertical-collpsed #sidebar-menu ul li a:not(.has-arrow):hover:after {
+            content: attr(data-title);
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1001;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            pointer-events: none;
+            opacity: 1;
+            visibility: visible;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-left: 3px solid var(--merchant-primary);
+            max-width: 250px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            animation: tooltipFadeIn 0.2s forwards;
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(5px, -50%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(0, -50%);
+            }
+        }        /* Improved icon centering in collapsed mode */
+        body.vertical-collpsed #sidebar-menu ul li a i {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto !important;
+            float: none;
+            height: 36px;
+            width: 36px;
+            min-width: 36px;
+            line-height: 36px;
+            position: relative;
+            font-size: 17px;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Enhanced icon alignment and hover effects */
+        body.vertical-collpsed #sidebar-menu ul li a {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            margin: 3px 0;
+            position: relative;
+        }
+
+        /* Improved hover effect for icons in collapsed mode */
+        body.vertical-collpsed #sidebar-menu ul li a:hover i {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(var(--merchant-primary-rgb), 0.2);
+        }
+
+        /* Enhanced active menu state in collapsed mode */
+        body.vertical-collpsed #sidebar-menu ul li.mm-active > a {
+            border-left: 3px solid var(--merchant-primary);
+            background: rgba(var(--merchant-primary-rgb), 0.08);
+            position: relative;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li.mm-active > a:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: var(--merchant-primary);
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li.mm-active > a i {
+            background: var(--merchant-primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(var(--merchant-primary-rgb), 0.3);
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu {
+            display: block !important;
+            left: 70px;
+            position: absolute;
+            width: 250px;
+            height: auto !important;
+            top: 0;
+            z-index: 1001;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            background-color: #fff;
+            border-radius: 0 12px 12px 0;
+            padding: 12px 0;
+            margin-top: 0;
+            margin-left: 0;
+            border-left: 3px solid var(--merchant-primary);
+            animation: fadeInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+                visibility: hidden;
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+                visibility: visible;
+            }
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a {
+            display: flex;
+            padding: 10px 15px 10px 20px;
+            text-align: left;
+            justify-content: flex-start;
+            align-items: center;
+            height: auto;
+            font-size: 0.9rem;
+            color: #555;
+            transition: all 0.2s ease;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover {
+            padding-left: 25px;
+            background-color: rgba(var(--merchant-primary-rgb), 0.06);
+            color: var(--merchant-primary);
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background-color: var(--merchant-primary);
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover:before {
+            width: 4px;
+            opacity: 1;
+        }
+
+        /* Handle nested submenus in collapsed mode */
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li.mm-active > a {
+            background-color: rgba(var(--merchant-primary-rgb), 0.1);
+            color: var(--merchant-primary);
+            font-weight: 600;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li.mm-active > a:before {
+            background-color: var(--merchant-primary);
+        }
+
+        /* Enhanced header for submenu popup */
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu:before {
+            content: attr(data-title);
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--merchant-primary);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu:after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: -10px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            transform: rotate(45deg);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            z-index: 0;
+        }
+
+        #sidebar-menu ul li a:hover {
+            color: var(--merchant-primary);
+            background: rgba(var(--merchant-primary-rgb), 0.06);
+        }
+
+        #sidebar-menu ul li a:hover i {
+            background: var(--merchant-primary);
+            color: white !important;
+            transform: scale(1.05);
+        }
+
+        #sidebar-menu ul li.mm-active > a {
+            color: var(--merchant-primary);
+            background: rgba(var(--merchant-primary-rgb), 0.1);
+            font-weight: 600;
+        }
+
+        #sidebar-menu ul li.mm-active > a i {
+            background: var(--merchant-primary);
+            color: white !important;
+        }
+
+        /* Menu title styling */
+        .menu-title {
+            padding: 12px 20px !important;
+            letter-spacing: .05em;
+            font-size: 11px;
+            font-weight: 700;
+            color: #919da9;
+            margin-top: 10px;
+        }
+
+        /* Submenu styling */
+        #sidebar-menu ul li ul.sub-menu {
+            padding: 0;
+            margin-left: 42px;
+        }
+
+        #sidebar-menu ul li ul.sub-menu li {
+            position: relative;
+            list-style: none;
+        }
+
+        #sidebar-menu ul li ul.sub-menu li a {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            margin: 0 0 3px 0;
+            border-radius: 6px;
+        }
+
+        #sidebar-menu ul li ul.sub-menu li a:before {
+            content: "";
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(var(--merchant-primary-rgb), 0.3);
+        }
+
+        #sidebar-menu ul li ul.sub-menu li a:hover:before {
+            background: var(--merchant-primary);
+        }
+
+        #sidebar-menu ul li ul.sub-menu li.mm-active > a {
+            color: var(--merchant-primary);
+            background: rgba(var(--merchant-primary-rgb), 0.08);
+        }
+
+        #sidebar-menu ul li ul.sub-menu li.mm-active > a:before {
+            background: var(--merchant-primary);
+        }
+
+        /* Arrow indicator for submenus */
+        #sidebar-menu ul li a.has-arrow:after {
+            content: "\F0140";
+            font-family: "Material Design Icons";
+            display: block;
+            float: right;
+            transition: transform .2s;
+            font-size: 1rem;
+            margin-left: auto;
+        }
+
+        #sidebar-menu ul li a.has-arrow[aria-expanded="true"]:after {
+            transform: rotate(90deg);
+        }
+
+        /* Profile summary in sidebar */
+        .merchant-profile-summary {
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(var(--merchant-primary-rgb), 0.1);
+            margin: 0 15px 15px;
+            border: 1px solid rgba(var(--merchant-primary-rgb), 0.15);
+            overflow: hidden;
+        }
+
+        /* Icon box for menu items */
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            width: 32px;
+            min-width: 32px;
+            background: rgba(var(--merchant-primary-rgb), 0.1);
+            border-radius: 8px;
+            margin-right: 12px;
+            color: var(--merchant-primary);
+        }
+
+        /* Beautify the settings menu section */
+        .nav-item-title {
+            display: block;
+            padding: 0.3rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            pointer-events: none;
+        }
         </style>
     @stack('after_styles')
 </head>
 
 <body data-topbar="dark">
-
+    <!-- Begin page -->
     <div id="layout-wrapper">
-        <header id="page-topbar" style="background-color:{{ $configuration->header_color }}">
+        <header id="page-topbar">
             <div class="navbar-header">
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <div class="navbar-brand-box">
-                        <a href="{{ route('merchant.dashboard') }}" class="logo logo-dark">
-                            <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="logo-sm" height="22">
-                            </span>
-                            <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="logo-dark" height="20">
-                            </span>
-                        </a>
+
                         <a href="{{ route('merchant.dashboard') }}" class="logo logo-light">
-                            <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="logo-sm-light" height="30">
-                            </span>
-                            <span class="logo-lg">
-                                <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo-light"
-                                    width="50">
+
+                            <span class="logo-lg d-flex align-items-center">
+                                @if(isset($configuration->site_logo))
+                                    <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo-light" height="32">
+                                @else
+                                    <img src="{{ asset('assets/images/logo-light.png') }}" alt="logo-light" height="32">
+                                @endif
                             </span>
                         </a>
                     </div>
-                    <button type="button" class="btn btn-sm px-3 font-size-24 header-item waves-effect"
+                    <button type="button" class="btn header-item waves-effect ms-2"
                         id="vertical-menu-btn">
-                        <i class="ri-menu-2-line align-middle"></i>
+                        <i class="ri-menu-2-line"></i>
                     </button>
                 </div>
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <div class="dropdown d-none d-lg-inline-block ms-1">
                         <button type="button" class="btn header-item noti-icon waves-effect" data-toggle="fullscreen">
                             <i class="ri-fullscreen-line"></i>
                         </button>
+                    </div>
+
+                    <!-- Wallet Balance -->
+                    <div class="d-none d-md-block ms-3 me-3">
+                        <div class="bg-soft-primary px-3 py-1 rounded-pill d-flex align-items-center">
+                            <i class="ri-wallet-3-fill me-1 text-primary"></i>
+                            <span class="fw-semibold">₦{{ number_format(Auth::guard('merchant')->user()->wallet->balance ?? 0, 2) }}</span>
+                            <a href="#" class="btn btn-sm btn-primary ms-2 rounded-pill px-2 py-0" data-bs-toggle="modal" data-bs-target=".bs-example-modal-center1">
+                                <i class="ri-add-line"></i> Fund
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="ri-notification-3-line"></i>
+                            <span class="noti-dot"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg p-0"
+                            aria-labelledby="page-header-notifications-dropdown">
+                            <div class="p-3">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="mb-0">Notifications</h6>
+                                    <div class="ms-auto">
+                                        <a href="#" class="small">Mark all as read</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-simplebar style="max-height: 230px;">
+                                <a href="" class="text-reset notification-item">
+                                    <div class="d-flex">
+                                        <div class="avatar-xs me-3">
+                                            <span class="avatar-title bg-primary rounded-circle font-size-16">
+                                                <i class="ri-shopping-cart-line"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h6 class="mb-1">New transaction completed</h6>
+                                            <div class="font-size-12 text-muted">
+                                                <p class="mb-1">Transaction ID: #TRX123456</p>
+                                                <p class="mb-0"><i class="mdi mdi-clock-outline"></i> 1 hour ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="p-2 border-top">
+                                <a class="btn btn-sm btn-link font-size-14 w-100 text-center" href="javascript:void(0)">
+                                    <i class="mdi mdi-arrow-right-circle me-1"></i> View More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User profile -->
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="d-none d-xl-inline-block ms-1 me-1">{{ Auth::guard('merchant')->user()->name ?? 'Merchant' }}</span>
+                            <img class="rounded-circle header-profile-user" src="{{ asset('assets/images/users/avatar-1.png') }}"
+                                alt="Header Avatar">
+                            <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <!-- item-->
+                            <a class="dropdown-item" href="#"><i class="ri-user-line align-middle me-1"></i> Profile</a>
+                            <a class="dropdown-item" href="#"><i class="ri-wallet-2-line align-middle me-1"></i> My Wallet</a>
+                            <a class="dropdown-item d-block" href="#"><i class="ri-settings-2-line align-middle me-1"></i> Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="{{ route('merchant.logout') }}"><i class="ri-shut-down-line align-middle me-1 text-danger"></i> Logout</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </header>
 
 
-        <div class="vertical-menu">
-            <div data-simplebar class="h-100">
-            <div id="sidebar-menu">
-                <ul class="metismenu list-unstyled" id="side-menu">
-                <li class="menu-title">Menu</li>
+        <!-- ========== Left Sidebar Start ========== -->
+        @include('merchant-layout.partials.vertical-menu')
+        <!-- Left Sidebar End -->
 
+        <div class="vertical-menu-overlay"></div>
 
-                <!-- For other roles, display all menu items -->
-                <li>
-                    <a href="{{ route('merchant.dashboard') }}" class="waves-effect">
-                    <i class="bi bi-grid"></i>
-                    <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.users', Auth::guard('merchant')->user()->id) }}"
-                    class="waves-effect">
-                    <i class="ri-user-line"></i>
-                    <span>Manage users</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.credit.user') }}" class="waves-effect">
-                    <i class="ri-user-line"></i>
-                    <span>Credit User account</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.transactions') }}" class="waves-effect">
-                    <i class="ri-tv-line"></i>
-                    <span>Transactions</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.airtime') }}" class="waves-effect">
-                    <i class="ri-phone-line"></i>
-                    <span>Airtime</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('merchant.data') }}" class="waves-effect">
-                    <i class="ri-wifi-line"></i>
-                    <span>Internet Data</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.electricity') }}" class="waves-effect">
-                    <i class="ri-lightbulb-flash-line"></i>
-                    <span>Electricity</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.tv') }}" class="waves-effect">
-                    <i class="ri-tv-line"></i>
-                    <span>Tv Subscription</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.education') }}" class="waves-effect">
-                    <i class="ri-tv-line"></i>
-                    <span>Education</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.insurance') }}" class="waves-effect">
-                    <i class="ri-tv-line"></i>
-                    <span>Insurance</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="ri-pages-line"></i>
-                    <span>CMS</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="{{ route('merchant.pages.index') }}">Pages</a></li>
-                    <li><a href="{{ route('merchant.menus.index') }}">Menus</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="ri-bill-line"></i>
-                    <span>Sub Merchants</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="{{ route('merchant.manage-merchants') }}">View All</a></li>
-                    <li><a href="{{ route('merchant.manage-roles') }}">Roles</a></li>
-                    </ul>
-                </li>
-                 <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="ri-bill-line"></i>
-                    <span>Contact Users</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="{{ route('merchant.message') }}">Messages</a></li>
-                    <li><a href="{{ route('merchant.notification') }}">Notifications</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="ri-bill-line"></i>
-                    <span>Settings</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="{{ route('merchant.site_setting') }}">Site Setting</a></li>
-                    <li><a href="{{ route('merchant.edit_profile') }}">Edit Profile</a></li>
-
-                </li>
-
-                <li class="menu-title">Others</li>
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="ri-bill-line"></i>
-                    <span>Fund Wallet</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="{{ route('merchant.dashboard', ['action' => 'showModal']) }}">ATM/Transfer
-                        Funding</a></li>
-                    <li><a href="#">Automated Bank Funding</a></li>
-                    <li><a href="#">Manual Bank Funding</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="{{ route('merchant.walletSummary') }}" class="waves-effect">
-                    <i class="ri-history-line"></i>
-                    <span>Wallet summary</span>
-                    </a>
-                </li>
-                <li>
-                    <form id="logout-form" action="{{ route('merchant.logout') }}" method="POST" style="display: none;">
-                    @csrf
-                    </form>
-                    <a href="#" class="waves-effect" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="ri-shut-down-line"></i>
-                    <span>Logout</span>
-                    </a>
-                </li>
-                </ul>
-            </div>
-            </div>
-        </div>
-    </div>
-</body>
-
-</html>

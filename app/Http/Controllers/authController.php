@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class authController extends Controller
+class AuthController extends Controller
 {
     public function login()
     {
