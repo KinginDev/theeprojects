@@ -1,24 +1,24 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
-use App\Classes\Helper;
-use App\Models\AirtimeTransaction;
-use App\Models\DataTransaction;
-use App\Models\EducationTransaction;
-use App\Models\ElectricityTransaction;
-use App\Models\FundTransaction;
-use App\Models\InsuranceTransaction;
-use App\Models\Notification;
-use App\Models\TvTransaction;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\WalletTransaction;
-use Carbon\Carbon;
+use App\Classes\Helper;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use App\Models\TvTransaction;
+use App\Models\DataTransaction;
+use App\Models\FundTransaction;
+use App\Models\WalletTransaction;
+use App\Models\AirtimeTransaction;
+use App\Http\Controllers\Controller;
+use App\Models\EducationTransaction;
+use App\Models\InsuranceTransaction;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Response;
+use App\Models\ElectricityTransaction;
 
-class usersController extends Controller
+class DashboardController extends Controller
 {
     /**
      * Display the user dashboard with various statistics and recent transactions.

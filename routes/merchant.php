@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AllPaymentController;
-use App\Http\Controllers\Merchant\authController;
+use App\Http\Controllers\Merchant\AuthController;
 use App\Http\Controllers\Merchant\MenuController;
 use App\Http\Controllers\Merchant\PageController;
 use App\Http\Controllers\Merchant\UserController;
@@ -16,21 +16,21 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
         return "Help";
     })->name('home');
 
-    Route::get('login', [authController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [authController::class, 'login'])->name('login.submit');
-    Route::post('logout', [authController::class, 'logout'])->name('logout');
-    Route::get('/forget/password', [authController::class, 'showForgetPasswordPage'])->name('show.password');
-    Route::post('/forget/password', [authController::class, 'sendPasswordRequest'])->name('forget.password');
-    Route::get('/password/reset/{token}', [authController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/update-password', [authController::class, 'updatePassword'])->name('update.password');
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/forget/password', [AuthController::class, 'showForgetPasswordPage'])->name('show.password');
+    Route::post('/forget/password', [AuthController::class, 'sendPasswordRequest'])->name('forget.password');
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('update.password');
 
 
-    Route::get('/merchant/submerchant-onboard/page/{token}', [authController::class, 'subMerchantOnboardShowPage'])
+    Route::get('/merchant/submerchant-onboard/page/{token}', [AuthController::class, 'subMerchantOnboardShowPage'])
     ->name('onboarding.page');
 
-     Route::get('/merchant/submerchant-onboard/notice/{token}', [authController::class, 'subMerchantOnboardNotice'])
+     Route::get('/merchant/submerchant-onboard/notice/{token}', [AuthController::class, 'subMerchantOnboardNotice'])
     ->name('onboarding.notice');
-    Route::post('/merchant/submerchant-onboard/store/{token}', [authController::class, 'subMerchantOnboardStore'])
+    Route::post('/merchant/submerchant-onboard/store/{token}', [AuthController::class, 'subMerchantOnboardStore'])
     ->name('onboarding.store');
 
 
@@ -44,11 +44,11 @@ Route::domain(config('app.domain'))->prefix('merchant')->name('merchant.')->grou
         return redirect('/merchant/dashboard')->with('success', 'Email verified successfully!');
     })->middleware(['auth:merchant', 'signed'])->name('verification.verify');
 
-    Route::post('/email/verification-notification', [authController::class, 'resendVerificationEmail'])->middleware(['auth:merchant', 'throttle:6,1'])->name('verification.send');
+    Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:merchant', 'throttle:6,1'])->name('verification.send');
 
     //Register Routes
-    Route::get('register', [authController::class, 'showRegisterForm'])->name('register');
-    Route::post('register', [authController::class, 'register'])->name('register.submit');
+    Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('register', [AuthController::class, 'register'])->name('register.submit');
     // Protected Routes
     Route::middleware(['auth:merchant', 'verified'])->group(function () {
         Route::post('/make/payment', [AllPaymentController::class, 'makePayment'])->name('make.payment');

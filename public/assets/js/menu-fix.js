@@ -85,37 +85,118 @@ if (typeof jQuery !== 'undefined') {
                 }
             }
 
-            // Handle submenu hover in collapsed mode
+            // Improved submenu hover handling in collapsed mode
             function setupSubmenuHover() {
                 // Remove any existing hover handlers first
                 $("#sidebar-menu ul li").off("mouseenter mouseleave");
 
-                // Only add hover handlers if we're in collapsed mode
+                // Only handle hover events in collapsed mode
                 if ($("body").hasClass("vertical-collpsed")) {
-                    $("#sidebar-menu ul li").hover(
-                        function() {
-                            if ($(this).find("ul.sub-menu").length > 0) {
-                                var parentTop = $(this).position().top;
-                                var windowHeight = $(window).height();
-                                var submenuHeight = $(this).find("ul.sub-menu").outerHeight() || 200;
+                    $("#sidebar-menu > ul > li").each(function () {
+                        var $menuItem = $(this);
 
-                                // Adjust position to keep submenu in viewport
-                                if (parentTop + submenuHeight > windowHeight) {
-                                    var newTop = Math.max(0, windowHeight - submenuHeight - 20);
-                                    $(this).find("ul.sub-menu").css("top", newTop);
-                                } else {
-                                    $(this).find("ul.sub-menu").css("top", parentTop);
+                        // Only apply hover handling to menu items with submenus
+                        if ($menuItem.find("ul.sub-menu").length > 0) {
+                            // Reset submenu display properties for collapsed mode
+                            $menuItem.find("ul.sub-menu").css({
+                                "display": "none",
+                                "opacity": 0,
+                                "visibility": "hidden",
+                                "height": "auto",
+                                "position": "absolute",
+                                "left": "70px", // Match the width of collapsed sidebar
+                                "top": "0",
+                                "min-width": "220px",
+                                "background": "#fff",
+                                "box-shadow": "0 5px 20px rgba(0, 0, 0, 0.1)",
+                                "border-radius": "0 8px 8px 0"
+                            }).removeClass("mm-show");
+
+                            // Apply hover event handlers
+                            $menuItem.hover(
+                                function () { // Mouse enter
+                                    var $item = $(this);
+                                    var $submenu = $item.find("ul.sub-menu");
+
+                                    // First show with visibility hidden to measure dimensions
+                                    $submenu.css({
+                                        "display": "block",
+                                        "visibility": "hidden",
+                                        "opacity": 0
+                                    });
+
+                                    // Calculate proper position to stay in viewport
+                                    var parentTop = $item.offset().top - $(window).scrollTop();
+                                    var windowHeight = $(window).height();
+                                    var submenuHeight = $submenu.outerHeight();
+
+                                    // Position submenu to stay in viewport
+                                    var newTop = parentTop;
+                                    if (parentTop + submenuHeight > windowHeight) {
+                                        newTop = Math.max(0, windowHeight - submenuHeight - 20);
+                                    }
+
+                                    // Apply positioning and show submenu with animation
+                                    $submenu.css({
+                                        "top": newTop,
+                                        "visibility": "visible",
+                                        "display": "block",
+                                        "z-index": 1001,
+                                        "border-left": "3px solid var(--merchant-primary)"
+                                    }).stop().animate({
+                                        "opacity": 1
+                                    }, 200);
+
+                                    $item.addClass("submenu-active");
+                                },
+                                function () { // Mouse leave
+                                    var $item = $(this);
+                                    var $submenu = $item.find("ul.sub-menu");
+
+                                    $submenu.stop().animate({
+                                        "opacity": 0
+                                    }, 150, function () {
+                                        $submenu.css({
+                                            "display": "none",
+                                            "visibility": "hidden"
+                                        });
+                                    });
+
+                                    $item.removeClass("submenu-active");
                                 }
-
-                                $(this).find("ul.sub-menu").stop().fadeIn(150);
-                                $(this).addClass("submenu-active");
-                            }
-                        },
-                        function() {
-                            $(this).find("ul.sub-menu").stop().fadeOut(100);
-                            $(this).removeClass("submenu-active");
+                            );
                         }
-                    );
+                    });
+                } else {
+                    // Handle submenu visibility in expanded mode
+                    $("#sidebar-menu > ul > li").each(function () {
+                        var $menuItem = $(this);
+
+                        if ($menuItem.find("ul.sub-menu").length > 0) {
+                            var $submenu = $menuItem.find("ul.sub-menu");
+
+                            // Reset proper positioning for expanded mode
+                            $submenu.css({
+                                "position": "",
+                                "left": "",
+                                "top": "",
+                                "min-width": "",
+                                "box-shadow": "",
+                                "border-radius": "",
+                                "border-left": "",
+                                "z-index": ""
+                            });
+
+                            // If menu item is active, show its submenu
+                            if ($menuItem.hasClass("mm-active")) {
+                                $submenu.addClass("mm-show").css({
+                                    "display": "block",
+                                    "opacity": 1,
+                                    "visibility": "visible"
+                                });
+                            }
+                        }
+                    });
                 }
             }
 
@@ -123,12 +204,51 @@ if (typeof jQuery !== 'undefined') {
             $("#vertical-menu-btn").on("click", function(e) {
                 e.preventDefault();
 
+                // Remember active submenus before toggling
+                var activeMenuItems = [];
+                $("#sidebar-menu ul li.mm-active").each(function () {
+                    activeMenuItems.push($(this).index());
+                });
+
                 // Toggle mobile menu state
                 $("body").toggleClass("sidebar-enable");
 
                 // Only toggle collapsed state on desktop
                 if ($(window).width() >= 992) {
                     $("body").toggleClass("vertical-collpsed");
+
+                    // Handle menu state change
+                    var isCollapsed = $("body").hasClass("vertical-collpsed");
+
+                    // Reset submenus to appropriate state
+                    $("#sidebar-menu ul li ul.sub-menu").each(function () {
+                        var $submenu = $(this);
+                        var $parent = $submenu.parent();
+
+                        if (isCollapsed) {
+                            // In collapsed mode, hide all submenus initially
+                            $submenu.removeClass("mm-show").css({
+                                "display": "none",
+                                "opacity": 0,
+                                "visibility": "hidden"
+                            });
+
+                            // But keep track of which ones were active
+                            if ($parent.hasClass("mm-active")) {
+                                $parent.data("was-active", true);
+                            }
+                        } else {
+                            // In expanded mode, restore previously active submenus
+                            if ($parent.hasClass("mm-active") || $parent.data("was-active")) {
+                                $parent.addClass("mm-active").data("was-active", false);
+                                $submenu.addClass("mm-show").css({
+                                    "display": "block",
+                                    "opacity": 1,
+                                    "visibility": "visible"
+                                });
+                            }
+                        }
+                    });
                 }
 
                 // Update mobile overlay state
@@ -142,7 +262,7 @@ if (typeof jQuery !== 'undefined') {
                 setTimeout(function() {
                     applyMenuStyles();
                     setupSubmenuHover();
-                }, 50);
+                }, 100);
             });
 
             // Close sidebar when clicking outside or on overlay
@@ -173,22 +293,54 @@ if (typeof jQuery !== 'undefined') {
 
                 applyMenuStyles();
                 setupSubmenuHover();
-            });
-
-            // Handle submenu toggle in expanded mode
+            });            // Handle submenu toggle in expanded mode
             $(document).on("click", ".has-arrow", function(e) {
+                e.preventDefault(); // Prevent default action
+
                 if (!$("body").hasClass("vertical-collpsed")) {
-                    if ($(this).parent().hasClass("mm-active")) {
-                        $(this).next(".sub-menu").slideUp(200, function() {
-                            $(this).removeClass("mm-show");
+                    // Fixed submenu toggle for expanded mode
+                    var $subMenu = $(this).next(".sub-menu");
+                    var $parent = $(this).parent();
+
+                    if ($parent.hasClass("mm-active")) {
+                        // Close this submenu
+                        $subMenu.slideUp(200, function () {
+                            $(this).removeClass("mm-show").css({
+                                "display": "none",
+                                "opacity": 0,
+                                "visibility": "hidden"
+                            });
+                            $parent.removeClass("mm-active");
                         });
-                        $(this).parent().removeClass("mm-active");
                     } else {
-                        $(this).next(".sub-menu").slideDown(200, function() {
-                            $(this).addClass("mm-show");
+                        // Close other open menus
+                        $("#sidebar-menu .mm-active").each(function () {
+                            var $activeItem = $(this);
+                            if ($activeItem[0] !== $parent[0]) { // Don't close the current item
+                                $activeItem.find(".sub-menu").slideUp(200, function () {
+                                    $(this).removeClass("mm-show").css({
+                                        "display": "none",
+                                        "opacity": 0,
+                                        "visibility": "hidden"
+                                    });
+                                    $activeItem.removeClass("mm-active");
+                                });
+                            }
                         });
-                        $(this).parent().addClass("mm-active");
+
+                        // Open this menu
+                        $parent.addClass("mm-active");
+                        $subMenu.slideDown(200, function () {
+                            $(this).addClass("mm-show").css({
+                                "display": "block",
+                                "opacity": 1,
+                                "visibility": "visible"
+                            });
+                        });
                     }
+                } else {
+                    // Don't trigger click in collapsed mode
+                    return false;
                 }
             });
 

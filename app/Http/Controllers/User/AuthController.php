@@ -1,22 +1,22 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Models\User;
 use App\Classes\Helper;
 use App\Models\Merchant;
-use App\Models\MerchantUser;
 use App\Models\Referral;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use App\Models\MerchantUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class authController extends Controller
+class AuthController extends Controller
 {
     public function login()
     {

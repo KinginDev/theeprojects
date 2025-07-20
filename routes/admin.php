@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\usersController;
-use App\Http\Controllers\Admin\authController;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 
 Route::domain(config('app.domain'))
@@ -10,19 +9,19 @@ Route::domain(config('app.domain'))
     ->name('admin.')
     ->group(function () {
     // Public routes (no auth required)
-    Route::get('login', [authController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [authController::class, 'login'])->name('login.submit');
-    Route::get('/forget_password', [authController::class, 'forget_password'])->name('forget_password');
-    Route::post('/forgetPassword', [authController::class, 'forgetPasswordMail'])->name('users.forget_password');
-    Route::get('/password/reset/{token}', [authController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/update-password', [authController::class, 'updatePassword'])->name('updatePassword');
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/forget_password', [AuthController::class, 'forget_password'])->name('forget_password');
+    Route::post('/forgetPassword', [AuthController::class, 'forgetPasswordMail'])->name('users.forget_password');
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('updatePassword');
 
     // Protected routes - require admin authentication
     Route::middleware('auth:admin')->group(function () {
-        Route::post('logout', [authController::class, 'logout'])->name('logout');
-        Route::get('/admin/generate-user-emails-csv', [usersController::class, 'generateUserEmailsCSV'])->name('generateUserEmailsCSV');
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/admin/generate-user-emails-csv', [DashboardController::class, 'generateUserEmailsCSV'])->name('generateUserEmailsCSV');
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-        Route::post('logout', [authController::class, 'logout'])->name('logout');
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/users', [DashboardController::class, 'manage'])->name('manage');
         Route::get('/users/credit/account', [DashboardController::class, 'creditUserAccount'])->name('creditUserAccount');

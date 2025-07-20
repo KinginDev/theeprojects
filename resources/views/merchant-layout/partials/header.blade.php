@@ -108,6 +108,11 @@
             overflow: hidden;
         }
 
+        /* Fix for collapsed state */
+        body.vertical-collpsed .vertical-menu {
+            overflow: visible;
+        }
+
         body[data-sidebar="dark"] .vertical-menu {
             background: #2a3042;
         }
@@ -422,205 +427,77 @@
             margin-left: 0;
             border-left: 3px solid var(--merchant-primary);
             animation: fadeInRight 0.2s ease-out;
-        }
-
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-                visibility: hidden;
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-                visibility: visible;
-            }
-        }        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a {
-            display: flex;
-            padding: 8px 15px;
-            text-align: left;
-            justify-content: flex-start;
-            align-items: center;
-            height: auto;
-            font-size: 0.875rem;
-            color: #555;
-            transition: all 0.15s ease;
-            border-radius: 0;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover {
-            background-color: rgba(var(--merchant-primary-rgb), 0.06);
-            color: var(--merchant-primary);
-            padding-left: 18px;
-        }
-
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 0;
-            background-color: var(--merchant-primary);
-            opacity: 0;
-            transition: all 0.15s ease;
-        }
-
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover:before {
-            width: 3px;
             opacity: 1;
+            visibility: visible;
         }
 
-        /* Handle nested submenus in collapsed mode */
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li.mm-active > a {
-            background-color: rgba(var(--merchant-primary-rgb), 0.1);
-            color: var(--merchant-primary);
-            font-weight: 600;
+        /* Fix for submenu initial state */
+        body.vertical-collpsed #sidebar-menu ul li ul.sub-menu {
+            display: none;
+            opacity: 0;
+            visibility: hidden;
         }
 
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li.mm-active > a:before {
-            background-color: var(--merchant-primary);
-        }        /* Simplified submenu header */
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu:before {
-            content: attr(data-title);
-            display: block;
-            padding: 8px 15px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--merchant-primary);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 5px;
-        }
-
-        #sidebar-menu ul li a:hover {
-            color: var(--merchant-primary);
-            background: rgba(var(--merchant-primary-rgb), 0.06);
-        }
-
-        #sidebar-menu ul li a:hover i {
-            background: var(--merchant-primary);
-            color: white !important;
-            transform: scale(1.05);
-        }
-
-        #sidebar-menu ul li.mm-active > a {
-            color: var(--merchant-primary);
-            background: rgba(var(--merchant-primary-rgb), 0.1);
-            font-weight: 600;
-        }
-
-        #sidebar-menu ul li.mm-active > a i {
-            background: var(--merchant-primary);
-            color: white !important;
-        }
-
-        /* Menu title styling */
-        .menu-title {
-            padding: 12px 20px !important;
-            letter-spacing: .05em;
-            font-size: 11px;
-            font-weight: 700;
-            color: #919da9;
-            margin-top: 10px;
-        }
-
-        /* Submenu styling */
+        /* Enhanced Submenu CSS Rules */
         #sidebar-menu ul li ul.sub-menu {
             padding: 0;
             margin-left: 42px;
-        }
-
-        #sidebar-menu ul li ul.sub-menu li {
-            position: relative;
             list-style: none;
+            transition: all 0.2s ease-in-out;
         }
 
+        #sidebar-menu ul li ul.sub-menu.mm-show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        #sidebar-menu ul li ul.sub-menu:not(.mm-show) {
+            display: none !important;
+        }
+
+        /* Improved submenu styling in expanded mode */
         #sidebar-menu ul li ul.sub-menu li a {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.9rem;
-            margin: 0 0 3px 0;
+            padding: 8px 15px;
+            font-size: 0.875rem;
+            color: #555;
+            display: block;
+            position: relative;
+            margin-bottom: 5px;
+            transition: all 0.2s ease-in-out;
             border-radius: 6px;
         }
 
-        #sidebar-menu ul li ul.sub-menu li a:before {
-            content: "";
+        #sidebar-menu ul li ul.sub-menu li a:hover {
+            color: var(--merchant-primary);
+            background-color: rgba(var(--merchant-primary-rgb), 0.08);
+            padding-left: 18px;
+        }
+
+        /* Fix for collapsed mode submenu display */
+        body.vertical-collpsed #sidebar-menu > ul > li > ul.sub-menu {
             position: absolute;
-            left: -16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(var(--merchant-primary-rgb), 0.3);
+            left: 70px;
+            top: 0;
+            width: 220px;
+            background: #fff;
+            padding: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 0 8px 8px 0;
+            border-left: 3px solid var(--merchant-primary);
+            margin-left: 0;
         }
 
-        #sidebar-menu ul li ul.sub-menu li a:hover:before {
-            background: var(--merchant-primary);
-        }
-
-        #sidebar-menu ul li ul.sub-menu li.mm-active > a {
+        /* Active menu item styling */
+        #sidebar-menu ul li.mm-active > a {
             color: var(--merchant-primary);
-            background: rgba(var(--merchant-primary-rgb), 0.08);
-        }
-
-        #sidebar-menu ul li ul.sub-menu li.mm-active > a:before {
-            background: var(--merchant-primary);
-        }
-
-        /* Arrow indicator for submenus */
-        #sidebar-menu ul li a.has-arrow:after {
-            content: "\F0140";
-            font-family: "Material Design Icons";
-            display: block;
-            float: right;
-            transition: transform .2s;
-            font-size: 1rem;
-            margin-left: auto;
-        }
-
-        #sidebar-menu ul li a.has-arrow[aria-expanded="true"]:after {
-            transform: rotate(90deg);
-        }
-
-        /* Profile summary in sidebar */
-        .merchant-profile-summary {
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(var(--merchant-primary-rgb), 0.1);
-            margin: 0 15px 15px;
-            border: 1px solid rgba(var(--merchant-primary-rgb), 0.15);
-            overflow: hidden;
-        }
-
-        /* Icon box for menu items */
-        .icon-box {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 32px;
-            width: 32px;
-            min-width: 32px;
-            background: rgba(var(--merchant-primary-rgb), 0.1);
-            border-radius: 8px;
-            margin-right: 12px;
-            color: var(--merchant-primary);
-        }
-
-        /* Beautify the settings menu section */
-        .nav-item-title {
-            display: block;
-            padding: 0.3rem 1.5rem;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #6c757d;
+            background-color: rgba(var(--merchant-primary-rgb), 0.1);
             font-weight: 600;
-            letter-spacing: 0.03em;
-            pointer-events: none;
+        }
+
+        #sidebar-menu ul li.mm-active > ul.sub-menu li.mm-active > a {
+            color: var(--merchant-primary);
+            font-weight: 600;
         }
         </style>
     @stack('after_styles')

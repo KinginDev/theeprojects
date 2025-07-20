@@ -1,24 +1,17 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use DateTime;
-use stdClass;
 use DateTimeZone;
 use App\Models\User;
 use GuzzleHttp\Client;
 use App\Classes\Helper;
-use App\Models\Product;
 use App\Models\Setting;
-use App\Models\Referral;
 use App\Models\Percentage;
-use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\TvTransaction;
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\WalletTransaction;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\EducationTransaction;
 use App\Models\InsuranceTransaction;

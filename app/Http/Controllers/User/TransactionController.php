@@ -1,7 +1,11 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Models\User;
+use Illuminate\Http\Request;
 use App\Models\AirtimeTransaction;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\DataTransaction;        // Import the TvTransaction model
 use App\Models\EducationTransaction;   // Import the TvTransaction model
 use App\Models\ElectricityTransaction; // Import the TvTransaction model
@@ -10,11 +14,8 @@ use App\Models\InsuranceTransaction;   // Import the TvTransaction model
 use App\Models\Notification;           // Import the TvTransaction model
 use App\Models\Setting;                // Import the TvTransaction model
 use App\Models\TvTransaction;          // Import the TvTransaction model
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class transactionController extends Controller
+class TransactionController extends Controller
 {
     public function indexAction(Request $request)
     {

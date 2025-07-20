@@ -1,19 +1,20 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Models\User;
 use App\Classes\Helper;
-use App\Models\DataTransaction;
-use App\Models\Notification;
 use App\Models\Percentage;
 use App\Models\Transaction;
-use App\Models\User;
-use App\Models\WalletTransaction;
-use App\Services\DataService;
+use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\DataService;
+use App\Models\DataTransaction;
+use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
-class dataController extends Controller
+class DataController extends Controller
 {
     private $dataService;
 

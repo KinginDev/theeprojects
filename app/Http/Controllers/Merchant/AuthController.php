@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Password;
 
-class authController extends Controller {
+class AuthController extends Controller {
 
     public function showLoginForm() {
         return view( 'merchant-layout.auth.login' );

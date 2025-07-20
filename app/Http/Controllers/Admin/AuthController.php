@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class authController extends Controller
+class AuthController extends Controller
 {
     /**
      * Show the admin login form.
