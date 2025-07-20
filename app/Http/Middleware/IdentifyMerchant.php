@@ -29,13 +29,7 @@ class IdentifyMerchant {
 
         if($merchant == null){
             // If no merchant found by domain, check if it's a subdomain
-            $hostParts = explode('.', $host);
-            $subdomain = $hostParts[0];
-
-            // Don't process 'www' as a subdomain
-            if ($subdomain !== 'www') {
-                $merchant = Merchant::where('slug', $subdomain)->first();
-            }
+            abort(404, 'Merchant not found for this domain');
         }
 
 

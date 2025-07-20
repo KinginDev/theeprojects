@@ -93,7 +93,7 @@
             text-transform: uppercase;
         }
 
-        /* Improved Sidebar Navigation Styling */
+        /* Simplified Sidebar Navigation Styling */
         .vertical-menu {
             width: 250px;
             background: #ffffff;
@@ -104,7 +104,8 @@
             left: 0;
             bottom: 0;
             z-index: 1000;
-            transition: all 0.3s;
+            transition: width 0.25s ease-in-out;
+            overflow: hidden;
         }
 
         body[data-sidebar="dark"] .vertical-menu {
@@ -119,8 +120,10 @@
         .main-content {
             margin-left: 250px;
             padding: 90px 24px 60px;
-            transition: all 0.3s;
-        }        .vertical-menu-enable .main-content {
+            transition: margin-left 0.25s ease-in-out;
+        }
+        
+        .vertical-menu-enable .main-content {
             margin-left: 250px;
         }
 
@@ -226,10 +229,11 @@
             color: var(--merchant-primary);
             margin-right: 10px;
             transition: all 0.3s;
-        }        /* Collapsed menu item styles */
+        }        /* Simplified collapsed menu styles */
         body.vertical-collpsed .vertical-menu {
             width: 70px !important;
             z-index: 5;
+            overflow: visible;
         }
 
         body.vertical-collpsed .main-content {
@@ -243,20 +247,25 @@
             justify-content: center;
             align-items: center;
             height: 50px;
+            position: relative;
         }
 
         body.vertical-collpsed #sidebar-menu ul li a i {
-            margin: 0 auto;
+            margin: 0 auto !important;
             font-size: 18px;
-            display: block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
             position: relative;
+            border-radius: 8px;
         }
 
         body.vertical-collpsed #sidebar-menu ul li a span {
             display: none;
+            opacity: 0;
         }
 
         body.vertical-collpsed #sidebar-menu .menu-title {
@@ -265,7 +274,9 @@
 
         body.vertical-collpsed #sidebar-menu ul li.mm-active .sub-menu {
             display: none;
-        }        /* Show submenu on hover for collapsed menu */
+        }
+        
+        /* Show submenu on hover for collapsed menu */
         body.vertical-collpsed #sidebar-menu ul li {
             position: relative;
         }        body.vertical-collpsed #sidebar-menu ul li:hover > a {
@@ -315,9 +326,7 @@
         /* Improve submenu active state */
         body.vertical-collpsed #sidebar-menu ul li.submenu-active > a {
             background-color: rgba(var(--merchant-primary-rgb), 0.08);
-        }
-
-        /* Show tooltip on hover with improved styling */
+        }        /* Simplified tooltip on hover */
         body.vertical-collpsed #sidebar-menu ul li a:not(.has-arrow):hover:after {
             content: attr(data-title);
             position: absolute;
@@ -326,9 +335,9 @@
             transform: translateY(-50%);
             z-index: 1001;
             background: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            padding: 8px 12px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             white-space: nowrap;
             font-size: 13px;
             font-weight: 500;
@@ -336,24 +345,11 @@
             pointer-events: none;
             opacity: 1;
             visibility: visible;
-            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
             border-left: 3px solid var(--merchant-primary);
-            max-width: 250px;
+            max-width: 200px;
             text-overflow: ellipsis;
             overflow: hidden;
-            animation: tooltipFadeIn 0.2s forwards;
-        }
-
-        @keyframes tooltipFadeIn {
-            from {
-                opacity: 0;
-                transform: translate(5px, -50%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(0, -50%);
-            }
-        }        /* Improved icon centering in collapsed mode */
+        }/* Improved icon centering in collapsed mode */
         body.vertical-collpsed #sidebar-menu ul li a i {
             display: flex !important;
             align-items: center;
@@ -414,18 +410,18 @@
             display: block !important;
             left: 70px;
             position: absolute;
-            width: 250px;
+            width: 220px;
             height: auto !important;
             top: 0;
             z-index: 1001;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            border-radius: 0 12px 12px 0;
-            padding: 12px 0;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 0;
             margin-top: 0;
             margin-left: 0;
             border-left: 3px solid var(--merchant-primary);
-            animation: fadeInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeInRight 0.2s ease-out;
         }
 
         @keyframes fadeInRight {
@@ -439,28 +435,29 @@
                 transform: translateX(0);
                 visibility: visible;
             }
-        }
-
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a {
+        }        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a {
             display: flex;
-            padding: 10px 15px 10px 20px;
+            padding: 8px 15px;
             text-align: left;
             justify-content: flex-start;
             align-items: center;
             height: auto;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: #555;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             border-radius: 0;
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover {
-            padding-left: 25px;
             background-color: rgba(var(--merchant-primary-rgb), 0.06);
             color: var(--merchant-primary);
+            padding-left: 18px;
         }
-
+        
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:before {
             content: '';
             position: absolute;
@@ -470,11 +467,11 @@
             width: 0;
             background-color: var(--merchant-primary);
             opacity: 0;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
-
+        
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li a:hover:before {
-            width: 4px;
+            width: 3px;
             opacity: 1;
         }
 
@@ -487,36 +484,18 @@
 
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu li.mm-active > a:before {
             background-color: var(--merchant-primary);
-        }
-
-        /* Enhanced header for submenu popup */
+        }        /* Simplified submenu header */
         body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu:before {
             content: attr(data-title);
-            display: flex;
-            align-items: center;
-            padding: 10px 20px 12px;
+            display: block;
+            padding: 8px 15px 10px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--merchant-primary);
             border-bottom: 1px solid rgba(0,0,0,0.05);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 8px;
-            position: relative;
-        }
-
-        body.vertical-collpsed #sidebar-menu ul li:hover > ul.sub-menu:after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: -10px;
-            width: 8px;
-            height: 8px;
-            background: white;
-            transform: rotate(45deg);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            border-left: 1px solid rgba(0,0,0,0.05);
-            z-index: 0;
+            margin-bottom: 5px;
         }
 
         #sidebar-menu ul li a:hover {
