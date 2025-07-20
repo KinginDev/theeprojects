@@ -5,6 +5,20 @@ namespace App\Models;
 use App\Notifications\UserVerify;
 use App\Models\Base\User as BaseUser;
 
+/**
+ * User model
+ * @property mixed $id
+ * @property mixed $name
+ * @property mixed $username
+ * @property mixed $email
+ * @property mixed $password
+ * @property mixed $phone
+ * @property mixed $preferences
+ * @property mixed $referrer_id
+ * @property mixed $api_earners
+ * @property mixed $smart_earners
+ * @property mixed $topuser_earners
+ */
 class User extends BaseUser
 {
 

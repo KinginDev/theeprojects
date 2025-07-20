@@ -153,7 +153,7 @@ class ProductSeeder extends Seeder
                 'slug'         => 'DSTV_Subscription',
                 'description'  => 'DSTV subscription packages',
                 'type'         => ProductTypes::TV,
-                'service_name' => null,
+                'service_name' => "Dstv_Payment",
                 'is_active'    => true,
             ],
             [
@@ -161,7 +161,7 @@ class ProductSeeder extends Seeder
                 'slug'         => 'Gotv_Payment',
                 'description'  => 'GOTV subscription packages',
                 'type'         => ProductTypes::TV,
-                'service_name' => null,
+                'service_name' => "Gotv_Payment",
                 'is_active'    => true,
             ],
             [
@@ -169,7 +169,7 @@ class ProductSeeder extends Seeder
                 'slug'         => 'Startimes_Subscription',
                 'description'  => 'Startimes subscription packages',
                 'type'         => ProductTypes::TV,
-                'service_name' => null,
+                'service_name' => "Startimes_Payment",
                 'is_active'    => true,
             ],
             [
@@ -177,7 +177,7 @@ class ProductSeeder extends Seeder
                 'slug'         => 'ShowMax',
                 'description'  => 'Showmax subscription packages',
                 'type'         => ProductTypes::TV,
-                'service_name' => null,
+                'service_name' => "Showmax_Payment",
                 'is_active'    => true,
             ],
 
@@ -285,7 +285,7 @@ class ProductSeeder extends Seeder
                 'slug'         => 'WAEC_Result_Checker_PIN',
                 'description'  => 'WAEC result checker PIN',
                 'type'         => ProductTypes::EDUCATION,
-                'service_name' => null,
+                'service_name' => "waec",
                 'is_active'    => true,
             ],
             [
@@ -293,7 +293,15 @@ class ProductSeeder extends Seeder
                 'slug'         => 'WAEC_Registration_PIN',
                 'description'  => 'WAEC registration PIN',
                 'type'         => ProductTypes::EDUCATION,
-                'service_name' => null,
+                'service_name' => "waec-registration",
+                'is_active'    => true,
+            ],
+            [
+                'name'         => 'JAMB Pin Vending',
+                'slug'         => 'JAMB_Pin_Vending',
+                'description'  => 'JAMB pin vending service',
+                'type'         => ProductTypes::EDUCATION,
+                'service_name' => "jamb",
                 'is_active'    => true,
             ],
 

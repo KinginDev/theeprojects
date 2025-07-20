@@ -612,6 +612,7 @@
                         <div class="d-flex justify-content-between mb-4">
                             <span class="fw-medium">Total Amount</span>
                             <span class="fw-bold text-primary" id="total">₦0.00</span>
+                            <input type="hidden" id="totalAmount" name="totalAmount" >
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">
@@ -709,6 +710,7 @@
 
             document.getElementById('transactionCharge').textContent = '₦' + charge.toFixed(2);
             document.getElementById('total').textContent = '₦' + total.toFixed(2);
+            document.getElementById('totalAmount').value = total.toFixed(2);
         });
 
 

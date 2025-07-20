@@ -79,13 +79,17 @@ class allPaymentController extends Controller
 
     public function makePayment(Request $request)
     {
+
+
         // Validate the request
         $validatedData = $request->validate([
             'amount' => 'required|numeric|min:1',
+            "totalAmount" => 'required|numeric|min:1',
+            'type'   => 'nullable|string|in:wallet,manual_funding', //
         ]);
 
         // Retrieve the authenticated user
-        $user          = Auth::user();
+        $user          = Auth::guard('web')->user();
         $configuration = null;
         if (Auth::guard('web')->check()) {
             $user          = Auth::guard('web')->user();
@@ -93,12 +97,14 @@ class allPaymentController extends Controller
         } else if (Auth::guard('merchant')->check()) {
             $user          = Auth::guard('merchant')->user();
             $configuration = $user->preferences;
-        } else {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Unauthorized access.',
-            ], 401);
         }
+
+        config([
+            'monnify.api_key' => $configuration->monnify_api_key,
+            'monnify.secret_key' => $configuration->monnify_secret_key,
+            'monnify.contract_code' => $configuration->monnify_contract_code
+        ]);
+
 
         // Generate a unique transaction ID
 
@@ -109,7 +115,7 @@ class allPaymentController extends Controller
                     'transactable_type' => Merchant::class,
                     'transactable_id'   => $user->id,
 
-                    'amount'            => $validatedData['amount'],
+                    'amount'            => $validatedData['totalAmount'],
                     'type'              => $request->type,
                     'payload'           => [
                         'Merchant Name'   => $user->name,
@@ -123,7 +129,7 @@ class allPaymentController extends Controller
                 $wt->wallet_owner_type = Merchant::class;
                 $wt->wallet_id         = $user->wallet->id;
                 $wt->transaction_id    = $transaction->id;
-                $wt->amount            = $validatedData['amount'];
+                $wt->amount            = $validatedData['totalAmount'];
                 $wt->save();
             }
 
@@ -132,7 +138,7 @@ class allPaymentController extends Controller
                     'transactable_type' => User::class,
                     'transactable_id'   => $user->id,
 
-                    'amount'            => $validatedData['amount'],
+                    'amount'            => $validatedData['totalAmount'],
                     'type'              => $request->type,
                     'payload'           => [
                         'User Name'   => $user->name,
@@ -149,7 +155,7 @@ class allPaymentController extends Controller
                 $wt->wallet_owner_type = User::class;
                 $wt->wallet_id         = $user->wallet->id;
                 $wt->transaction_id    = $transaction->id;
-                $wt->amount            = $validatedData['amount'];
+                $wt->amount            = $validatedData['totalAmount'];
                 $wt->save();
             }
 
@@ -157,6 +163,7 @@ class allPaymentController extends Controller
 
             return $transaction;
         });
+
 
         $data = [
             'amount'             => $transaction->amount,
@@ -169,6 +176,11 @@ class allPaymentController extends Controller
             'redirectUrl'        => route('process.callback'),
             'paymentMethods'     => ['CARD', 'ACCOUNT_TRANSFER'],
         ];
+
+
+
+        // dd(config('monnify'));
+
 
         $response = Monnify::transactions()->initialise($data);
 

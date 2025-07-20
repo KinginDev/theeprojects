@@ -24,7 +24,7 @@
     <link href="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.css" rel="stylesheet">
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-
+     @stack('before_styles')
     <style>
         :root {
             --header-bg: {{ $configuration->header_color }};
@@ -38,6 +38,10 @@
             background: {{ $configuration->header_color }} !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .logo-lg{
+            height: 40px !important;
+            transition: all 0.3s ease;
         }
 
         .navbar-header {
@@ -85,21 +89,30 @@
         #sidebar-menu ul li a:hover {
             color: var(--primary-color);
             background: rgba(var(--primary-color-rgb), 0.05);
+            transform: translateX(3px);
+            border-left: 3px solid var(--primary-color);
         }
 
         #sidebar-menu ul li a:hover i {
             background: var(--primary-color);
-            color: #fff;
+            color: #fff !important;
+            box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.3);
+            box-sizing: border-box;
+            transform: scale(1.1);
         }
 
-        #sidebar-menu ul li.mm-active > a {
+        #sidebar-menu ul li.active > a {
             color: var(--primary-color);
-            background: rgba(var(--primary-color-rgb), 0.05);
+            background: rgba(var(--primary-color-rgb), 0.09);
+            border-right: 4px solid var(--primary-color);
+            font-weight: 600;
         }
 
-        #sidebar-menu ul li.mm-active > a i {
+        #sidebar-menu ul li.active > a i {
             background: var(--primary-color);
-            color: #fff;
+            color: #fff !important;
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.3);
         }
 
         .navbar-brand-box {
@@ -167,8 +180,10 @@
         }
     </style>
     @yield('styles')
+    @stack('after_styles')
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
     <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
 </head>
@@ -183,10 +198,10 @@
                     <div class="navbar-brand-box">
                         <a href="{{ route('users.dashboard', ['slug' => Helper::merchant()->slug]) }}" class="logo">
                             <span class="logo-sm">
-                                <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo" height="30">
+                                <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo" height="50">
                             </span>
                             <span class="logo-lg">
-                                <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo" height="40">
+                                <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo" height="50">
                             </span>
                         </a>
                     </div>
@@ -254,8 +269,8 @@
                     <ul class="metismenu list-unstyled" id="side-menu">
                         <li class="menu-title"><span>MAIN MENU</span></li>
 
-                        <li>
-                            <a href="{{ route('users.dashboard', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
+                        <li class="{{ active('users.dashboard') }}">
+                            <a href="{{ route('users.dashboard', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect ">
                                 <i class="bi bi-grid"></i>
                                 <span>Dashboard</span>
                             </a>
@@ -263,42 +278,42 @@
 
                         <li class="menu-title"><span>SERVICES</span></li>
 
-                        <li>
+                        <li class="{{ active('users.airtime') }}">
                             <a href="{{ route('users.airtime', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-phone"></i>
                                 <span>Airtime</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.data') }}">
                             <a href="{{ route('users.data', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-wifi"></i>
                                 <span>Internet Data</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.electricity') }}">
                             <a href="{{ route('users.electricity', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-lightning-charge"></i>
                                 <span>Electricity</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.tv') }}">
                             <a href="{{ route('users.tv', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-tv"></i>
                                 <span>TV Subscription</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.education') }}">
                             <a href="{{ route('users.education', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-book"></i>
                                 <span>Education</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.insurance') }}">
                             <a href="{{ route('users.insurance', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-shield-check"></i>
                                 <span>Insurance</span>
@@ -324,21 +339,21 @@
 
                         <li class="menu-title"><span>ACCOUNT</span></li>
 
-                        <li>
+                        <li class=""{{ active('users.usertransactions') }}">
                             <a href="{{ route('users.usertransactions', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-clock-history"></i>
                                 <span>History</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.usersupport') }}">
                             <a href="{{ route('users.usersupport', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-headset"></i>
                                 <span>Support</span>
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ active('users.user.setting') }}">
                             <a href="{{ route('users.user.setting', ['slug' => Helper::merchant()->slug]) }}" class="waves-effect">
                                 <i class="bi bi-gear"></i>
                                 <span>Settings</span>

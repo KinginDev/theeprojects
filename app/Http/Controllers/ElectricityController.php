@@ -223,17 +223,11 @@ class ElectricityController extends Controller
 
         try{
             $result = $this->electricityService->verifyMeterNumber($data);
+            $errorCodes = $this->electricityService->errorCodes;
+            $this->electricityService->processVTPassVerifyResultForErrors($result, $errorCodes);
 
 
-            if(isset($result['code']) && in_array($result['code'], $this->electricityService->errorCodes)) {
-                // Return success response
-                 throw new \Exception($result['response_description']);
-            }
 
-            if(isset($result['content']['error'])) {
-                // Return error response
-                throw new \Exception($result['content']['error']);
-            }
             return response()->json([
                 'status' => 'success',
                 'message' => 'Meter number verified successfully',
@@ -281,20 +275,9 @@ class ElectricityController extends Controller
     private function processElectricityToken(array $data)
     {
         $result = $this->electricityService->requestToken($data);
+        $errorCodes = $this->electricityService->errorCodes;
 
-        if (isset($result['code']) && in_array($result['code'], $this->electricityService->errorCodes)) {
-            $message = $result['response_description'] ?? "Purchase failed: Please try again later";
-
-            throw new \Exception($message);
-        }
-
-        if (!isset($result['content']['transactions']) ||
-            (isset($result['content']['transactions']) && $result['content']['transactions']['status'] == "failed")) {
-
-            $message = $result['response_description'] ?? $result['content']['errors'] ?? 'Unknown error';
-            throw new \Exception($message);
-
-        }
+        $this->electricityService->processVTPassPurchaseResultForErrors($result, $errorCodes);
 
         return $result;
     }

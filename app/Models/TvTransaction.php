@@ -14,6 +14,8 @@ class TvTransaction extends BaseProduct
     // Specify which attributes are mass assignable
     protected $fillable = [
         'username',
+        'user_id',
+        'transaction_id',
         'api_response',
         'network',
         'tel',

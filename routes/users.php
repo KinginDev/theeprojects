@@ -1,7 +1,10 @@
 <?php
 
 use App\Classes\Helper;
+use App\Http\Controllers\EducationController;
+use App\Services\TvService;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TvController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\dataController;
 use App\Http\Controllers\PageController;
@@ -56,7 +59,15 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
             Route::get('/electricity', [UtilitiesPaymentController::class, 'indexElectricity'])->name('electricity');
             Route::get('/tv', [UtilitiesPaymentController::class, 'indexTv'])->name('tv');
             Route::get('/upgradeTopuser', [UtilitiesPaymentController::class, 'upgradeTopuser'])->name('upgradeTopuser');
-            Route::get('/education', [UtilitiesPaymentController::class, 'education'])->name('education');
+
+            Route::prefix('/education')->group(function () {
+                Route::get('/', [UtilitiesPaymentController::class, 'education'])->name('education');
+                Route::post('/purchase', [UtilitiesPaymentController::class, 'purchaseEducation'])->name('education.purchase');
+                Route::post('/verify', [EducationController::class, 'verifyEducation'])->name('education.verify');
+                Route::post('/check-result', [UtilitiesPaymentController::class, 'checkEducationResult'])->name('education.check.result');
+                Route::post('/query-transaction', [UtilitiesPaymentController::class, 'queryEducationTransaction'])->name('education.query.transaction');
+            });
+
             Route::get('/insurance', [UtilitiesPaymentController::class, 'insurance'])->name('insurance');
 
 
@@ -104,6 +115,12 @@ Route::middleware(['identify.merchant','require.merchant'])->group(function () {
                 Route::post('/verify-meter', [ElectricityController::class, 'verifyMeterNumber'])->name('electricity.verifyMeter');
                 Route::post('/purchase', [ElectricityController::class, 'purchaseElectricity'])->name('electricity.purchase');
                 Route::post('verify/meter', [ElectricityController::class, 'meterCodeVerify'])->name('meterCodeVerify');
+            });
+
+            Route::prefix('tv')->group(function () {
+                Route::get('/', [TvController::class, 'indexTv'])->name('tv');
+                Route::post('/purchase', [TvController::class, 'purchaseRenewBouquet'])->name('tv.purchase');
+                Route::post('/verify', [TvController::class, 'verifySmartCardNumber'])->name('tv.verify');
             });
 
         });

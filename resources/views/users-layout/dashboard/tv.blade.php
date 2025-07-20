@@ -1,1186 +1,556 @@
+@php
+use App\Classes\Helper;
+@endphp
+
 @extends('users-layout.dashboard.layouts.app')
 
-@section('title', 'Cable Tv Page')
+@section('title', 'Cable Tv Subscription')
+
+@push('after_styles')
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: {{ $configuration->template_color ?? '#4F46E5' }};
+            --primary-hover: {{ $configuration->template_color ? 'color-mix(in srgb, ' . $configuration->template_color . ' 80%, black)' : '#4338CA' }};
+            --surface-color: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --error-color: #EF4444;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --input-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --card-border-radius: 16px;
+            --input-border-radius: 12px;
+            --button-border-radius: 12px;
+        }
+
+        .tv-page {
+            padding: 2rem;
+            background-color: var(--gray-50);
+        }
+
+        .tv-card {
+            background: var(--surface-color);
+            border-radius: var(--card-border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .tv-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .provider-icon{
+            width: 100px;
+            height: 40px;
+            border-radius: 20%;
+        }
+
+        .form-control {
+            border: 2px solid var(--gray-200);
+            border-radius: var(--input-border-radius);
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--surface-color);
+            box-shadow: var(--input-shadow);
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 15%, transparent);
+            outline: none;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .provider-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .provider-option {
+            background: var(--surface-color);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--card-border-radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
+        }
+
+        .provider-option:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .provider-option.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg,
+                color-mix(in srgb, var(--primary-color) 3%, transparent),
+                color-mix(in srgb, var(--primary-color) 5%, transparent)
+            );
+        }
+
+        .provider-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            padding: 8px;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submit-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--button-border-radius);
+            padding: 1.25rem;
+            width: 100%;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transform: translateX(-100%);
+        }
+
+        .submit-button:hover::before {
+            transform: translateX(100%);
+            transition: transform 0.5s ease;
+        }
+
+        .customer-info-card {
+            background: var(--surface-color);
+            border-radius: var(--card-border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .customer-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .customer-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .nav-pills {
+            background: var(--surface-color);
+            border-radius: var(--card-border-radius);
+            padding: 0.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: var(--input-border-radius);
+            padding: 1rem 1.5rem;
+            margin: 0 0.25rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-pills .nav-link:hover {
+            color: var(--primary-color);
+            background-color: var(--gray-50);
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        #preloader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #preloader .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-amount {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--button-border-radius);
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .quick-amount:hover, .quick-amount.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .bouquet-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--input-border-radius);
+        }
+
+        .bouquet-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .bouquet-item:hover {
+            background: var(--gray-50);
+        }
+
+        .bouquet-item.active {
+            background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .bouquet-item:last-child {
+            border-bottom: none;
+        }
+
+        .validation-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            transition: all 0.3s ease;
+        }
+
+        .validation-icon.valid {
+            color: var(--success-color);
+        }
+
+        .validation-icon.invalid {
+            color: var(--error-color);
+        }
+
+        .is-validating {
+            border-color: var(--warning-color) !important;
+        }
+
+        .is-validating + .validation-icon {
+            color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .verified-button {
+            background: var(--success-color) !important;
+            transition: all 0.3s ease;
+        }
+
+        .verified-button:hover {
+            background: color-mix(in srgb, var(--success-color) 80%, black) !important;
+        }
+
+        .recent-transaction {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .recent-transaction:hover {
+            background: var(--gray-50);
+        }
+
+        .recent-transaction:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .provider-select {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+@endpush
 
 @section('content')
-
-    <!-- ============================================================== -->
-    <!-- Start right Content here -->
-    <!-- ============================================================== -->
-    <div class="main-content">
-
+    <div class="main-content tv-page">
         <div class="page-content">
             <div class="container-fluid">
-
-                <!-- start page title -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0">Tv Subscription</h4>
-
-                            <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="javascript: void(0);">Utility</a></li>
-                                    <li class="breadcrumb-item active">Tv Subscription</li>
-                                </ol>
-                            </div>
-
-                        </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-1">TV Subscription</h4>
+                        <p class="text-gray-500">Purchase subscriptions for your TV decoder</p>
                     </div>
+                    {!! Helper::generateBreadCrumbs('TV Subscription') !!}
                 </div>
-                <!-- end page title -->
 
-                <!-- Container to hold the main page elements-->
+                <div class="row">
+                    <!-- Wallet Balance Card -->
+                    <x-users.wallet-balance></x-users.wallet-balance>
 
-                <div class="container main-tags">
-
-                    <div class="col-md-8 col-sm-12">
-
-                        <div class="card-body m-0 p-0">
-
-                            <!-- Nav tabs -->
-                            <ul class="nav nav-pills p-0 m-0" role="tablist">
-                                <li class="nav-item waves-effect waves-light tab-s ms-2 ms-md-3 ">
-                                    <a class="nav-link active" data-bs-toggle="tab" href="#dstv" role="tab">
-                                        <span class="d-block">DSTV</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item waves-effect waves-light tab-s ms-2 ms-md-3">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#gotv" role="tab">
-                                        <span class="d-block">GOTV</span>
-
-                                    </a>
-                                </li>
-
-                                <li class="nav-item waves-effect waves-light tab-s ms-2 ms-md-3">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#startime" role="tab">
-                                        <span class="d-block">STARTIME</span>
-
-                                    </a>
-                                </li>
-
-                                <li class="nav-item waves-effect waves-light tab-s ms-2 ms-md-3">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#showmax" role="tab">
-                                        <span class="d-block">SHOWMAX</span>
-
-                                    </a>
-                                </li>
-
+                    <!-- Left Column: TV Subscription Form -->
+                    <div class="col-lg-8">
+                        <!-- Service Provider Tabs -->
+                        <div class="tv-card">
+                            <ul class="nav nav-pills" role="tablist">
+                                <!-- Tabs will be dynamically generated by JavaScript -->
                             </ul>
+                        </div>
 
-                            <!-- Tab panes -->
-                            <div class="tab-content text-muted">
-                                {{-- DSTV section --}}
-                                <div class="tab-pane active mt-3" id="dstv" role="tabpanel">
+                        <!-- Tab Content -->
+                        <div class="tab-content">
+                            <!-- DSTV Tab -->
+                            <div class="tab-pane fade show active" id="dstv" role="tabpanel">
+                                <div class="tv-card">
                                     <form class="custom-validation" id="dstvForm">
                                         @csrf
                                         <div class="mb-3">
-                                            <label>Smart Card number</label>
-                                            <input type="text" class="form-control p-12" required
-                                                placeholder="Enter valid DSTV smartcard number" id="billersCode"
-                                                name="billerCode" />
+                                            <label class="form-label">Smart Card Number</label>
+                                            <div class="position-relative">
+                                                <input type="text" class="form-control" required
+                                                    placeholder="Enter valid DSTV smartcard number" id="dstvBillersCode"
+                                                    name="billersCode" />
+                                                <span class="validation-icon material-icons-round">credit_card</span>
+                                            </div>
+                                            <small class="text-muted">Enter the smartcard number printed on your DSTV decoder</small>
                                         </div>
                                         <div class="mb-3">
-                                            <button type="submit" class="btn btn-primary w-100"
-                                                id="checkBillcode">Continue</button>
+                                            <button type="submit" class="submit-button" id="checkBillCodeButton">
+                                                <span class="material-icons-round me-2">search</span>
+                                                Verify Smart Card
+                                            </button>
                                         </div>
-                                        <div class="hideInnerForm" style="display:none">
-                                            <div class="mb-3">
-                                                <div class="card moni-card dstvCard" style="display:none;">
-                                                    <div class="tran-items">
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Name</p>
-                                                            <p class="d-flex"> <span class="ms-2" id="customerName">Nnaji
-                                                                    Christian</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Current Bouquet(s)</p>
-                                                            <p class="d-flex"> <span class="ms-2" id="currentBouquet">GOTV
-                                                                    Jolli ₦2,800</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Due Date</p>
-                                                            <p class="d-flex"> <span class="ms-2" id="dueDate">March
-                                                                    15th, 2024</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Renewal Amount</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="renewalAmount">₦3,863</span></p>
-                                                        </div>
-                                                    </div>
+
+                                        <!-- Customer Information (Hidden by default) -->
+                                        <div class="hideInnerForm" id="dstvInnerForm" style="display:none">
+                                            <div class="customer-info-card mb-4">
+                                                <h5 class="p-3 border-bottom">Customer Information</h5>
+                                                <div class="customer-info-item">
+                                                    <span class="text-gray-600">Name</span>
+                                                    <span class="text-gray-800 fw-bold" id="customerName"></span>
+                                                </div>
+                                                <div class="customer-info-item">
+                                                    <span class="text-gray-600">Current Bouquet</span>
+                                                    <span class="text-gray-800" id="currentBouquet"></span>
+                                                </div>
+                                                <div class="customer-info-item">
+                                                    <span class="text-gray-600">Due Date</span>
+                                                    <span class="text-gray-800" id="dueDate"></span>
+                                                </div>
+                                                <div class="customer-info-item">
+                                                    <span class="text-gray-600">Renewal Amount</span>
+                                                    <span class="text-gray-800 fw-bold" id="renewalAmount"></span>
                                                 </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="validationCustom03" class="form-label">What do you want to
-                                                    do?</label>
-                                                <select class="form-select p-12" disabled id="validationCustom03"
+
+                                            <div class="mb-4">
+                                                <label class="form-label">What do you want to do?</label>
+                                                <select class="form-select form-control" disabled id="validationCustom03"
                                                     name="bouquet" required>
-                                                    <option selected disabled value="">What do you want to do</option>
-                                                    <option class="d-flex" value="renew"> Renew Current Bouquet</option>
-                                                    <option class="d-flex" value="change"> Change Bouquet</option>
+                                                    <option selected disabled value="">Select an option</option>
+                                                    <option value="renew">Renew Current Bouquet</option>
+                                                    <option value="change">Change Bouquet</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3" id="selectBouquetContainer" style="display: none;">
-                                                <label for="selectBouquet" class="form-label">Select a Bouquet</label>
-                                                <select class="form-select p-12" id="selectBouquet" name="selectBouquet"
-                                                    required>
+
+                                            <div id="selectBouquetContainer" style="display: none;" class="mb-4">
+                                                <label class="form-label">Select a Bouquet</label>
+                                                <select class="form-select form-control" id="selectBouquet"
+                                                    name="selectBouquet" required>
                                                     <option selected disabled value="">Please select type...</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3" id="amountContainer" style="display: none;">
-                                                <label for="amount" class="form-label">Amount</label>
-                                                <input type="text" class="form-control" id="amount" value=""
-                                                    name="amount">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label>Phone number</label>
-                                                <input type="text" class="form-control p-12" required
-                                                    placeholder="Recipient Phone number" name="tel" />
-                                            </div>
-                                            <div class="mb-3">
-                                                <div>
-                                                    <button type="submit"
-                                                        class="btn btn-org w-100 mt-2 waves-effect waves-light p-12"
-                                                        id="submitDstv">Continue</button>
+
+                                            <div id="amountContainer" style="display: none;" class="mb-4">
+                                                <label class="form-label">Amount</label>
+                                                <div class="position-relative">
+                                                    <span class="position-absolute start-0 top-50 translate-middle-y ps-3">₦</span>
+                                                    <input type="text" class="form-control ps-4" id="amount" readonly
+                                                        name="amount">
                                                 </div>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label class="form-label">Phone Number</label>
+                                                <div class="position-relative">
+                                                    <input type="text" class="form-control" required
+                                                        placeholder="Recipient phone number" name="tel" />
+                                                    <span class="validation-icon material-icons-round">phone</span>
+                                                </div>
+                                                <small class="text-muted">You'll receive a confirmation on this number</small>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <button type="button" class="submit-button" id="submitDstv">
+                                                    <span class="material-icons-round me-2">shopping_cart</span>
+                                                    Complete Payment
+                                                </button>
                                             </div>
                                         </div>
                                     </form>
-
                                 </div>
-                                <!-- Preloader -->
-                                <div id="preloader" class="justify-content-center align-items-center"
-                                    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:9999;">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
-                                <!-- End Preloader -->
-                                {{-- GOTV section --}}
-                                <div class="tab-pane" id="gotv" role="tabpanel">
-                                    <p class="mb-0">
-                                    <form class="custom-validation" id="gotvForm">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <label>Smart Card number</label>
-                                            <input type="text" class="form-control p-12" required
-                                                placeholder="Enter Valid GOTV IUC NUMBER" id="billerCodeGotv"
-                                                name="billerCodeGotv" />
-                                        </div>
-                                        <div class="mb-3">
-                                            <button type="submit" class="btn btn-primary w-100"
-                                                id="checkBillcodeGotv">Continue</button>
-                                        </div>
-                                        <div class="hideInnerForm" style="display:none">
-                                            <div class="mb-3">
-                                                <div class="card moni-card gotvCard" style="display:none;">
-                                                    <div class="tran-items">
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Name</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="customerNameGotv">Nnaji
-                                                                    Christian</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Current Bouquet(s)</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="currentBouquetGotv">GOTV
-                                                                    Jolli ₦2,800</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Due Date</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="dueDateGotv">March
-                                                                    15th, 2024</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Renewal Amount</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="renewalAmountGotv">₦3,863</span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="bouquet" class="form-label">What do you want to
-                                                    do?</label>
-                                                <select class="form-select p-12" disabled id="bouquetGotv"
-                                                    name="bouquetGotv" required>
-                                                    <option selected disabled value="">What do you want to do
-                                                    </option>
-                                                    <option class="d-flex" value="renew"> Renew Current Bouquet</option>
-                                                    <option class="d-flex" value="change"> Change Bouquet</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3" id="selectBouquetContainerGotv" style="display: none;">
-                                                <label for="selectBouquet" class="form-label">Select a Bouquet</label>
-                                                <select class="form-select p-12" id="selectBouquetGotv"
-                                                    name="selectBouquetGotv" required>
-                                                    <option selected disabled value="">Please select type...</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3" id="amountContainerGotv" style="display: none;">
-                                                <label for="amountGotv" class="form-label">Amount</label>
-                                                <input type="text" class="form-control" id="amountGotv"
-                                                    value="" name="amountGotv">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label>Phone number</label>
-                                                <input type="text" class="form-control p-12" required
-                                                    placeholder="Recipient Phone number" name="telGotv" />
-                                            </div>
-                                            <div class="mb-3">
-                                                <div>
-                                                    <button type="submit"
-                                                        class="btn btn-org w-100 mt-2 waves-effect waves-light p-12"
-                                                        id="submitGotv">Continue</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </p>
-                                </div>
-
-                                {{-- STARTIMES section --}}
-                                <div class="tab-pane" id="startime" role="tabpanel">
-                                    <p class="mb-0">
-                                    <form class="custom-validation" id="startimeForm">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <label>Smart Card number</label>
-                                            <input type="text" class="form-control p-12" required
-                                                placeholder="Enter Startimes Smartcard /ewallet Number"
-                                                id="billerCodeStartime" name="billerCodeStartime" />
-                                        </div>
-                                        <div class="mb-3">
-                                            <button type="submit" class="btn btn-primary w-100"
-                                                id="checkBillcodeStartime">Continue</button>
-                                        </div>
-                                        <div class="hideInnerForm" style="display:none">
-                                            <div class="mb-3">
-                                                <div class="card moni-card startimeCard" style="display:none;">
-                                                    <div class="tran-items">
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Name</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="customerNameStartime">Nnaji
-                                                                    Christian</span></p>
-                                                        </div>
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Smartcard Number</p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="currentBouquetStartime">GOTV
-                                                                    Jolli ₦2,800</span></p>
-                                                        </div>
-
-                                                        <div class="d-flex tran-item">
-                                                            <p class="text-gray">Balance </p>
-                                                            <p class="d-flex"> <span class="ms-2"
-                                                                    id="renewalAmountStartime">₦3,863</span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3" id="selectBouquetContainerStartime">
-                                                <label for="selectBouquet" class="form-label">Select a Bouquet</label>
-                                                <select class="form-select p-12" id="selectBouquetStartime"
-                                                    name="selectBouquetStartime" required>
-                                                    <option selected disabled value="">Please select type...</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3" id="amountContainerStartime" style="display: none;">
-                                                <label for="amountStartime" class="form-label">Amount</label>
-                                                <input type="text" class="form-control" id="amountStartime"
-                                                    value="" name="amountStartime">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label>Phone number</label>
-                                                <input type="text" class="form-control p-12" required
-                                                    placeholder="Recipient Phone number" name="telStartime" />
-                                            </div>
-                                            <div class="mb-3">
-                                                <div>
-                                                    <button type="submit"
-                                                        class="btn btn-org w-100 mt-2 waves-effect waves-light p-12"
-                                                        id="submitStartime">Continue</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </p>
-                                </div>
-
-                                {{-- ShowMax section --}}
-                                <div class="tab-pane" id="showmax" role="tabpanel">
-                                    <p class="mb-0">
-                                    <form class="custom-validation" id="showmaxForm">
-                                        @csrf
-
-                                        <div>
-                                            <div class="mb-3">
-                                                <label>Phone number</label>
-                                                <input type="text" class="form-control p-12" required
-                                                    placeholder="Recipient Phone number" name="telShowmax" />
-                                            </div>
-                                            <div class="mb-3" id="selectBouquetContainershowmax">
-                                                <label for="selectBouquet" class="form-label">Select a Type</label>
-                                                <select class="form-select p-12" id="selectBouquetShowmax"
-                                                    name="selectBouquetShowmax" required>
-                                                    <option selected disabled value="">Please select type...</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3" id="amountContainerShowmax">
-                                                <label for="amountShowmax" class="form-label">Amount</label>
-                                                <input type="text" class="form-control" id="amountShowmax"
-                                                    value="" name="amountShowmax" readonly>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <div>
-                                                    <button type="submit"
-                                                        class="btn btn-org w-100 mt-2 waves-effect waves-light p-12"
-                                                        id="submitShowmax">Continue</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </p>
-                                </div>
-
                             </div>
 
+                            <!-- GOTV Tab -->
+                           @include('users-layout.dashboard.partials.tv.tabs.gotv')
+
+                            <!-- Startimes Tab -->
+                            @include('users-layout.dashboard.partials.tv.tabs.startimes')
+
+
+                            <!-- Showmax Tab -->
+                             @include('users-layout.dashboard.partials.tv.tabs.showmax')
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Transaction History -->
+                    <div class="col-lg-4">
+                        <!-- Transaction History -->
+                        <div class="tv-card">
+                            <h5 class="mb-4">Recent Subscriptions</h5>
+                            <div id="transactionHistory">
+                                <!-- Transaction history will be populated here -->
+                            </div>
                         </div>
 
+                        <!-- Help & Support -->
+                        <div class="tv-card">
+                            <h5 class="mb-4">Help & Support</h5>
+                            <div class="mb-4">
+                                <h6 class="mb-2">Having trouble with your subscription?</h6>
+                                <p class="text-muted mb-3">Our support team is available 24/7 to help you with any issues you may encounter.</p>
+                                <a href="#" class="submit-button d-flex align-items-center justify-content-center">
+                                    <span class="material-icons-round me-2">support_agent</span>
+                                    Contact Support
+                                </a>
+                            </div>
+                            <div class="mb-2">
+                                <h6 class="mb-2">Frequently Asked Questions</h6>
+                                <div class="accordion" id="faqAccordion">
+                                    <div class="accordion-item border-0 mb-2">
+                                        <h2 class="accordion-header" id="headingOne">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                                How long does it take to activate my subscription?
+                                            </button>
+                                        </h2>
+                                        <div id="collapseOne" class="accordion-collapse collapse"
+                                            aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body text-muted">
+                                                Your subscription is usually activated within 5-10 minutes after successful payment.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item border-0 mb-2">
+                                        <h2 class="accordion-header" id="headingTwo">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                Can I change my subscription plan?
+                                            </button>
+                                        </h2>
+                                        <div id="collapseTwo" class="accordion-collapse collapse"
+                                            aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body text-muted">
+                                                Yes, you can change your subscription plan by selecting the "Change Bouquet" option
+                                                after verifying your smartcard number.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                </div>
-                <!-- Container to hold the main page elements ends here-->
-
-            </div> <!-- container-fluid -->
-        </div>
-        <!-- End Page-content -->
-
-        <footer class="footer">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-12 col-md-12 text-center">
-                        <script>
-                            document.write(new Date().getFullYear())
-                        </script> © {{ $configuration->site_name }}.
-                    </div>
-
                 </div>
             </div>
-        </footer>
-
+        </div>
     </div>
-    <!-- end main content-->
-
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Function to show preloader
-        function showPreloader() {
-            $('#preloader').show();
-        }
-
-        // Function to hide preloader
-        function hidePreloader() {
-            $('#preloader').hide();
-        }
-
-        $(document).ready(function() {
-            // DSTV SUBMIT BY JQUERY
-
-            $('#checkBillcode').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-
-                var billerCode = $('#billersCode').val();
-
-                $.ajax({
-                    url: '/tv/billcode/Dstv', // The route to your Laravel controller
-                    method: 'POST',
-                    data: {
-                        billerCode: billerCode,
-                        _token: '{{ csrf_token() }}' // Include the CSRF token for security
-                    },
-                    success: function(response) {
-                        hidePreloader(); // Hide preloader
-                        // Handle the response from the server
-                        console.log(response);
-
-                        if (response.result && response.result.content) {
-                            var content = response.result.content;
-
-                            // Update the card content
-                            $('#customerName').text(content.Customer_Name);
-                            $('#currentBouquet').text(content
-                                .Current_Bouquet
-                            ); // Adjust according to your response structure
-                            $('#dueDate').text(content.Due_Date);
-                            $('#renewalAmount').text('₦' + content
-                                .Renewal_Amount); // Adjust according to your response structure
-
-                            // Show the card if it was hidden
-                            $('.dstvCard').show();
-                            $('.hideInnerForm').show();
-                            $('#validationCustom03').prop('disabled', false);
-
-                            // Handle the change event of the main select element
-                            $('#validationCustom03').off('change').on('change', function() {
-                                var selectedValue = $(this).val();
-
-                                if (selectedValue === 'change') {
-                                    $('#selectBouquetContainer').show();
-                                    $('#amountContainer').hide();
-
-                                    $.ajax({
-                                        url: 'https://vtpass.com/api/service-variations?serviceID=dstv',
-                                        type: 'GET',
-                                        dataType: 'json',
-                                        success: function(response) {
-                                            console.log(response);
-                                            if (response && response
-                                                .content && response.content
-                                                .varations) {
-                                                // Access the variations array
-                                                var varations = response
-                                                    .content.varations;
-
-                                                // Clear previous options
-                                                $('#selectBouquet').empty();
-
-                                                // Add default option
-                                                $('#selectBouquet').append(
-                                                    '<option selected disabled value="">Please select type...</option>'
-                                                );
-
-                                                // Iterate through the variations and add options to the select element
-                                                $.each(varations, function(
-                                                    index, varation
-                                                ) {
-                                                    $('#selectBouquet')
-                                                        .append(
-                                                            $(
-                                                                '<option></option>'
-                                                            )
-                                                            .val(
-                                                                varation
-                                                                .variation_code
-                                                            )
-                                                            .text(
-                                                                varation
-                                                                .name
-                                                            )
-                                                            .attr(
-                                                                'data-amount',
-                                                                varation
-                                                                .variation_amount
-                                                            )
-                                                        );
-                                                });
-
-                                                // Handle the change event for selectBouquet
-                                                $('#selectBouquet').off(
-                                                    'change').on(
-                                                    'change',
-                                                    function() {
-                                                        // Get the selected option
-                                                        var selectedOption =
-                                                            $(this)
-                                                            .find(
-                                                                'option:selected'
-                                                            );
-
-                                                        // Retrieve the data-amount attribute
-                                                        var amount =
-                                                            selectedOption
-                                                            .data(
-                                                                'amount'
-                                                            );
-
-                                                        // Display the amount in the #amount input field
-                                                        $('#amountContainer')
-                                                            .show();
-                                                        $('#amount')
-                                                            .val(
-                                                                amount);
-                                                    });
-
-                                                // Show the selectBouquetContainer after populating options
-                                                $('#selectBouquetContainer')
-                                                    .show();
-                                            }
-                                        },
-                                        error: function(error) {
-                                            hidePreloader
-                                                (); // Hide preloader
-                                            // Handle the error response
-                                            console.log(error);
-                                        }
-                                    });
-                                } else if (selectedValue === 'renew') {
-                                    $('#selectBouquetContainer').hide();
-                                    $('#amountContainer').show();
-                                    $('#amount').val(content.Renewal_Amount);
-                                } else {
-                                    $('#selectBouquetContainer').hide();
-                                    $('#amountContainer').hide();
-                                }
-                            });
-                        } else {
-                            alert('Transaction failed');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        hidePreloader(); // Hide preloader
-                        // Handle any errors
-                        console.error('Error: ' + error);
-                        console.error('Status: ' + status);
-                        console.error(xhr.responseText);
-                        alert('An error occurred. Please try again.');
-                    }
-                });
-            });
-
-            $('#submitDstv').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-                var bouquet = $('[name="bouquet"]').val();
-                var serviceId = 'dstv';
-
-                if (bouquet == 'change') {
-                    // Serialize the form data, including the CSRF token
-                    var formData = $('#dstvForm').serialize();
-                    console.log(formData);
-
-                    $.ajax({
-                        url: '/tv/changeBouquet', // The route to your Laravel controller
-                        method: 'POST',
-                        data: $.param({
-                            serviceId: serviceId
-                        }) + '&' + formData, // Directly use the serialized form data
-                        success: function(response) {
-                            hidePreloader(); // Hide preloader
-                            console.log(response);
-                            // Handle the successful response
-                            if (response.status === 'initiated') {
-                                Swal.fire({
-                                    title: "Success!",
-                                    html: response.message,
-                                    icon: "success",
-
-                                }).then(() => {
-                                    // Redirect to the success page with a hash parameter
-                                    window.location.href = '/transactionview?hash=' +
-                                        encodeURIComponent(response.result.requestId);
-                                });
-
-                                // Additional handling for success
-                            } else if (response.status === 'failed') {
-                                Swal.fire({
-                                    title: "Error, Please try again!!!",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            hidePreloader(); // Hide preloader
-                            // Handle any errors
-                            console.error('Error: ' + error);
-                            console.error('Status: ' + status);
-                            console.error(xhr.responseText);
-                        }
-                    });
-                } else {
-                    // Serialize the form data, including the CSRF token
-                    var formData = $('#dstvForm').serialize();
-                    console.log(formData);
-
-                    $.ajax({
-                        url: '/tv/renewBouquet', // The route to your Laravel controller
-                        method: 'POST',
-                        data: $.param({
-                            serviceId: serviceId
-                        }) + '&' + formData, // Directly use the serialized form data
-                        success: function(response) {
-                            hidePreloader(); // Hide preloader
-                            if (response.status === 'initiated') {
-                                Swal.fire({
-                                    title: "Success!",
-                                    html: response.message,
-                                    icon: "success",
-
-                                }).then(() => {
-                                    // Redirect to the success page with a hash parameter
-                                    window.location.href = '/transactionview?hash=' +
-                                        encodeURIComponent(response.result.requestId);
-                                });
-
-                                // Additional handling for success
-                            } else if (response.status === 'failed') {
-                                Swal.fire({
-                                    title: "Error, Please try again!!!",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            hidePreloader(); // Hide preloader
-                            // Handle any errors
-                            console.error('Error: ' + error);
-                            console.error('Status: ' + status);
-                            console.error(xhr.responseText);
-                        }
-                    });
-                }
-            });
-
-            // GOTV SUBMIT BY JQUERY
-
-            $('#checkBillcodeGotv').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-
-                var billerCode = $('#billerCodeGotv').val();
-
-                $.ajax({
-                    url: '/tv/billcode/Gotv', // The route to your Laravel controller
-                    method: 'POST',
-                    data: {
-                        billerCode: billerCode,
-                        _token: '{{ csrf_token() }}' // Include the CSRF token for security
-                    },
-                    success: function(response) {
-                        hidePreloader(); // Hide preloader
-                        // Handle the response from the server
-                        console.log(response);
-
-                        if (response.result && response.result.content) {
-                            var content = response.result.content;
-
-                            // Update the card content
-                            $('#customerNameGotv').text(content.Customer_Name);
-                            $('#currentBouquetGotv').text(content
-                                .Current_Bouquet
-                            ); // Adjust according to your response structure
-                            $('#dueDateGotv').text(content.Due_Date);
-                            $('#renewalAmountGotv').text('₦' + content
-                                .Renewal_Amount); // Adjust according to your response structure
-
-                            // Show the card if it was hidden
-                            $('.gotvCard').show();
-                            $('.hideInnerForm').show();
-                            $('#bouquetGotv').prop('disabled', false);
-
-                            // Handle the change event of the main select element
-                            $('#bouquetGotv').off('change').on('change', function() {
-                                var selectedValue = $(this).val();
-
-                                if (selectedValue === 'change') {
-                                    $('#selectBouquetContainerGotv').show();
-                                    $('#amountContainerGotv').hide();
-
-                                    $.ajax({
-                                        url: 'https://vtpass.com/api/service-variations?serviceID=gotv',
-                                        type: 'GET',
-                                        dataType: 'json',
-                                        success: function(response) {
-                                            console.log(response);
-                                            if (response && response
-                                                .content && response.content
-                                                .varations) {
-                                                // Access the variations array
-                                                var varations = response
-                                                    .content.varations;
-
-                                                // Clear previous options
-                                                $('#selectBouquetGotv')
-                                                    .empty();
-
-                                                // Add default option
-                                                $('#selectBouquetGotv')
-                                                    .append(
-                                                        '<option selected disabled value="">Please select type...</option>'
-                                                    );
-
-                                                // Iterate through the variations and add options to the select element
-                                                $.each(varations, function(
-                                                    index, varation
-                                                ) {
-                                                    $('#selectBouquetGotv')
-                                                        .append(
-                                                            $(
-                                                                '<option></option>'
-                                                            )
-                                                            .val(
-                                                                varation
-                                                                .variation_code
-                                                            )
-                                                            .text(
-                                                                varation
-                                                                .name
-                                                            )
-                                                            .attr(
-                                                                'data-amount',
-                                                                varation
-                                                                .variation_amount
-                                                            )
-                                                        );
-                                                });
-
-                                                // Handle the change event for selectBouquet
-                                                $('#selectBouquetGotv').off(
-                                                    'change').on(
-                                                    'change',
-                                                    function() {
-                                                        // Get the selected option
-                                                        var selectedOption =
-                                                            $(this)
-                                                            .find(
-                                                                'option:selected'
-                                                            );
-
-                                                        // Retrieve the data-amount attribute
-                                                        var amount =
-                                                            selectedOption
-                                                            .data(
-                                                                'amount'
-                                                            );
-
-                                                        // Display the amount in the #amount input field
-                                                        $('#amountContainerGotv')
-                                                            .show();
-                                                        $('#amountGotv')
-                                                            .val(
-                                                                amount);
-                                                    });
-
-                                                // Show the selectBouquetContainer after populating options
-                                                $('#selectBouquetContainerGotv')
-                                                    .show();
-                                            }
-                                        },
-                                        error: function(error) {
-                                            hidePreloader
-                                                (); // Hide preloader
-                                            // Handle the error response
-                                            console.log(error);
-                                        }
-                                    });
-                                } else if (selectedValue === 'renew') {
-                                    $('#selectBouquetContainerGotv').hide();
-                                    $('#amountContainerGotv').show();
-                                    $('#amountGotv').val(content.Renewal_Amount);
-                                } else {
-                                    $('#selectBouquetContainerGotv').hide();
-                                    $('#amountContainerGotv').hide();
-                                }
-                            });
-                        } else {
-                            alert('Transaction failed');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        hidePreloader(); // Hide preloader
-                        // Handle any errors
-                        console.error('Error: ' + error);
-                        console.error('Status: ' + status);
-                        console.error(xhr.responseText);
-                        alert('An error occurred. Please try again.');
-                    }
-                });
-            });
-
-            $('#submitGotv').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-                var bouquet = $('[name="bouquetGotv"]').val();
-                var serviceId = 'gotv';
-
-                if (bouquet == 'change') {
-                    var billerCode = $('[name="billerCodeGotv"]').val();
-                    var selectBouquet = $('[name="selectBouquetGotv"]').val();
-                    var tel = $('[name="telGotv"]').val();
-                    var _token = $('[name="_token"]').val();
-                    var amount = $('[name="amountGotv"]').val();
-                    // Serialize the form data, including the CSRF token
-                    var formData = $('#gotvForm').serialize();
-                    console.log(formData);
-
-                    $.ajax({
-                        url: '/tv/changeBouquet', // The route to your Laravel controller
-                        method: 'POST',
-                        data: {
-                            _token: _token,
-                            billerCode: billerCode,
-                            bouquet: bouquet,
-                            selectBouquet: selectBouquet,
-                            tel: tel,
-                            amount: amount,
-                            serviceId: serviceId
-                        }, // Directly use the serialized form data
-                        success: function(response) {
-                            hidePreloader(); // Hide preloader
-                            // Handle the successful response
-                            if (response.status === 'initiated') {
-                                Swal.fire({
-                                    title: "Success!",
-                                    html: response.message,
-                                    icon: "success",
-
-                                }).then(() => {
-                                    // Redirect to the success page with a hash parameter
-                                    window.location.href = '/transactionview?hash=' +
-                                        encodeURIComponent(response.result.requestId);
-                                });
-                                // Additional handling for success
-                            } else if (response.status === 'failed') {
-                                Swal.fire({
-                                    title: "Error, Please try again!!!",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            hidePreloader(); // Hide preloader
-                            // Handle any errors
-                            console.error('Error: ' + error);
-                            console.error('Status: ' + status);
-                            console.error(xhr.responseText);
-                        }
-                    });
-                } else {
-                    var billerCode = $('[name="billerCodeGotv"]').val();
-                    var tel = $('[name="telGotv"]').val();
-                    var amount = $('[name="amountGotv"]').val();
-                    var _token = $('[name="_token"]').val();
-                    // Serialize the form data, including the CSRF token
-                    var formData = $('#gotvForm').serialize();
-                    console.log(formData);
-
-                    $.ajax({
-                        url: '/tv/renewBouquet', // The route to your Laravel controller
-                        method: 'POST',
-                        data: {
-                            _token: _token,
-                            billerCode: billerCode,
-                            bouquet: bouquet,
-                            tel: tel,
-                            amount: amount,
-                            serviceId: serviceId
-                        }, // Directly use the serialized form data
-                        success: function(response) {
-                            hidePreloader(); // Hide preloader
-                            console.log(response);
-                            if (response.status === 'initiated') {
-                                Swal.fire({
-                                    title: "Success!",
-                                    html: response.message,
-                                    icon: "success",
-
-                                }).then(() => {
-                                    // Redirect to the success page with a hash parameter
-                                    window.location.href = '/transactionview?hash=' +
-                                        encodeURIComponent(response.result.requestId);
-                                });
-
-                                // Additional handling for success
-                            } else if (response.status === 'failed') {
-                                Swal.fire({
-                                    title: "Error, Please try again!!!",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            hidePreloader(); // Hide preloader
-                            // Handle any errors
-                            console.error('Error: ' + error);
-                            console.error('Status: ' + status);
-                            console.error(xhr.responseText);
-                        }
-                    });
-                }
-            });
-
-            // Startime SUBMIT BY JQUERY
-
-            // STARTIMES SUBMIT BY JQUERY
-            $('#checkBillcodeStartime').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-
-                var billerCode = $('#billerCodeStartime').val();
-
-                $.ajax({
-                    url: '/tv/billcode/Startime', // The route to your Laravel controller
-                    method: 'POST',
-                    data: {
-                        billerCode: billerCode,
-                        _token: '{{ csrf_token() }}', // Include the CSRF token for security
-                    },
-                    success: function(response) {
-                        hidePreloader(); // Hide preloader
-                        console.log(response);
-
-                        if (response.result && response.result.content) {
-                            var content = response.result.content;
-
-                            // Update the card content
-                            $('#customerNameStartime').text(content.Customer_Name);
-                            $('#currentBouquetStartime').text(content.Smartcard_Number);
-                            $('#renewalAmountStartime').text('₦' + content.Balance);
-
-                            // Show the card if it was hidden
-                            $('.startimeCard').show();
-                            $('.hideInnerForm').show();
-
-                            // Fetch and populate bouquet variations
-                            $.ajax({
-                                url: 'https://vtpass.com/api/service-variations?serviceID=startimes',
-                                type: 'GET',
-                                dataType: 'json',
-                                success: function(response) {
-                                    console.log(response);
-                                    if (response && response.content && response
-                                        .content.varations) {
-                                        // Access the variations array
-                                        var variations = response.content.varations;
-
-                                        // Clear previous options
-                                        $('#selectBouquetStartime').empty();
-
-                                        // Add default option
-                                        $('#selectBouquetStartime').append(
-                                            '<option selected disabled value="">Please select type...</option>'
-                                        );
-
-                                        // Populate the dropdown
-                                        $.each(variations, function(index,
-                                            variation) {
-                                            $('#selectBouquetStartime')
-                                                .append(
-                                                    $('<option></option>')
-                                                    .val(variation
-                                                        .variation_code)
-                                                    .text(variation.name)
-                                                    .attr('data-amount',
-                                                        variation
-                                                        .variation_amount)
-                                                );
-                                        });
-
-                                        // Handle the change event for selectBouquetStartime
-                                        $('#selectBouquetStartime').off('change')
-                                            .on('change', function() {
-                                                var selectedOption = $(this)
-                                                    .find('option:selected');
-                                                var amount = selectedOption
-                                                    .data('amount');
-                                                $('#amountContainerStartime')
-                                                    .show();
-                                                $('#amountStartime').val(
-                                                    amount);
-                                            });
-
-                                        // Show the selectBouquetContainer after populating options
-                                        $('#selectBouquetContainerStartime').show();
-                                    }
-                                },
-                                error: function(error) {
-                                    console.error(
-                                        'Error fetching Startimes bouquet variations:',
-                                        error);
-                                },
-                            });
-                        } else {
-                            alert('Transaction failed. Please check the Smartcard number.');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        hidePreloader(); // Hide preloader
-                        console.error('Error: ' + error);
-                        alert('An error occurred. Please try again.');
-                    },
-                });
-            });
-
-
-            $('#submitStartime').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-
-                var billerCode = parseInt($('[name="billerCodeStartime"]').val(), 10);
-                var selectBouquet = $('[name="selectBouquetStartime"]').val();
-                var tel = $('[name="telStartime"]').val();
-                var _token = $('[name="_token"]').val();
-                var amount = $('[name="amountStartime"]').val();
-                // Serialize the form data, including the CSRF token
-                var formData = $('#startimeForm').serialize();
-                console.log(formData);
-
-                $.ajax({
-                    url: '/tv/bouquet/Startime', // The route to your Laravel controller
-                    method: 'POST',
-                    data: {
-                        _token: _token,
-                        billerCode: billerCode,
-                        selectBouquet: selectBouquet,
-                        tel: tel,
-                        amount: amount
-                    }, // Directly use the serialized form data
-                    success: function(response) {
-                        hidePreloader(); // Hide preloader
-                        // Handle the successful response
-                        if (response.status === 'initiated') {
-                            Swal.fire({
-                                title: "Success!",
-                                html: response.message,
-                                icon: "success",
-
-                            }).then(() => {
-                                // Redirect to the success page with a hash parameter
-                                window.location.href = '/transactionview?hash=' +
-                                    encodeURIComponent(response.result.requestId);
-                            });
-                            // Additional handling for success
-                        } else if (response.status === 'failed') {
-                            Swal.fire({
-                                title: "Error, Please try again!!!",
-                                text: response.message,
-                                icon: "error"
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        hidePreloader(); // Hide preloader
-                        // Handle any errors
-                        console.error('Error: ' + error);
-                        console.error('Status: ' + status);
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-
-            // Showmax SUBMIT BY JQUERY
-
-            // SHOWMAX SUBMIT BY JQUERY
-            $.ajax({
-                url: 'https://vtpass.com/api/service-variations?serviceID=showmax',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    hidePreloader(); // Hide preloader
-                    console.log(response);
-
-                    if (response && response.content && response.content.varations) {
-                        var variations = response.content.varations;
-
-                        // Clear previous options
-                        $('#selectBouquetShowmax').empty();
-
-                        // Add default option
-                        $('#selectBouquetShowmax').append(
-                            '<option selected disabled value="">Please select type...</option>'
-                        );
-
-                        // Populate the dropdown
-                        $.each(variations, function(index, variation) {
-                            $('#selectBouquetShowmax').append(
-                                $('<option></option>')
-                                .val(variation.variation_code)
-                                .text(variation.name)
-                                .attr('data-amount', variation.variation_amount)
-                            );
-                        });
-
-                        // Show the container after populating options
-                        $('#selectBouquetContainershowmax').show();
-                    } else {
-                        alert('Failed to fetch Showmax bouquet variations. Please try again.');
-                    }
-                },
-                error: function(error) {
-                    hidePreloader();
-                    console.error('Error fetching Showmax bouquet variations:', error);
-                    alert('An error occurred while fetching data.');
-                },
-            });
-
-
-
-            $('#submitShowmax').on('click', function(event) {
-                event.preventDefault(); // Prevent the default button click action
-                showPreloader(); // Show preloader
-
-                var selectBouquet = $('[name="selectBouquetShowmax"]').val();
-                var tel = $('[name="telShowmax"]').val();
-                var _token = $('[name="_token"]').val();
-                var amount = $('[name="amountShowmax"]').val();
-                // Serialize the form data, including the CSRF token
-                var formData = $('#showmaxForm').serialize();
-                console.log(formData);
-
-                $.ajax({
-                    url: '/tv/bouquet/Showmax', // The route to your Laravel controller
-                    method: 'POST',
-                    data: {
-                        _token: _token,
-                        selectBouquet: selectBouquet,
-                        tel: tel,
-                        amount: amount
-                    }, // Directly use the serialized form data
-                    success: function(response) {
-                        hidePreloader(); // Hide preloader
-                        console.log(response);
-                        // Handle the successful response
-                        if (response.status === 'initiated') {
-                            Swal.fire({
-                                title: "Success!",
-                                html: response.message,
-                                icon: "success",
-
-                            }).then(() => {
-                                // Redirect to the success page with a hash parameter
-                                window.location.href = '/transactionview?hash=' +
-                                    encodeURIComponent(response.result.requestId);
-                            });
-
-                            // Additional handling for success
-                        } else if (response.status === 'failed') {
-                            Swal.fire({
-                                title: "Error, Please try again!!!",
-                                text: response.message,
-                                icon: "error"
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        hidePreloader(); // Hide preloader
-                        // Handle any errors
-                        console.error('Error: ' + error);
-                        console.error('Status: ' + status);
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
-
-        $('#selectBouquetShowmax').off('change').on('change', function() {
-            var selectedOption = $(this).find('option:selected');
-            var amount = selectedOption.data('amount'); // Fetch the data-amount attribute
-            $('#amountContainerShowmax').show();
-            $('#amountShowmax').val(amount); // Update the input field
-        });
-    </script>
-
+      @include('users-layout.dashboard.partials.tv.modals')
+@endsection
+
+@section('scripts')
+<script>
+window.TVPurchaseConfig = {
+    purchaseApiUrl: "{{ route('users.tv.purchase') }}",
+    verifyUrl: "{{ route('users.tv.verify') }}",
+    userBalance: {{ Auth::user()->wallet->balance }},
+    csrfToken: "{{ csrf_token() }}",
+}
+</script>
+<script src="{{ asset('assets/js/users/tv.js') }}"></script>
 @endsection

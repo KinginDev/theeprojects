@@ -32,6 +32,13 @@
 
     @stack('before_styles')
     @yield('styles')
+    <style>
+      .logo-lg{
+            height: 40px !important;
+            transition: all 0.3s ease;
+        }
+
+        </style>
     @stack('after_styles')
 </head>
 
@@ -56,7 +63,7 @@
                             </span>
                             <span class="logo-lg">
                                 <img src="{{ asset('storage/' . $configuration->site_logo) }}" alt="logo-light"
-                                    width="100%">
+                                    width="50">
                             </span>
                         </a>
                     </div>

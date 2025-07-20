@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('secret_key')->nullable();
             $table->string('site_token')->nullable();
             $table->string('monnify_api_key')->nullable();
+            $table->string('monnify_secret_key')->nullable();
             $table->string('monnify_percent')->nullable();
             $table->string('monnify_contract_code')->nullable();
             $table->string('airtime_api_url')->nullable();
@@ -34,6 +35,7 @@ return new class extends Migration
             $table->string('education_jamb_api_url')->nullable();
             $table->string('education_check_result_api_url')->nullable();
             $table->string('education_jamb_verify_api_url')->nullable();
+            $table->string('education_purchase_api_url')->nullable();
             $table->string('insurance_health_insurance_api_url')->nullable();
             $table->string('insurance_personal_accident_api_url')->nullable();
             $table->string('insurance_ui_insure_api_url')->nullable();

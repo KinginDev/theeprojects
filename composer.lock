@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "595b8855412f0c92826fe8f2f8a34d89",
+    "content-hash": "e9a5cfe2adf134a1f9753d3fe1763654",
     "packages": [
         {
             "name": "brick/math",
@@ -6056,6 +6056,72 @@
                 }
             ],
             "time": "2024-11-21T01:49:47+00:00"
+        },
+        {
+            "name": "watson/active",
+            "version": "7.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dwightwatson/active.git",
+                "reference": "02cdd392dbb56a181348ca9a078963d6b9d60ab9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dwightwatson/active/zipball/02cdd392dbb56a181348ca9a078963d6b9d60ab9",
+                "reference": "02cdd392dbb56a181348ca9a078963d6b9d60ab9",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/config": "^10.0|^11.0||^12.0",
+                "illuminate/http": "^10.0|^11.0||^12.0",
+                "illuminate/routing": "^10.0|^11.0||^12.0",
+                "illuminate/support": "^10.0|^11.0||^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5.1",
+                "phpunit/phpunit": "^9.0|^10.5|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Active": "Watson\\Watson\\Facades\\Active"
+                    },
+                    "providers": [
+                        "Watson\\Active\\ActiveServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Watson\\Active\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dwight Watson",
+                    "email": "dwight@studiousapp.com"
+                }
+            ],
+            "description": "Laravel helper for recognising the current route, controller and action",
+            "keywords": [
+                "active",
+                "laravel",
+                "routing"
+            ],
+            "support": {
+                "issues": "https://github.com/dwightwatson/active/issues",
+                "source": "https://github.com/dwightwatson/active/tree/7.2.0"
+            },
+            "time": "2025-02-25T23:22:01+00:00"
         },
         {
             "name": "webmozart/assert",

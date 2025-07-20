@@ -232,10 +232,90 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                                 <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="tv_billcode_api_url" class="form-label">VTPASS TV BillCode Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('tv_billcode_api_url') is-invalid @enderror"
+                                                            id="tv_billcode_api_url" name="tv_billcode_api_url"
+                                                            value="{{ old('tv_billcode_api_url', $settings->tv_billcode_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('tv_billcode_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="tv_bouquet_api_url" class="form-label">VTPASS TV Bouquet Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('tv_bouquet_api_url') is-invalid @enderror"
+                                                            id="tv_bouquet_api_url" name="tv_bouquet_api_url"
+                                                            value="{{ old('tv_bouquet_api_url', $settings->tv_bouquet_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('tv_bouquet_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                              <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="education_jamb_verify_api_url" class="form-label">VTPASS WAEC Education Buy Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('education_jamb_verify_api_url') is-invalid @enderror"
+                                                            id="education_jamb_verify_api_url" name="education_jamb_verify_api_url"
+                                                            value="{{ old('education_jamb_verify_api_url', $settings->education_jamb_verify_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('education_jamb_verify_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                              <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="education_waec_api_url" class="form-label">VTPASS WAEC Result Checker Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('education_waec_api_url') is-invalid @enderror"
+                                                            id="education_waec_api_url" name="education_waec_api_url"
+                                                            value="{{ old('education_waec_api_url', $settings->education_waec_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('education_waec_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                              <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="education_jamb_verify_api_url" class="form-label">VTPASS JAMB Verify Api</label>
+                                                    <div class="input-group">
+                                                        <input type="text"
+                                                            class="form-control api-key-field @error('education_jamb_verify_api_url') is-invalid @enderror"
+                                                            id="education_jamb_verify_api_url" name="education_jamb_verify_api_url"
+                                                            value="{{ old('education_jamb_verify_api_url', $settings->education_jamb_verify_api_url ?? '') }}"
+                                                            required>
+
+                                                        @error('education_jamb_verify_api_url')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <hr />
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="monnify_api_key" class="form-label">MONNIFY Secret
+                                                    <label for="monnify_api_key" class="form-label">MONNIFY Api
                                                         Key</label>
                                                     <div class="input-group">
                                                         <input type="password"
@@ -248,6 +328,26 @@
                                                             <i class="bi bi-eye"></i>
                                                         </button>
                                                         @error('monnify_api_key')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="monnify_secret_key" class="form-label">MONNIFY Secret
+                                                        Key</label>
+                                                    <div class="input-group">
+                                                        <input type="password"
+                                                            class="form-control api-key-field @error('monnify_secret_key') is-invalid @enderror"
+                                                            id="monnify_secret_key" name="monnify_secret_key"
+                                                            value="{{ old('monnify_secret_key', $settings->monnify_secret_key ?? '') }}"
+                                                            required>
+                                                        <button class="btn btn-outline-secondary" type="button"
+                                                            onclick="togglePassword('monnify_secret_key')">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        @error('monnify_secret_key')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </div>

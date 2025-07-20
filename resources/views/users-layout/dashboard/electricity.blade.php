@@ -44,28 +44,6 @@ use App\Classes\Helper;
         }
 
 
-
-        .wallet-balance {
-            background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 60%, black) 100%);
-            border-radius: var(--card-border-radius);
-            padding: 1.5rem;
-            color: white;
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .wallet-balance::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20L0 20z' fill='%23fff' fill-opacity='.05'/%3E%3C/svg%3E") repeat;
-            opacity: 0.5;
-        }
-
         .input-group {
             position: relative;
             margin-bottom: 1.5rem;
@@ -123,6 +101,8 @@ use App\Classes\Helper;
                 color-mix(in srgb, var(--primary-color) 3%, transparent),
                 color-mix(in srgb, var(--primary-color) 5%, transparent)
             );
+                transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
         }
 
         .disco-logo {
@@ -180,7 +160,13 @@ use App\Classes\Helper;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+         .meter-info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
 
         .meter-info-item {
             display: flex;
@@ -512,153 +498,6 @@ use App\Classes\Helper;
   };
 </script>
 
-<script src="{{ asset('assets/js/users/electricity-chart.js') }}"></script>
 <script src="{{ asset('assets/js/users/electricity.js') }}"></script>
 
-<script>
-// Fix for accessibility issue with modal focus management
-document.addEventListener('DOMContentLoaded', function() {
-  const successModal = document.getElementById('successModal');
-  const errorModal = document.getElementById('errorModal');
-  let previousFocusElement = null;
-
-  // Save original aria-hidden values before Bootstrap modifies them
-  document.querySelectorAll('[aria-hidden]').forEach(element => {
-    if (!element.hasAttribute('data-aria-hidden-original')) {
-      element.setAttribute('data-aria-hidden-original', element.getAttribute('aria-hidden'));
-    }
-  });
-
-  // Helper function to manage focus trapping in a modal
-  function setupFocusTrap(modal) {
-    if (!modal) return;
-
-    // Get focusable elements, prioritize those with data-focus-first attribute
-    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    let firstFocusableElement = null;
-    let lastFocusableElement = null;
-
-    // First check if we have an element with data-focus-first
-    const priorityFocusElement = modal.querySelector('[data-focus-first="true"]');
-    if (priorityFocusElement) {
-      firstFocusableElement = priorityFocusElement;
-    } else if (focusableElements.length > 0) {
-      firstFocusableElement = focusableElements[0];
-    }
-
-    if (focusableElements.length > 0) {
-      lastFocusableElement = focusableElements[focusableElements.length - 1];
-    }
-
-    if (!firstFocusableElement || !lastFocusableElement) return;
-
-    // Setup keyboard handling for focus trapping
-    modal.addEventListener('keydown', function(e) {
-      if (e.key === 'Tab') {
-        if (e.shiftKey) { // Shift + Tab
-          if (document.activeElement === firstFocusableElement) {
-            lastFocusableElement.focus();
-            e.preventDefault();
-          }
-        } else { // Just Tab
-          if (document.activeElement === lastFocusableElement) {
-            firstFocusableElement.focus();
-            e.preventDefault();
-          }
-        }
-      } else if (e.key === 'Escape') {
-        // Close the modal on Escape
-        const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        if (bootstrapModal) {
-          bootstrapModal.hide();
-        }
-      }
-    });
-  }
-
-  // Setup focus management for success modal
-  if (successModal) {
-    setupFocusTrap(successModal);
-
-    successModal.addEventListener('shown.bs.modal', function() {
-      // Store the previously focused element
-      previousFocusElement = document.activeElement;
-
-      // Focus on the download receipt button when the modal is shown
-      const downloadBtn = document.getElementById('downloadReceipt');
-      if (downloadBtn) {
-        downloadBtn.focus();
-      }
-    });
-
-    successModal.addEventListener('hidden.bs.modal', function() {
-      // Delay the focus restoration to ensure the modal is fully closed
-      setTimeout(() => {
-        // Return focus to the element that had focus before the modal opened
-        if (previousFocusElement && typeof previousFocusElement.focus === 'function') {
-          previousFocusElement.focus();
-          // Set a small timeout to ensure focus isn't immediately moved elsewhere
-          setTimeout(() => {
-            if (document.activeElement !== previousFocusElement) {
-              previousFocusElement.focus();
-            }
-          }, 10);
-        }
-
-        // Reset document-wide aria-hidden attributes that might have been set by Bootstrap
-        document.querySelectorAll('[aria-hidden="true"]').forEach(element => {
-          // Only remove aria-hidden from elements that are outside our modal
-          // and are not naturally aria-hidden elements
-          if (!successModal.contains(element) && element !== successModal &&
-              !element.hasAttribute('data-aria-hidden-original')) {
-            element.removeAttribute('aria-hidden');
-          }
-        });
-      }, 100);
-    });
-  }
-
-  // Setup focus management for error modal
-  if (errorModal) {
-    setupFocusTrap(errorModal);
-
-    errorModal.addEventListener('shown.bs.modal', function() {
-      // Store the previously focused element
-      previousFocusElement = document.activeElement;
-
-      // Focus on the retry button when the modal is shown
-      const retryBtn = document.getElementById('retryButton');
-      if (retryBtn) {
-        retryBtn.focus();
-      }
-    });
-
-    errorModal.addEventListener('hidden.bs.modal', function() {
-      // Delay the focus restoration to ensure the modal is fully closed
-      setTimeout(() => {
-        // Return focus to the element that had focus before the modal opened
-        if (previousFocusElement && typeof previousFocusElement.focus === 'function') {
-          previousFocusElement.focus();
-          // Set a small timeout to ensure focus isn't immediately moved elsewhere
-          setTimeout(() => {
-            if (document.activeElement !== previousFocusElement) {
-              previousFocusElement.focus();
-            }
-          }, 10);
-        }
-
-        // Reset document-wide aria-hidden attributes that might have been set by Bootstrap
-        document.querySelectorAll('[aria-hidden="true"]').forEach(element => {
-          // Only remove aria-hidden from elements that are outside our modal
-          // and are not naturally aria-hidden elements
-          if (!errorModal.contains(element) && element !== errorModal &&
-              !element.hasAttribute('data-aria-hidden-original')) {
-            element.removeAttribute('aria-hidden');
-          }
-        });
-      }, 100);
-    });
-  }
-});
-</script>
 @endsection
